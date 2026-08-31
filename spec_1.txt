@@ -1,0 +1,613 @@
+
+Maintenance system — developer build spec
+Team: Dev A — Backend + Flutter  |  Dev B — Web app
+0. Roles — who accesses what, and how
+
+Role
+App
+Scope
+
+super_admin
+Web
+Everything — all companies/clients
+
+client_admin
+Web
+One client (the “zoo”) — builds zones, adds devices, manages staff
+
+zone_incharge
+Web (as “zone officer”) + Mobile (as “zone head”)
+Their assigned zone AND all its sub-zones (cascading)
+
+zone_staff
+Mobile
+Same cascading scope as their assigned zone_incharge (optional role, same permission rule)
+
+technician
+Mobile
+Only issues assigned to them, or unassigned issues within their coverage (client/zone, also cascading)
+
+Key rule for this build: zone_incharge and zone_staff always see their own zone PLUS every sub-zone underneath it — devices, issues, and daily logs, however deep the tree goes. Every backend endpoint returning zone-scoped data must use the recursive subtree query, not a flat zone_id match.
+1. Backend (Dev A) — database
+MySQL 8.0+. Full CREATE TABLE statements, triggers, and recursive procedures are in schema-mysql.sql — this is the quick-reference structure.
+companies
+
+Column
+Type
+Notes
+
+id
+uuid
+PK
+
+name
+varchar
+-
+
+status
+enum
+active/suspended
+clients
+
+Column
+Type
+Notes
+
+id
+uuid
+PK
+
+company_id
+uuid
+FK companies
+
+name
+varchar
+-
+
+type
+varchar
+free text
+verticals / client_verticals
+
+Column
+Type
+Notes
+
+verticals.name
+varchar
+e.g. Hardware/CCTV
+
+client_verticals.client_id
+uuid
+FK clients
+
+client_verticals.vertical_id
+uuid
+FK verticals
+
+client_verticals.active
+bool
+toggle on/off
+users
+
+Column
+Type
+Notes
+
+id
+uuid
+PK
+
+company_id / client_id
+uuid
+scoping FK, one set depending on role
+
+email
+varchar
+unique, login
+
+role
+enum
+see section 0
+
+account_status
+enum
+invited/active/suspended/removed
+zones — THE RECURSIVE TABLE
+
+Column
+Type
+Notes
+
+id
+uuid
+PK
+
+client_id
+uuid
+FK clients
+
+parent_zone_id
+uuid
+FK zones.id, self-reference, NULL = top-level
+
+name
+varchar
+-
+
+status
+enum
+draft/active/inactive
+zone_assignments
+
+Column
+Type
+Notes
+
+zone_id
+uuid
+FK zones
+
+user_id
+uuid
+FK users
+
+role
+enum
+incharge/staff
+
+unassigned_at
+datetime
+NULL = still active
+hardware_types / devices
+
+Column
+Type
+Notes
+
+hardware_types.name
+varchar
+e.g. CCTV camera
+
+hardware_types.spec_fields
+json
+auto-fill template
+
+devices.zone_id
+uuid
+FK zones
+
+devices.hardware_type_id
+uuid
+FK, nullable if manual
+
+devices.status
+enum
+provisioned/active/under_maintenance/faulty/retired
+
+devices.is_manual_entry
+bool
+true = custom_spec used instead
+issue_categories / issues
+
+Column
+Type
+Notes
+
+issue_categories.hardware_type_id
+uuid
+scopes dropdown per device type
+
+issues.device_id
+uuid
+FK devices
+
+issues.category_id
+uuid
+FK issue_categories
+
+issues.assigned_technician_id
+uuid
+nullable until assigned
+
+issues.priority
+enum
+low/medium/high/critical
+
+issues.status
+enum
+open/assigned/in_progress/resolved/closed (drop on_hold/reopened for v1)
+issue_status_history
+
+Column
+Type
+Notes
+
+issue_id
+uuid
+FK issues
+
+from_status / to_status
+enum
+auto-logged by trigger, no manual insert needed
+
+changed_by_user_id
+uuid
+FK users
+technicians / technician_assignments
+
+Column
+Type
+Notes
+
+technicians.user_id
+uuid
+1:1 with users
+
+technician_assignments.client_id / zone_id
+uuid
+at least one set — coverage cascades same as zone_incharge
+daily_status_logs
+
+Column
+Type
+Notes
+
+device_id
+uuid
+FK devices
+
+logged_by_user_id
+uuid
+FK users
+
+status
+enum
+working/not_working/needs_attention
+
+log_date
+date
+unique per device per day
+
+1a. API endpoints
+Common pattern used by almost every endpoint below (write once as middleware/guard, don't repeat per-endpoint):
+1. Auth guard: verify JWT, load caller's role + client_id + assigned zone_id.
+2. Scope resolution: if role is zone_incharge/zone_staff, call zone_descendants(caller's zone_id) once and cache the id list for the request; if technician, resolve via technician_assignments the same way; if client_admin, scope = whole client_id; if super_admin, no scope filter.
+3. Apply the resolved id list as a WHERE zone_id IN (...) / device.zone_id IN (...) filter on the query — never trust a zone_id/client_id passed in the request body/query for anything other than fetching entity ids will be validated against, without re-checking scope.
+
+
+Method + path
+Roles
+Logic
+
+POST /auth/login
+all
+• Look up user by email, verify password hash
+• Reject if account_status is invited (must complete setup first), suspended, or removed — return 403 with reason
+• Issue short-lived JWT (access) + longer-lived refresh token; JWT payload includes user_id, role, client_id, and zone_id if the role is zone-scoped
+• Response also includes the user's zone_descendants() and zone_ancestors() results if zone-scoped, so the app/web client can build its room-subscription list immediately without a second call
+
+POST /auth/device-token
+mobile roles
+• Upsert on (user_id, platform) — replace old token if device re-registers
+• Store platform (ios/android) alongside token since FCM payload format differs slightly per platform
+• No-op silently if same token already stored (avoid unnecessary writes on every app open)
+
+POST /zones
+client_admin
+• Validate client_id matches caller's own client_id (client_admin can't create zones for another client)
+• If parent_zone_id given, validate it belongs to the same client_id — reject cross-client parenting before it ever reaches the DB trigger
+• Insert with status='draft' always — status is never settable directly on create
+• DB cycle-prevention trigger is the final safety net, but validating parent's client_id here avoids a wasted round-trip for the obvious mistake
+
+GET /zones/:id/descendants
+client_admin, zone_incharge, zone_staff
+• Permission check first: caller must be client_admin of that zone's client, OR the target zone id must be in caller's own zone_descendants() result (i.e. it's their zone or a sub-zone of it)
+• Then run the recursive query and return flattened list with depth, ordered depth ascending so the UI can render a tree top-down
+• This endpoint is the single source of truth for cascading visibility — every other list endpoint below re-uses its result, don't reimplement the recursion elsewhere
+
+GET /zones/:id/ancestors
+all zone-scoped roles
+• Same permission check as descendants
+• Returns root-first array, used both for UI breadcrumbs and for the socket client to know which ancestor rooms to join on connect
+
+POST /zones/:id/assign
+client_admin
+• Validate the user_id being assigned belongs to the same client_id and has role zone_incharge or zone_staff
+• Insert into zone_assignments; the DB's BEFORE INSERT trigger will reject it if that user already has an active assignment with the same role in that zone — catch that specific error and return a clean 409, don't let it surface as a generic 500
+• The AFTER INSERT trigger auto-flips the zone from draft to active on first incharge — no application code needed for that part, just return the updated zone status in the response so the UI doesn't need a second fetch
+
+POST /devices
+client_admin
+• Branch on hardware_type_id vs manual entry: if hardware_type_id is set, pull its spec_fields template and validate the submitted fields match the expected keys; if is_manual_entry is true instead, require custom_spec to be non-empty JSON and hardware_type_id must be null
+• Validate zone_id belongs to the caller's client_id
+• Insert with status='provisioned' always — flips to active only via a separate “confirm install” action or the first successful daily log, not on creation
+
+GET /devices?zoneId=&includeSubzones=
+zone_incharge, zone_staff, client_admin
+• If includeSubzones=true, first resolve zoneId through zone_descendants(zoneId) to get the full id list, then query devices WHERE zone_id IN (that list)
+• If false, plain WHERE zone_id = zoneId
+• Support an optional status filter (e.g. ?status=faulty) so the web dashboard can show “faulty devices only” without pulling everything client-side
+• Paginate — a large zoo can have hundreds of devices under one subtree
+
+POST /issues
+zone_staff, zone_incharge
+• Validate device_id belongs to caller's own zone_descendants() scope (staff can't raise an issue against a device outside their zone)
+• Validate category_id belongs to that device's hardware_type_id — reject mismatched category/device combinations
+• Default priority to 'medium' if not supplied
+• Insert the issue; the DB's AFTER INSERT trigger automatically writes the first issue_status_history row and flips the device to under_maintenance — don't duplicate that logic in application code
+• After successful insert, emit issue:created to the device's zone room + every ancestor zone room + the client room (no push notification on create in v1, per the cut-scope plan)
+
+GET /issues?scope=&id=&includeSubzones=
+all
+• zone_incharge/zone_staff: filter to issues whose device.zone_id is in their own subtree
+• technician: return issues where assigned_technician_id = self, UNION issues with status='open' whose device.zone_id falls within their technician_assignments coverage (also resolved via zone_descendants if the assignment is zone-level)
+• client_admin: no zone filter, just client_id match via a join through devices→zones→clients
+• Support filtering by status and priority as query params; default sort newest first
+
+PATCH /issues/:id/assign
+client_admin
+• Only allowed while status='open' — reject with 409 if already assigned
+• Validate the technician's technician_assignments actually covers this issue's zone (or its client) before allowing the assignment — don't let an admin assign a technician with zero coverage there
+• Update assigned_technician_id and set status='assigned' in the same transaction
+• DB trigger logs the status_history row automatically
+• After commit: emit issue:updated to the usual rooms, and send an FCM push to the technician's stored device token with the issue id so the app can deep-link straight to Issue Detail
+
+PATCH /issues/:id/status
+technician (own issues only), client_admin
+• Enforce the state machine strictly: only assigned→in_progress, in_progress→resolved, resolved→closed are valid in this v1 scope — reject any other transition with a 400 naming the invalid jump
+• Technician can only move issues where assigned_technician_id = self; client_admin can move any issue in their client, primarily used for confirming resolved→closed
+• On transition to closed, DB trigger flips the device back to active automatically
+• Emit issue:updated on every transition; only send an FCM push to the original raiser specifically on the closed transition, per the cut-scope plan for v1
+
+POST /daily-logs
+zone_staff, zone_incharge
+• Validate device_id is within caller's own zone_descendants() scope
+• Attempt insert; the DB's UNIQUE(device_id, log_date) constraint will reject a second log for the same device today — catch that specific error and either return 409 (“already logged today”) or, better UX, treat it as an update-in-place (delete+reinsert or a separate PATCH) so staff can correct a mistaken entry same-day
+• AFTER INSERT trigger checks the last 3 logs and flips the device to faulty automatically if all 3 are not_working — no application logic needed for that
+• Emit log:submitted to the zone room + ancestor rooms so a zone_officer watching the dashboard sees it appear live
+
+GET /daily-logs?zoneId=&includeSubzones=
+zone_incharge, client_admin
+• Same subtree resolution pattern as devices/issues
+• Support ?date= to pull a specific day's logs (used for the “who hasn't logged today” dashboard widget: devices in scope with no log row for today's date)
+
+GET /dashboard/summary?scope=
+all admin/officer roles
+• Resolve scope exactly as in the common pattern above, then run four aggregate counts in parallel: open issues (status not in closed), faulty devices, devices missing today's log, and total devices in scope
+• This is called on every dashboard mount and on every socket reconnect — keep it to simple COUNT(...) queries with the same WHERE zone_id IN (...) filter, no heavy joins, so it stays fast even for a large subtree
+
+1b. Real-time (Socket.io) + push (FCM)
+
+Trigger
+Socket event
+Room(s)
+Push to
+
+Issue created
+issue:created
+zone room + all ancestor zone rooms + client room
+— (v1: no push on create)
+
+Issue assigned
+issue:updated
+same as above
+Assigned technician
+
+Issue status changed
+issue:updated
+same as above
+— (v1: no push except closed)
+
+Issue closed
+issue:updated
+same as above
+Raiser (zone_staff/incharge)
+
+Daily log submitted
+log:submitted
+zone room + ancestor rooms
+—
+
+Room join logic on socket connect: join user's own zone room, plus every ancestor zone room (from GET /zones/:id/ancestors) so events bubble up to anyone watching a parent zone — this is what makes cascading visibility live, not just a one-time fetch.
+2. Flutter app (Dev A) — screens
+zone_head flow (role: zone_incharge / zone_staff)
+
+Screen
+Purpose
+Calls
+
+Login
+Auth, store JWT, register FCM token
+POST /auth/login, POST /auth/device-token
+
+Zone home
+Own zone + sub-zones summary: device count, open issues, faulty count
+GET /dashboard/summary?scope=zone&includeSubzones=true
+
+Zone/sub-zone tree
+Drill into sub-zones, same cascading rule
+GET /zones/:id/descendants
+
+Device list
+Devices for selected zone level, status badge per device
+GET /devices?zoneId=&includeSubzones=
+
+Daily log
+Mark each device working/not_working/needs_attention + note
+POST /daily-logs
+
+Raise issue
+Pick device (auto-fills zone/type/location), category, priority, description
+GET /issue-categories, POST /issues
+
+My issues
+List + detail + status history for issues they raised
+GET /issues?..., GET /issues/:id
+
+technician flow
+
+Screen
+Purpose
+Calls
+
+Login
+Auth, register FCM token
+POST /auth/login, POST /auth/device-token
+
+Issue queue
+Assigned issues, grouped by status; push notification deep-links here
+GET /issues?scope=technician
+
+Issue detail
+Device info, category, description, full status history, update-status button
+GET /issues/:id, PATCH /issues/:id/status
+
+3. Web app (Dev B) — pages
+super_admin
+
+Page
+Purpose
+Calls
+
+Companies
+List/create companies
+GET/POST /companies
+
+Clients
+List/create clients per company, toggle verticals
+GET/POST /clients, PATCH /client_verticals
+
+Platform dashboard
+All-company summary, live counts
+GET /dashboard/summary?scope=platform + socket subscribe
+
+client_admin (“zoo owner”)
+
+Page
+Purpose
+Calls
+
+Zone builder
+Create zones/sub-zones, assign incharge/staff
+POST /zones, GET /zones/:id/descendants, POST /zones/:id/assign
+
+Devices
+Add/edit devices, manage hardware types
+GET/POST /devices, GET/POST /hardware-types
+
+Issues (all)
+Every issue client-wide, assign technicians
+GET /issues?scope=client, PATCH /issues/:id/assign
+
+Staff
+Invite/manage users
+GET/POST /users
+
+Dashboard
+Live counts, updates without refresh
+GET /dashboard/summary?scope=client + socket subscribe on client room
+
+zone_officer (web view of zone_incharge)
+
+Page
+Purpose
+Calls
+
+Zone dashboard
+Own zone + ALL sub-zones — devices, statuses, open issues, live via socket
+GET /zones/:id/descendants, GET /devices?includeSubzones=true, socket subscribe on zone room + ancestor rooms
+
+Issues
+Issues across own zone + sub-zones, can raise new ones
+GET /issues?includeSubzones=true, POST /issues
+
+Daily log history
+Read-only view of logs submitted by mobile staff, across sub-zones
+GET /daily-logs?includeSubzones=true
+
+Live-without-refresh rule for every dashboard/list page above: on mount, GET the initial data, then open a socket connection and subscribe to issue:updated / issue:created / log:submitted for the user's room set; merge incoming events into local state directly — never re-fetch the whole list on an event.
+4. Shared core / helper functions — build these first
+These are the pieces every screen/endpoint depends on. Build them before any feature screen, not alongside — retrofitting auth/socket handling into finished screens is far more rework than building it once up front.
+4a. Backend core (Dev A)
+
+Helper
+Purpose
+
+AuthGuard + @Roles() decorator
+• Verifies JWT on every request, attaches the decoded user to req.user
+• @Roles('client_admin','super_admin') decorator on controllers/routes, checked against req.user.role — write once, apply everywhere instead of manual if-checks per endpoint
+
+ScopeResolver service
+• Single function: resolveScope(user) → { type: 'all' | 'client' | 'zone', ids: [...] }
+• Internally calls zone_descendants() for zone_incharge/zone_staff, technician_assignments lookup for technician, plain client_id for client_admin, unrestricted for super_admin
+• Every controller that returns zone/device/issue/log data calls this once and reuses the result — this is the single place the cascading-visibility rule lives, so it only has to be correct in one spot
+
+Global exception filter
+• Catches DB constraint errors (duplicate assignment, duplicate daily log, cycle-prevention trigger) and maps each to a specific, clean error code/message instead of a raw 500
+• Standard response shape for every error: { success: false, code, message } so both Flutter and web can handle errors generically
+
+SocketRoomHelper
+• buildRooms(zoneId) → returns ['zone:<id>', ...every ancestor as 'zone:<ancestorId>', 'client:<clientId>']
+• Used both when a socket client connects (to know what to join) and when emitting an event (to know who to notify) — same function, two call sites, so the room logic can never drift out of sync between join and emit
+
+PushService
+• Thin wrapper over Firebase Admin SDK: sendToUser(userId, title, body, data)
+• Looks up the user's stored device token(s), sends, and silently logs (not throws) on failure — a failed push should never fail the underlying API request that triggered it
+
+Validation DTOs
+• One class-validator DTO per POST/PATCH body (CreateZoneDto, RaiseIssueDto, etc.)
+• Reject malformed requests before they reach any business logic — required fields, enum values, uuid format
+
+4b. Flutter core (Dev A)
+
+Helper
+Purpose
+
+ApiClient (Dio wrapper)
+• Single configured instance used by every screen — base URL, JSON headers
+• Request interceptor: attaches JWT automatically, no screen ever touches the token directly
+• Response interceptor: on 401, attempt refresh-token flow once, then retry the original request; on repeated failure, force logout back to login screen
+
+AuthController (state)
+• Holds current user, role, JWT, and — for zone_incharge/zone_staff — their zone_descendants() result, fetched once at login
+• Persists token in secure storage so the app doesn't force a re-login every open
+• Exposes a single isLoggedIn/role stream the navigation shell listens to
+
+PushNotificationService
+• Initializes FCM, requests permission, gets the device token and sends it to POST /auth/device-token right after login
+• Foreground handler: show an in-app banner/snackbar
+• Background/terminated tap handler: parse the notification payload's issue_id and deep-link straight to Issue Detail, not just the app's home screen
+
+RoleRouter
+• One place that decides the initial navigation stack based on role — zone_incharge/zone_staff into the zone_head flow, technician into the technician flow
+• Avoids scattering role if-checks across individual screens
+
+Shared widgets
+• StatusBadge — one widget, colored by device/issue status enum, used on every list/detail screen so status colors never drift between screens
+• ZoneBreadcrumb — renders the GET /zones/:id/ancestors result
+• IssueCard, EmptyState, ErrorSnackbar — reused across both role flows
+
+4c. Web core (Dev B)
+
+Helper
+Purpose
+
+ApiClient (fetch/axios wrapper)
+Same shape as the Flutter one: attaches JWT automatically, handles 401 refresh-and-retry, throws a normalized error object every component can catch the same way
+
+AuthContext + route guard
+Next.js middleware (or a top-level layout check) that redirects to login if unauthenticated, and to a “not authorized” page if the route's required role doesn't match — checked once per navigation, not per component
+
+SocketProvider
+• One socket connection for the whole app, created on login
+• On connect, joins rooms using the SAME zone_ancestors()-derived room list the backend expects (see 1b) — fetch ancestors once, join all of them plus the user's own zone/client room
+• Exposes a useSocketEvent(eventName, handler) hook so any component can subscribe without managing the connection itself
+
+useLiveList hook
+• Wraps the “fetch once, then merge socket events” pattern required by every dashboard/list page in section 3
+• Takes an initial fetcher + the relevant socket event name(s), returns a list that updates in place as events arrive — write this once, reuse on every issues/devices/logs list instead of hand-rolling the merge logic per page
+
+Shared components
+StatusBadge, ZoneTree (renders the descendants result as a collapsible tree), DataTable, IssueCard, Breadcrumb — same reasoning as the Flutter shared widgets: one definition, used by all three web roles' pages

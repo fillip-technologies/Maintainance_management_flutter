@@ -1,0 +1,563 @@
+
+Maintenance module
+Detailed documentation — hierarchy, roles, flow states, and table schema
+1. Hierarchy model
+The platform hierarchy is fixed: Platform → Company → Client → Vertical. Inside the hardware/CCTV vertical, the zone structure below the client is where all the flexibility lives.
+
+Figure 1. Platform-level hierarchy — fixed spine that every vertical plugs into.
+The zone layer is a single self-referencing table: every zone row has an optional parent_zone_id pointing to another row in the same table. This is what makes the hierarchy “vertical” in the sense you described — unlimited depth, no schema change needed to add a level.
+A client can have any number of top-level zones (Zone A, Zone B, Zone C…).
+Any zone can have any number of sub-zones, and those sub-zones can have their own sub-zones, indefinitely.
+Devices (cameras, etc.) attach to whichever zone level is relevant — directly under a top-level zone, or several levels deep.
+Each zone, at any depth, can have its own incharge and staff, independent of its parent zone’s staff.
+
+Figure 2. Example: two top-level zones, one with a sub-zone, each with independent staff and devices.
+Practically, this means the exact scenario you described — install cameras in the zoo, assign one admin and one staff, then later add a second zone with more cameras and a new incharge — is always the same three operations: create a zone row, attach devices to it, assign people to it. Nothing about the database or the permission model changes as you go deeper or wider.
+2. Roles
+
+Role
+Scope
+Assigned by
+Can do
+
+Platform admin
+Everything
+—
+Manage companies, billing
+
+Company admin
+One company
+Platform admin
+Add clients, turn on verticals
+
+Client admin
+One client
+Company admin
+Create zones, add devices, assign incharge/staff, see all issues client-wide
+
+Zone incharge
+One zone (+ sub-zones if cascading is on)
+Client admin
+Raise issues, update zone status, assign staff, see zone history
+
+Zone staff
+One zone only
+Zone incharge / client admin
+Raise issues, submit daily status log
+
+Technician
+One or more zones/clients
+Company/platform admin
+Receive assigned issues, update issue status, close issue
+
+Access is always scoped by the zone path — a user assigned to Sub-zone A1 only ever sees A1’s own devices and issues, never Zone B’s, even though both sit under the same client.
+3. Flow states
+Every record type that moves through a process has an explicit state machine below: every state it can be in, what triggers each transition, and who is allowed to trigger it.
+3.1 Zone lifecycle
+
+Figure 3. Zone lifecycle.
+
+State
+Meaning
+Who moves it
+Next state(s)
+
+draft
+Zone created, no incharge/staff assigned yet — not visible to any zone-level user
+Client admin (creates)
+active
+
+active
+Fully operational — has staff, can have devices, issues can be raised against its devices
+Client admin (assigns incharge)
+inactive
+
+inactive
+Archived/decommissioned — read-only, kept for historical reporting, no new issues can be raised
+Client admin
+active (reactivate)
+
+3.2 Device lifecycle
+
+Figure 4. Device lifecycle.
+
+State
+Meaning
+Trigger
+
+provisioned
+Added to system, not yet physically installed/confirmed live
+Admin adds device
+
+active
+Installed and operating normally
+Admin/incharge confirms install, or an issue is resolved and closed
+
+under_maintenance
+Has an open or in-progress issue against it
+Auto-set when an issue is raised against this device
+
+faulty
+Failing daily status checks repeatedly, no ticket raised yet — a soft warning, not a hard block
+2+ consecutive not_working daily logs (threshold configurable)
+
+retired
+Physically removed / decommissioned
+Admin action — permanent, kept for historical issue records, not deletable
+
+Note: under_maintenance is derived from whether the device has any open/in-progress issue. You can compute it live at read time, or store it as a denormalized column kept in sync by a trigger on issue status changes — recommended, since it makes device-list dashboards fast without a join on every page load.
+3.3 Issue lifecycle (the core state machine)
+
+Figure 5. Issue lifecycle, including the on_hold and reopened branches.
+
+State
+Meaning
+Who triggers it
+Allowed next state(s)
+
+open
+Just raised, unassigned
+System, on creation
+assigned
+
+assigned
+A technician has been attached
+Client admin / auto-assignment rule
+in_progress, on_hold
+
+in_progress
+Technician actively working
+Technician
+resolved, on_hold
+
+on_hold
+Blocked — waiting on parts, access, etc. Kept separate from in_progress so it doesn’t count the same against SLA
+Technician
+in_progress
+
+resolved
+Technician says it’s fixed, awaiting confirmation
+Technician
+closed, reopened
+
+closed
+Confirmed fixed — final state
+Client admin / zone incharge confirms, or auto-close after N days if undisputed
+— (terminal)
+
+reopened
+Raiser or incharge disputes the resolution
+Zone incharge / raiser, within the confirmation window
+assigned
+
+Every transition writes a row to issue_status_history — nothing is overwritten in place, so the full timeline of an issue is always reconstructable after the fact.
+Priority is a separate axis from status, set at creation and editable by the client admin: low → medium → high → critical. Priority does not gate status transitions — it only drives sorting, SLA timers, and notification urgency.
+3.4 Daily status log
+This is a snapshot, not a lifecycle — each entry is a new row per device per day, never edited afterward. Each entry is one of:
+working — normal, no action needed
+not_working — device is down; the UI can prompt “raise an issue for this?” to avoid a silent gap between a bad log and an actual ticket
+needs_attention — partially working or showing early warning signs
+The trend across days matters more than any single entry — e.g. three consecutive not_working entries auto-flags the device as faulty per section 3.2, even if nobody has raised a ticket yet.
+3.5 User / assignment states
+
+State
+Meaning
+
+invited
+Account created, invite sent, not yet logged in
+
+active
+Logged in at least once, currently has access
+
+suspended
+Access temporarily revoked (e.g. staff on leave) without deleting the record
+
+removed
+No longer has access; historical issues/logs they created are preserved with their name intact
+
+4. Feature flow — step by step
+4.1 Setting up a new zone (client admin)
+
+Figure 4.1. Setting up a new zone — flow diagram.
+
+
+4.2 Raising an issue (zone incharge / staff)
+
+Figure 4.2. Raising an issue — flow diagram.
+
+
+4.3 Issue assignment and resolution (client admin + technician)
+
+Figure 4.3. Issue assignment and resolution — flow diagram.
+
+
+
+
+
+
+
+
+
+4.4 Daily status log (zone staff / incharge)
+
+Figure 4.4. Daily status log — flow diagram.
+
+
+4.5 Cascading visibility — decide before building reporting
+
+Figure 4.5. Cascading visibility — decision diagram.
+5. Table schema (feature-wise)
+Grouped by feature area. Types are illustrative (Postgres-style) — adjust to your actual database. Timestamps (created_at / updated_at) are omitted from most tables below for brevity except where they carry specific meaning.
+
+Figure 6. Entity relationship overview — arrows point from the referenced (parent) table to the table holding the foreign key.
+5.1 Hierarchy & zone assignment
+zones
+Index recommended on (client_id, parent_zone_id) for fast child lookups.
+
+Column
+Type
+Constraints / notes
+
+id
+uuid
+PK
+
+client_id
+uuid
+FK → clients.id, not null
+
+parent_zone_id
+uuid
+FK → zones.id, nullable (null = top-level zone)
+
+name
+varchar(120)
+not null
+
+status
+enum
+draft, active, inactive — default draft
+
+created_by
+uuid
+FK → users.id
+
+created_at
+timestamp
+
+
+zone_assignments
+Unique constraint on (zone_id, user_id, role) where unassigned_at IS NULL — prevents duplicate active assignments.
+
+Column
+Type
+Constraints / notes
+
+id
+uuid
+PK
+
+zone_id
+uuid
+FK → zones.id, not null
+
+user_id
+uuid
+FK → users.id, not null
+
+role
+enum
+incharge, staff
+
+assigned_at
+timestamp
+
+
+unassigned_at
+timestamp
+nullable — set instead of deleting the row, preserves history
+
+5.2 Device catalogue
+hardware_types
+
+Column
+Type
+Constraints / notes
+
+id
+uuid
+PK
+
+name
+varchar(80)
+not null, unique (e.g. “CCTV camera”, “router”)
+
+spec_fields
+jsonb
+defines which fields auto-populate on device creation
+
+devices
+
+Column
+Type
+Constraints / notes
+
+id
+uuid
+PK
+
+zone_id
+uuid
+FK → zones.id, not null
+
+hardware_type_id
+uuid
+FK → hardware_types.id, nullable if is_manual_entry
+
+name
+varchar(120)
+not null
+
+location
+varchar(200)
+free text, e.g. “north gate, pole 3”
+
+install_date
+date
+nullable
+
+status
+enum
+provisioned, active, under_maintenance, faulty, retired
+
+is_manual_entry
+boolean
+default false
+
+custom_spec
+jsonb
+nullable — used instead of hardware_types.spec_fields when manually entered
+
+added_by
+uuid
+FK → users.id
+
+5.3 Issue management
+issue_categories
+Categories are scoped per hardware type, so each device type shows a relevant dropdown.
+
+Column
+Type
+Constraints / notes
+
+id
+uuid
+PK
+
+hardware_type_id
+uuid
+FK → hardware_types.id, not null
+
+name
+varchar(100)
+e.g. “lens damage”, “no power”
+
+issues
+Index on (status, assigned_technician_id) for the technician queue view. Index on (device_id, status) for open-issue lookups.
+
+Column
+Type
+Constraints / notes
+
+id
+uuid
+PK
+
+device_id
+uuid
+FK → devices.id, not null
+
+category_id
+uuid
+FK → issue_categories.id, not null
+
+raised_by_user_id
+uuid
+FK → users.id, not null
+
+assigned_technician_id
+uuid
+FK → technicians.id, nullable until assigned
+
+priority
+enum
+low, medium, high, critical — default medium
+
+status
+enum
+open, assigned, in_progress, on_hold, resolved, closed, reopened
+
+description
+text
+required at creation
+
+created_at
+timestamp
+
+
+resolved_at
+timestamp
+nullable
+
+closed_at
+timestamp
+nullable
+
+issue_status_history
+
+Column
+Type
+Constraints / notes
+
+id
+uuid
+PK
+
+issue_id
+uuid
+FK → issues.id, not null
+
+from_status
+enum
+nullable (null for the first row)
+
+to_status
+enum
+not null
+
+changed_by_user_id
+uuid
+FK → users.id
+
+changed_at
+timestamp
+
+
+notes
+text
+nullable
+
+5.4 Daily status log
+daily_status_logs
+Unique constraint on (device_id, log_date) — one log per device per day.
+
+Column
+Type
+Constraints / notes
+
+id
+uuid
+PK
+
+device_id
+uuid
+FK → devices.id, not null
+
+logged_by_user_id
+uuid
+FK → users.id, not null
+
+status
+enum
+working, not_working, needs_attention
+
+log_date
+date
+not null
+
+notes
+text
+nullable
+
+5.5 Technician coverage
+technicians
+
+Column
+Type
+Constraints / notes
+
+id
+uuid
+PK
+
+user_id
+uuid
+FK → users.id, not null, unique
+
+specialization
+varchar(100)
+nullable, e.g. “CCTV/networking”
+
+technician_assignments
+At least one of client_id / zone_id must be set — allows client-wide or zone-specific coverage.
+
+Column
+Type
+Constraints / notes
+
+id
+uuid
+PK
+
+technician_id
+uuid
+FK → technicians.id, not null
+
+client_id
+uuid
+FK → clients.id, nullable
+
+zone_id
+uuid
+FK → zones.id, nullable
+
+5.6 Users (shared platform-wide)
+users
+
+Column
+Type
+Constraints / notes
+
+id
+uuid
+PK
+
+company_id
+uuid
+FK → companies.id, nullable
+
+client_id
+uuid
+FK → clients.id, nullable
+
+name
+varchar(120)
+not null
+
+email
+varchar(200)
+unique
+
+role
+enum
+platform_admin, company_admin, client_admin, zone_incharge, zone_staff, technician
+
+account_status
+enum
+invited, active, suspended, removed
+
+6. Decisions to lock in before building
+Cascading visibility — does a parent zone’s incharge see sub-zone data, or is client admin the only roll-up view?
+Reassignment — can a zone incharge reassign a ticket to a different technician mid-flight, or only client admin/platform?
+Auto-close window — how many days after resolved before an issue auto-closes if nobody disputes it?
+Faulty threshold — how many consecutive not_working daily logs before a device auto-flags as faulty?
