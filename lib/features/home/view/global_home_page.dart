@@ -28,6 +28,7 @@ class _GlobalHomePageState extends ConsumerState<GlobalHomePage>
   String _searchQuery = '';
   DeviceStatus? _deviceFilterStatus;
   IssuePriority? _selectedPriorityFilter;
+  bool _isLoggingOut = false;
 
   final Map<String, TextEditingController> _logNoteControllers = {};
 
@@ -531,13 +532,33 @@ class _GlobalHomePageState extends ConsumerState<GlobalHomePage>
         actions: [
           Container(
             margin: const EdgeInsets.only(right: 12),
-            child: IconButton(
-              icon: const Icon(Icons.logout_rounded, color: AppColors.icon),
-              tooltip: 'Sign Out',
-              onPressed: () {
-                ref.read(authStateProvider.notifier).logout();
-              },
-            ),
+            child: _isLoggingOut
+                ? const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(12),
+                      child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.2,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  )
+                : IconButton(
+                    icon: const Icon(Icons.logout_rounded, color: AppColors.icon),
+                    tooltip: 'Sign Out',
+                    onPressed: () async {
+                      setState(() => _isLoggingOut = true);
+                      try {
+                        await ref.read(authStateProvider.notifier).logout();
+                        AppSnackbar.info('Signed out successfully');
+                      } catch (e) {
+                        if (mounted) setState(() => _isLoggingOut = false);
+                      }
+                    },
+                  ),
           ),
         ],
         bottom: TabBar(
