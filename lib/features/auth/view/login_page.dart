@@ -1,40 +1,49 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/providers/auth_provider.dart';
 import '../../../core/theme/colors.dart';
-import '../../staff/view/staff_home_page.dart';
-import '../../technician/view/technician_home_page.dart';
+import '../../../core/utils/app_logger.dart';
+import '../../../data/models/user_model.dart';
 import 'widgets/custom_password_field.dart';
 import 'widgets/custom_text_field.dart';
 
-class LoginPage extends StatefulWidget {
+class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  ConsumerState<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
-  final _emailController = TextEditingController(text: 'staff@zoo.com');
-  final _passwordController = TextEditingController(text: 'password123');
+class _LoginPageState extends ConsumerState<LoginPage> {
+  final _emailController = TextEditingController(text: 'ravi@cityzoo.com');
+  final _passwordController = TextEditingController(text: 'Password123!');
   bool _isLoading = false;
+  String? _errorMessage;
 
   final List<Map<String, String>> _demoProfiles = [
+    {
+      'name': 'Ravi Kumar',
+      'email': 'ravi@cityzoo.com',
+      'role': 'Zone Incharge / Staff',
+      'scope': 'North Wing Tree (Cascading)',
+    },
+    {
+      'name': 'Amit Shah',
+      'email': 'amit@example.com',
+      'role': 'Technician',
+      'scope': 'Assigned Issue Queue',
+    },
+    {
+      'name': 'Priya Singh',
+      'email': 'priya@cityzoo.com',
+      'role': 'Client Admin',
+      'scope': 'City Zoo (All Zones)',
+    },
     {
       'name': 'Sarah Connor',
       'email': 'staff@zoo.com',
       'role': 'Zone Staff',
-      'zone': 'Safari Zone (Main)',
-    },
-    {
-      'name': 'Alex Mercer',
-      'email': 'zonehead@zoo.com',
-      'role': 'Zone Incharge',
-      'zone': 'Safari Zone (Main)',
-    },
-    {
-      'name': 'Marcus Vance',
-      'email': 'tech@zoo.com',
-      'role': 'Technician',
-      'zone': 'All Zones',
+      'scope': 'Safari Zone',
     },
   ];
 
@@ -45,25 +54,87 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  void _handleLogin([String? email]) {
+  Future<void> _handleLogin([String? email, String? password]) async {
     final targetEmail = email ?? _emailController.text.trim();
-    final isTechnician = targetEmail.toLowerCase().contains('tech');
+    final targetPassword = password ?? _passwordController.text.trim();
 
-    setState(() => _isLoading = true);
+    AppLogger.i('👆 [LoginPage] Login triggered for: $targetEmail');
 
-    Future.delayed(const Duration(milliseconds: 300), () {
+    if (targetEmail.isEmpty || targetPassword.isEmpty) {
+      setState(() => _errorMessage = 'Please enter both email and password');
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      // 1. Attempt Real Backend Login via Riverpod AuthProvider
+      await ref
+          .read(authStateProvider.notifier)
+          .login(email: targetEmail, password: targetPassword);
+      AppLogger.i('🎉 [LoginPage] Login successful for $targetEmail');
+    } catch (e, st) {
+      AppLogger.e('💥 [LoginPage] Login failed: $e', e, st);
+
+      // 2. If backend is offline or network error during early dev, offer friendly fallback
+      if (mounted) {
+        final errorMsg = e.toString().replaceAll('Exception:', '').trim();
+
+        // If backend connection refused, let them use offline dev mode seamlessly
+        if (errorMsg.contains('Connection refused') ||
+            errorMsg.contains('SocketException') ||
+            errorMsg.contains('connection timeout')) {
+          _promptOfflineDevLogin(targetEmail);
+        } else {
+          setState(() {
+            _errorMessage = errorMsg;
+          });
+        }
+      }
+    } finally {
       if (mounted) {
         setState(() => _isLoading = false);
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => isTechnician
-                ? const TechnicianHomePage()
-                : const StaffHomePage(),
-          ),
-        );
       }
-    });
+    }
+  }
+
+  void _promptOfflineDevLogin(String email) {
+    final isTech =
+        email.toLowerCase().contains('amit') ||
+        email.toLowerCase().contains('tech');
+    final storage = ref.read(storageServiceProvider);
+
+    final mockUser = UserModel(
+      id: isTech ? 'usr-tech-amit' : 'usr-incharge-ravi',
+      name: isTech ? 'Amit Shah (Technician)' : 'Ravi Kumar (Zone Incharge)',
+      email: email,
+      role: isTech ? UserRole.technician : UserRole.zoneIncharge,
+      clientId: 'c2222222-2222-2222-2222-222222222222',
+      assignedZoneId: 'a0000000-0000-0000-0000-000000000001',
+      assignedZoneName: 'North Wing (Main)',
+    );
+
+    storage.saveTokens(
+      accessToken: 'offline-dev-token',
+      refreshToken: 'offline-refresh-token',
+    );
+    storage.saveUser(mockUser);
+
+    // Update state to trigger navigation
+    ref.invalidate(authStateProvider);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        backgroundColor: AppColors.warningText,
+        content: Text(
+          'Could not reach server. Started offline dev session.',
+          style: TextStyle(color: AppColors.textWhite),
+        ),
+      ),
+    );
   }
 
   @override
@@ -73,7 +144,7 @@ class _LoginPageState extends State<LoginPage> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -95,7 +166,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
 
                 // Title & Subtitle
                 const Text(
@@ -119,14 +190,52 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
 
-                const SizedBox(height: 32),
+                const SizedBox(height: 20),
+
+                // Error Message if any
+                if (_errorMessage != null) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.errorLight,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: AppColors.error.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.error_outline,
+                          size: 18,
+                          color: AppColors.errorText,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            _errorMessage!,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: AppColors.errorText,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
 
                 // Email Input
                 CustomTextField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   labelText: "Email Address",
-                  hintText: "staff@zoo.com",
+                  hintText: "ravi@cityzoo.com",
                   prefixIcon: Icons.email_outlined,
                 ),
 
@@ -181,7 +290,9 @@ class _LoginPageState extends State<LoginPage> {
                             width: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(AppColors.textWhite),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                AppColors.textWhite,
+                              ),
                             ),
                           )
                         : const Text(
@@ -194,7 +305,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
 
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
 
                 // Divider
                 Row(
@@ -203,7 +314,7 @@ class _LoginPageState extends State<LoginPage> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: Text(
-                        "Demo Profiles (Tap to auto-login)",
+                        "Backend Seed Accounts (Tap to auto-login)",
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
@@ -215,24 +326,26 @@ class _LoginPageState extends State<LoginPage> {
                   ],
                 ),
 
-                const SizedBox(height: 18),
+                const SizedBox(height: 14),
 
                 // Quick Demo Profiles List
                 ..._demoProfiles.map((profile) {
-                  final isStaff = profile['role'] == 'Zone Staff';
-                  final isHead = profile['role'] == 'Zone Incharge';
+                  final isStaff =
+                      profile['role']!.contains('Staff') ||
+                      profile['role']!.contains('Incharge');
+                  final isTech = profile['role']!.contains('Technician');
 
                   final roleBadgeColor = isStaff
                       ? AppColors.infoLight
-                      : isHead
-                          ? AppColors.purpleLight
-                          : AppColors.warningLight;
+                      : isTech
+                      ? AppColors.warningLight
+                      : AppColors.purpleLight;
 
                   final roleTextColor = isStaff
                       ? AppColors.infoText
-                      : isHead
-                          ? AppColors.purpleText
-                          : AppColors.warningText;
+                      : isTech
+                      ? AppColors.warningText
+                      : AppColors.purpleText;
 
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 10),
@@ -241,11 +354,15 @@ class _LoginPageState extends State<LoginPage> {
                           ? null
                           : () {
                               _emailController.text = profile['email']!;
-                              _handleLogin(profile['email']);
+                              _passwordController.text = 'Password123!';
+                              _handleLogin(profile['email'], 'Password123!');
                             },
                       borderRadius: BorderRadius.circular(14),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 12,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.surface,
                           borderRadius: BorderRadius.circular(14),
@@ -278,9 +395,9 @@ class _LoginPageState extends State<LoginPage> {
                                     ),
                                   ),
                                   Text(
-                                    profile['email']!,
+                                    '${profile['email']!} • ${profile['scope']!}',
                                     style: const TextStyle(
-                                      fontSize: 12,
+                                      fontSize: 11,
                                       color: AppColors.textSecondary,
                                     ),
                                   ),
@@ -288,7 +405,10 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                             ),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
                                 color: roleBadgeColor,
                                 borderRadius: BorderRadius.circular(8),
@@ -296,7 +416,7 @@ class _LoginPageState extends State<LoginPage> {
                               child: Text(
                                 profile['role']!,
                                 style: TextStyle(
-                                  fontSize: 11,
+                                  fontSize: 10,
                                   fontWeight: FontWeight.w600,
                                   color: roleTextColor,
                                 ),

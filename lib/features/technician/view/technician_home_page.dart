@@ -1,20 +1,21 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/providers/auth_provider.dart';
 import '../../../core/theme/colors.dart';
 import '../../../core/widgets/status_badge.dart';
 import '../../../data/models/issue_model.dart';
-import '../../auth/view/login_page.dart';
 import '../../staff/view/widgets/issue_detail_sheet.dart';
 import 'widgets/update_status_sheet.dart';
 
-class TechnicianHomePage extends StatefulWidget {
+class TechnicianHomePage extends ConsumerStatefulWidget {
   const TechnicianHomePage({super.key});
 
   @override
-  State<TechnicianHomePage> createState() => _TechnicianHomePageState();
+  ConsumerState<TechnicianHomePage> createState() => _TechnicianHomePageState();
 }
 
-class _TechnicianHomePageState extends State<TechnicianHomePage>
+class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   String _searchQuery = '';
@@ -327,19 +328,19 @@ class _TechnicianHomePageState extends State<TechnicianHomePage>
               ),
             ),
             const SizedBox(width: 10),
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Marcus Vance',
-                    style: TextStyle(
+                    ref.watch(authStateProvider).value?.name ?? 'Field Technician',
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
                     ),
                   ),
-                  Row(
+                  const Row(
                     children: [
                       Icon(
                         Icons.build_circle_outlined,
@@ -348,7 +349,7 @@ class _TechnicianHomePageState extends State<TechnicianHomePage>
                       ),
                       SizedBox(width: 3),
                       Text(
-                        'Hardware Technician • All Zones',
+                        'Hardware Technician • All Assigned Zones',
                         style: TextStyle(
                           fontSize: 12,
                           color: AppColors.textSecondary,
@@ -368,10 +369,7 @@ class _TechnicianHomePageState extends State<TechnicianHomePage>
               icon: const Icon(Icons.logout_rounded, color: AppColors.icon),
               tooltip: 'Sign Out',
               onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (_) => const LoginPage()),
-                );
+                ref.read(authStateProvider.notifier).logout();
               },
             ),
           ),

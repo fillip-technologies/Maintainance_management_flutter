@@ -1,22 +1,54 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'core/providers/auth_provider.dart';
+import 'core/storage/storage_service.dart';
 import 'core/theme/colors.dart';
+import 'data/models/user_model.dart';
 import 'features/auth/view/login_page.dart';
+import 'features/staff/view/staff_home_page.dart';
+import 'features/technician/view/technician_home_page.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const EquipmentManagementApp());
+  final storageService = await StorageService.init();
+
+  runApp(
+    ProviderScope(
+      overrides: [storageServiceProvider.overrideWithValue(storageService)],
+      child: const EquipmentManagementApp(),
+    ),
+  );
 }
 
-class EquipmentManagementApp extends StatelessWidget {
+class EquipmentManagementApp extends ConsumerWidget {
   const EquipmentManagementApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authStateProvider);
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Equipment Management System',
       theme: AppColors.theme,
-      home: const LoginPage(),
+      home: authState.when(
+        data: (user) {
+          if (user == null) {
+            return const LoginPage();
+          }
+          if (user.role == UserRole.technician) {
+            return const TechnicianHomePage();
+          }
+          return const StaffHomePage();
+        },
+        loading: () => const Scaffold(
+          backgroundColor: AppColors.background,
+          body: Center(
+            child: CircularProgressIndicator(color: AppColors.primary),
+          ),
+        ),
+        error: (_, _) => const LoginPage(),
+      ),
     );
   }
 }

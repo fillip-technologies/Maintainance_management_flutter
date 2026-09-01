@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/providers/auth_provider.dart';
 import '../../../core/theme/colors.dart';
 import '../../../core/widgets/status_badge.dart';
 import '../../../data/models/daily_log_model.dart';
 import '../../../data/models/device_model.dart';
 import '../../../data/models/issue_model.dart';
-import '../../auth/view/login_page.dart';
 import 'widgets/issue_detail_sheet.dart';
 import 'widgets/raise_issue_sheet.dart';
 
-class StaffHomePage extends StatefulWidget {
+class StaffHomePage extends ConsumerStatefulWidget {
   const StaffHomePage({super.key});
 
   @override
-  State<StaffHomePage> createState() => _StaffHomePageState();
+  ConsumerState<StaffHomePage> createState() => _StaffHomePageState();
 }
 
-class _StaffHomePageState extends State<StaffHomePage>
+class _StaffHomePageState extends ConsumerState<StaffHomePage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final Map<String, TextEditingController> _logNoteControllers = {};
@@ -378,13 +379,13 @@ class _StaffHomePageState extends State<StaffHomePage>
               ),
             ),
             const SizedBox(width: 10),
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Sarah Connor (Staff)',
-                    style: TextStyle(
+                    ref.watch(authStateProvider).value?.name ?? 'Staff Member',
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
@@ -392,13 +393,21 @@ class _StaffHomePageState extends State<StaffHomePage>
                   ),
                   Row(
                     children: [
-                      Icon(Icons.location_on, size: 12, color: AppColors.icon),
-                      SizedBox(width: 2),
+                      const Icon(
+                        Icons.location_on,
+                        size: 12,
+                        color: AppColors.icon,
+                      ),
+                      const SizedBox(width: 2),
                       Expanded(
                         child: Text(
-                          'Safari Zone (Main) • Cascading Scope',
+                          ref
+                                  .watch(authStateProvider)
+                                  .value
+                                  ?.assignedZoneName ??
+                              'Assigned Zone Scope',
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 12,
                             color: AppColors.textSecondary,
                           ),
@@ -418,10 +427,7 @@ class _StaffHomePageState extends State<StaffHomePage>
               icon: const Icon(Icons.logout_rounded, color: AppColors.icon),
               tooltip: 'Sign Out',
               onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (_) => const LoginPage()),
-                );
+                ref.read(authStateProvider.notifier).logout();
               },
             ),
           ),

@@ -40,15 +40,15 @@ class ZoneModel {
 
   factory ZoneModel.fromJson(Map<String, dynamic> json) {
     return ZoneModel(
-      id: json['id'] as String,
-      clientId: json['client_id'] as String? ?? '',
-      parentZoneId: json['parent_zone_id'] as String?,
-      name: json['name'] as String,
+      id: (json['id'] as String?) ?? '',
+      clientId: (json['clientId'] ?? json['client_id']) as String? ?? '',
+      parentZoneId: (json['parentZoneId'] ?? json['parent_zone_id']) as String?,
+      name: (json['name'] as String?) ?? 'Unknown Zone',
       status: ZoneStatus.fromString(json['status'] as String?),
       depth: (json['depth'] as num?)?.toInt() ?? 0,
-      deviceCount: (json['device_count'] as num?)?.toInt() ?? 0,
-      openIssuesCount: (json['open_issues_count'] as num?)?.toInt() ?? 0,
-      subZones: (json['sub_zones'] as List<dynamic>?)
+      deviceCount: (json['device_count'] ?? json['deviceCount'] as num?)?.toInt() ?? 0,
+      openIssuesCount: (json['open_issues_count'] ?? json['openIssuesCount'] as num?)?.toInt() ?? 0,
+      subZones: (json['sub_zones'] ?? json['subZones'] as List<dynamic>?)
               ?.map((e) => ZoneModel.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],

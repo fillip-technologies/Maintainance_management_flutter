@@ -1,5 +1,5 @@
 enum UserRole {
-  platformAdmin('platform_admin', 'Platform Admin'),
+  superAdmin('super_admin', 'Super Admin'),
   companyAdmin('company_admin', 'Company Admin'),
   clientAdmin('client_admin', 'Client Admin'),
   zoneIncharge('zone_incharge', 'Zone Incharge / Head'),
@@ -23,7 +23,7 @@ enum UserRole {
   bool get isAdmin =>
       this == UserRole.clientAdmin ||
       this == UserRole.companyAdmin ||
-      this == UserRole.platformAdmin;
+      this == UserRole.superAdmin;
 }
 
 class UserModel {
@@ -50,16 +50,20 @@ class UserModel {
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    final email = (json['email'] as String?) ?? '';
+    final name = (json['name'] as String?) ?? (email.isNotEmpty ? email.split('@').first : 'User');
+    final role = UserRole.fromString(json['role'] as String?);
+
     return UserModel(
-      id: json['id'] as String,
-      email: json['email'] as String,
-      name: json['name'] as String? ?? (json['email'] as String).split('@').first,
-      role: UserRole.fromString(json['role'] as String?),
-      companyId: json['company_id'] as String?,
-      clientId: json['client_id'] as String?,
-      assignedZoneId: json['assigned_zone_id'] as String?,
-      assignedZoneName: json['assigned_zone_name'] as String?,
-      accountStatus: json['account_status'] as String? ?? 'active',
+      id: (json['id'] as String?) ?? '',
+      email: email,
+      name: name,
+      role: role,
+      companyId: (json['companyId'] ?? json['company_id']) as String?,
+      clientId: (json['clientId'] ?? json['client_id']) as String?,
+      assignedZoneId: (json['zoneId'] ?? json['assigned_zone_id'] ?? json['zone_id']) as String?,
+      assignedZoneName: (json['assigned_zone_name'] ?? json['zone_name']) as String?,
+      accountStatus: (json['accountStatus'] ?? json['account_status']) as String? ?? 'active',
     );
   }
 
@@ -75,5 +79,29 @@ class UserModel {
       'assigned_zone_name': assignedZoneName,
       'account_status': accountStatus,
     };
+  }
+
+  UserModel copyWith({
+    String? id,
+    String? email,
+    String? name,
+    UserRole? role,
+    String? companyId,
+    String? clientId,
+    String? assignedZoneId,
+    String? assignedZoneName,
+    String? accountStatus,
+  }) {
+    return UserModel(
+      id: id ?? this.id,
+      email: email ?? this.email,
+      name: name ?? this.name,
+      role: role ?? this.role,
+      companyId: companyId ?? this.companyId,
+      clientId: clientId ?? this.clientId,
+      assignedZoneId: assignedZoneId ?? this.assignedZoneId,
+      assignedZoneName: assignedZoneName ?? this.assignedZoneName,
+      accountStatus: accountStatus ?? this.accountStatus,
+    );
   }
 }
