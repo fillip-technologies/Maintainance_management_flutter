@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/providers/auth_provider.dart';
 import 'core/storage/storage_service.dart';
 import 'core/theme/colors.dart';
+import 'core/utils/app_snackbar.dart';
 import 'data/models/user_model.dart';
 import 'features/auth/view/login_page.dart';
 import 'features/staff/view/staff_home_page.dart';
@@ -28,6 +29,7 @@ class EquipmentManagementApp extends ConsumerWidget {
     final authState = ref.watch(authStateProvider);
 
     return MaterialApp(
+      scaffoldMessengerKey: AppSnackbar.messengerKey,
       debugShowCheckedModeBanner: false,
       title: 'Equipment Management System',
       theme: AppColors.theme,

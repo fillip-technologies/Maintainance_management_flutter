@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../core/theme/colors.dart';
+import '../../../../core/utils/app_snackbar.dart';
 import '../../../../data/models/device_model.dart';
 import '../../../../data/models/issue_model.dart';
 
@@ -96,17 +97,7 @@ class _RaiseIssueSheetState extends State<RaiseIssueSheet> {
         });
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: AppColors.errorText,
-            content: Text(
-              'Failed to capture image: $e',
-              style: const TextStyle(color: AppColors.textWhite),
-            ),
-          ),
-        );
-      }
+      AppSnackbar.error('Failed to capture image: $e');
     } finally {
       if (mounted) {
         setState(() => _isPickingImage = false);
@@ -290,15 +281,7 @@ class _RaiseIssueSheetState extends State<RaiseIssueSheet> {
     widget.onIssueCreated(newIssue);
     Navigator.pop(context);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        backgroundColor: AppColors.successText,
-        content: Text(
-          'Maintenance issue raised successfully!',
-          style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold),
-        ),
-      ),
-    );
+    AppSnackbar.success('Maintenance issue raised successfully!');
   }
 
   @override

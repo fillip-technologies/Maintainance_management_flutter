@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../../../core/theme/colors.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../core/utils/app_snackbar.dart';
 import '../../../data/models/user_model.dart';
 import 'widgets/custom_password_field.dart';
 import 'widgets/custom_text_field.dart';
@@ -126,15 +127,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     // Update state to trigger navigation
     ref.invalidate(authStateProvider);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        backgroundColor: AppColors.warningText,
-        content: Text(
-          'Could not reach server. Started offline dev session.',
-          style: TextStyle(color: AppColors.textWhite),
-        ),
-      ),
-    );
+    AppSnackbar.warning('Could not reach server. Started offline dev session.');
   }
 
   @override

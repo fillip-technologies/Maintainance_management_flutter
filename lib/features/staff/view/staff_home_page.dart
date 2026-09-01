@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../../../core/theme/colors.dart';
+import '../../../core/utils/app_snackbar.dart';
 import '../../../core/widgets/status_badge.dart';
 import '../../../data/models/daily_log_model.dart';
 import '../../../data/models/device_model.dart';
@@ -217,6 +218,9 @@ class _StaffHomePageState extends ConsumerState<StaffHomePage>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(() {
+      if (mounted) setState(() {});
+    });
   }
 
   @override
@@ -254,23 +258,14 @@ class _StaffHomePageState extends ConsumerState<StaffHomePage>
       }
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: status == DailyLogStatus.working
-            ? AppColors.successText
-            : status == DailyLogStatus.needsAttention
-            ? AppColors.warningText
-            : AppColors.errorText,
-        duration: const Duration(seconds: 2),
-        content: Text(
-          'Marked ${device.name} as ${status.label}',
-          style: const TextStyle(
-            color: AppColors.textWhite,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-    );
+    final msg = 'Marked ${device.name} as ${status.label}';
+    if (status == DailyLogStatus.working) {
+      AppSnackbar.success(msg);
+    } else if (status == DailyLogStatus.needsAttention) {
+      AppSnackbar.warning(msg);
+    } else {
+      AppSnackbar.error(msg);
+    }
 
     if (status == DailyLogStatus.notWorking) {
       _promptRaiseIssue(device);
@@ -453,16 +448,6 @@ class _StaffHomePageState extends ConsumerState<StaffHomePage>
               text: 'Issues',
             ),
           ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _openRaiseIssueSheet(),
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.textWhite,
-        icon: const Icon(Icons.add_circle_outline, size: 20),
-        label: const Text(
-          'Raise Issue',
-          style: TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
       body: Column(

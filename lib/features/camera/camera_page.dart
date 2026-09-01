@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../core/theme/colors.dart';
+import '../../core/utils/app_snackbar.dart';
 
 class CameraPage extends StatefulWidget {
   final String? initialTitle;
@@ -42,17 +43,7 @@ class _CameraPageState extends State<CameraPage> {
         widget.onImageSelected?.call(file);
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: AppColors.errorText,
-            content: Text(
-              'Failed to pick image: $e',
-              style: const TextStyle(color: AppColors.textWhite),
-            ),
-          ),
-        );
-      }
+      AppSnackbar.error('Failed to pick image: $e');
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -377,15 +368,7 @@ class _CameraPageState extends State<CameraPage> {
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              backgroundColor: AppColors.successText,
-                              content: Text(
-                                'Photo saved successfully!',
-                                style: TextStyle(color: AppColors.textWhite),
-                              ),
-                            ),
-                          );
+                          AppSnackbar.success('Photo saved successfully!');
                         },
                         icon: const Icon(Icons.check, size: 18),
                         label: const Text('Confirm'),

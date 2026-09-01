@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../../core/theme/colors.dart';
+import '../../../../../core/utils/app_snackbar.dart';
 import '../../../../../data/models/issue_model.dart';
 
 class UpdateStatusSheet extends StatefulWidget {
@@ -117,14 +118,7 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
         });
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: AppColors.errorText,
-            content: Text('Failed to take photo: $e'),
-          ),
-        );
-      }
+      AppSnackbar.error('Failed to take photo: $e');
     } finally {
       if (mounted) {
         setState(() => _isPickingImage = false);

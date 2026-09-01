@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../../../core/theme/colors.dart';
+import '../../../core/utils/app_snackbar.dart';
 import '../../../core/widgets/status_badge.dart';
 import '../../../data/models/issue_model.dart';
 import '../../staff/view/widgets/issue_detail_sheet.dart';
@@ -267,22 +268,14 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage>
           }
         });
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: newStatus == IssueStatus.resolved
-                ? AppColors.successText
-                : newStatus == IssueStatus.onHold
-                ? AppColors.purpleText
-                : AppColors.primary,
-            content: Text(
-              'Ticket ${issue.id} moved to ${newStatus.label}',
-              style: const TextStyle(
-                color: AppColors.textWhite,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        );
+        final msg = 'Ticket ${issue.id} moved to ${newStatus.label}';
+        if (newStatus == IssueStatus.resolved) {
+          AppSnackbar.success(msg);
+        } else if (newStatus == IssueStatus.onHold) {
+          AppSnackbar.warning(msg);
+        } else {
+          AppSnackbar.info(msg);
+        }
       },
     );
   }
