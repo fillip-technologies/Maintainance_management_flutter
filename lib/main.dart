@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'core/config/app_config.dart';
 import 'core/providers/auth_provider.dart';
 import 'core/storage/storage_service.dart';
 import 'core/theme/colors.dart';
@@ -29,22 +30,23 @@ class EquipmentManagementApp extends ConsumerWidget {
     return MaterialApp(
       scaffoldMessengerKey: AppSnackbar.messengerKey,
       debugShowCheckedModeBanner: false,
-      title: 'Equipment Management System',
+      title: AppConfig.appName,
       theme: AppColors.theme,
       home: authState.when(
         data: (user) {
           if (user == null) {
-            return const LoginPage();
+            return const LoginPage(key: ValueKey('login_page'));
           }
-          return const GlobalHomePage();
+          return const GlobalHomePage(key: ValueKey('global_home_page'));
         },
         loading: () => const Scaffold(
+          key: ValueKey('auth_loading'),
           backgroundColor: AppColors.background,
           body: Center(
             child: CircularProgressIndicator(color: AppColors.primary),
           ),
         ),
-        error: (_, _) => const LoginPage(),
+        error: (_, _) => const LoginPage(key: ValueKey('login_page_error')),
       ),
     );
   }

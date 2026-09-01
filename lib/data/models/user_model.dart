@@ -1,6 +1,5 @@
 enum UserRole {
   superAdmin('super_admin', 'Super Admin'),
-  companyAdmin('company_admin', 'Company Admin'),
   clientAdmin('client_admin', 'Client Admin'),
   zoneIncharge('zone_incharge', 'Zone Incharge / Head'),
   zoneStaff('zone_staff', 'Zone Staff'),
@@ -8,6 +7,7 @@ enum UserRole {
 
   final String value;
   final String label;
+
   const UserRole(this.value, this.label);
 
   static UserRole fromString(String? role) {
@@ -19,11 +19,11 @@ enum UserRole {
 
   bool get isZoneHeadOrStaff =>
       this == UserRole.zoneIncharge || this == UserRole.zoneStaff;
+
   bool get isTechnician => this == UserRole.technician;
+
   bool get isAdmin =>
-      this == UserRole.clientAdmin ||
-      this == UserRole.companyAdmin ||
-      this == UserRole.superAdmin;
+      this == UserRole.clientAdmin || this == UserRole.superAdmin;
 }
 
 class UserModel {
@@ -31,7 +31,7 @@ class UserModel {
   final String email;
   final String name;
   final UserRole role;
-  final String? companyId;
+
   final String? clientId;
   final String? assignedZoneId;
   final String? assignedZoneName;
@@ -43,7 +43,6 @@ class UserModel {
     required this.email,
     required this.name,
     required this.role,
-    this.companyId,
     this.clientId,
     this.assignedZoneId,
     this.assignedZoneName,
@@ -53,7 +52,9 @@ class UserModel {
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     final email = (json['email'] as String?) ?? '';
-    final name = (json['name'] as String?) ?? (email.isNotEmpty ? email.split('@').first : 'User');
+    final name =
+        (json['name'] as String?) ??
+        (email.isNotEmpty ? email.split('@').first : 'User');
     final role = UserRole.fromString(json['role'] as String?);
 
     return UserModel(
@@ -61,12 +62,16 @@ class UserModel {
       email: email,
       name: name,
       role: role,
-      companyId: (json['companyId'] ?? json['company_id']) as String?,
       clientId: (json['clientId'] ?? json['client_id']) as String?,
-      assignedZoneId: (json['zoneId'] ?? json['assigned_zone_id'] ?? json['zone_id']) as String?,
-      assignedZoneName: (json['assigned_zone_name'] ?? json['zone_name']) as String?,
+      assignedZoneId:
+          (json['zoneId'] ?? json['assigned_zone_id'] ?? json['zone_id'])
+              as String?,
+      assignedZoneName:
+          (json['assigned_zone_name'] ?? json['zone_name']) as String?,
       technicianId: (json['technicianId'] ?? json['technician_id']) as String?,
-      accountStatus: (json['accountStatus'] ?? json['account_status']) as String? ?? 'active',
+      accountStatus:
+          (json['accountStatus'] ?? json['account_status']) as String? ??
+          'active',
     );
   }
 
@@ -76,7 +81,6 @@ class UserModel {
       'email': email,
       'name': name,
       'role': role.value,
-      'company_id': companyId,
       'client_id': clientId,
       'assigned_zone_id': assignedZoneId,
       'assigned_zone_name': assignedZoneName,
@@ -90,7 +94,6 @@ class UserModel {
     String? email,
     String? name,
     UserRole? role,
-    String? companyId,
     String? clientId,
     String? assignedZoneId,
     String? assignedZoneName,
@@ -102,7 +105,6 @@ class UserModel {
       email: email ?? this.email,
       name: name ?? this.name,
       role: role ?? this.role,
-      companyId: companyId ?? this.companyId,
       clientId: clientId ?? this.clientId,
       assignedZoneId: assignedZoneId ?? this.assignedZoneId,
       assignedZoneName: assignedZoneName ?? this.assignedZoneName,

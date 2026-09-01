@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/config/app_config.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../../../core/theme/colors.dart';
 import '../../../core/utils/app_logger.dart';
@@ -153,7 +154,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       border: Border.all(color: AppColors.border),
                     ),
                     child: const Icon(
-                      Icons.shield_outlined,
+                      Icons.hardware_outlined,
                       size: 42,
                       color: AppColors.primary,
                     ),
@@ -164,11 +165,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
                 // Title & Subtitle
                 const Text(
-                  "Equipment Hub",
+                  AppConfig.appName,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 28,
+                    fontSize: 30,
                     fontWeight: FontWeight.bold,
+                    letterSpacing: -0.5,
                     color: AppColors.textPrimary,
                   ),
                 ),
@@ -176,7 +178,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 const SizedBox(height: 6),
 
                 const Text(
-                  "Maintenance & Device Management System",
+                  AppConfig.appTagline,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,

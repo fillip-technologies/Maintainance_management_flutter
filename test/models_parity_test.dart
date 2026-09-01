@@ -1,0 +1,235 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:equipment_management_system/data/models/user_model.dart';
+import 'package:equipment_management_system/data/models/zone_model.dart';
+import 'package:equipment_management_system/data/models/device_model.dart';
+import 'package:equipment_management_system/data/models/issue_model.dart';
+import 'package:equipment_management_system/data/models/hardware_type_model.dart';
+import 'package:equipment_management_system/data/models/daily_log_model.dart';
+import 'package:equipment_management_system/data/models/dashboard_summary_model.dart';
+
+void main() {
+  group('Backend ⟷ Frontend Model Parity Tests', () {
+    test('1. UserModel parses backend login response correctly', () {
+      final backendUserJson = {
+        'id': 'fc4349f5-eef1-4405-83c6-d43a452c725a',
+        'name': 'Ravi Kumar',
+        'email': 'ravi@cityzoo.com',
+        'role': 'zone_incharge',
+        'clientId': '6a348679-0265-41d5-aa19-0b98f4abf635',
+        'zoneId': '052feedc-261f-4805-bfdc-1145a41cf7c8',
+      };
+
+      final user = UserModel.fromJson(backendUserJson);
+
+      expect(user.id, 'fc4349f5-eef1-4405-83c6-d43a452c725a');
+      expect(user.name, 'Ravi Kumar');
+      expect(user.email, 'ravi@cityzoo.com');
+      expect(user.role, UserRole.zoneIncharge);
+      expect(user.role.value, 'zone_incharge');
+      expect(user.role.isZoneHeadOrStaff, isTrue);
+      expect(user.clientId, '6a348679-0265-41d5-aa19-0b98f4abf635');
+      expect(user.assignedZoneId, '052feedc-261f-4805-bfdc-1145a41cf7c8');
+    });
+
+    test('2. ZoneModel parses backend zone tree response correctly', () {
+      final backendZoneJson = {
+        'id': '052feedc-261f-4805-bfdc-1145a41cf7c8',
+        'clientId': '6a348679-0265-41d5-aa19-0b98f4abf635',
+        'parentZoneId': null,
+        'name': 'North Wing',
+        'status': 'active',
+        'depth': 0,
+        'deviceCount': 4,
+        'openIssuesCount': 1,
+      };
+
+      final zone = ZoneModel.fromJson(backendZoneJson);
+
+      expect(zone.id, '052feedc-261f-4805-bfdc-1145a41cf7c8');
+      expect(zone.name, 'North Wing');
+      expect(zone.status, ZoneStatus.active);
+      expect(zone.depth, 0);
+      expect(zone.parentZoneId, isNull);
+      expect(zone.deviceCount, 4);
+      expect(zone.openIssuesCount, 1);
+    });
+
+    test('3. DeviceModel parses backend device response and nested relations correctly', () {
+      final backendDeviceJson = {
+        'id': 'e23fdc61-4365-4a33-9d22-82412878e8fc',
+        'zoneId': '1a1b8786-ce7b-4708-b340-47d8e98c3412',
+        'hardwareTypeId': 'hw-ptz-01',
+        'name': 'Cam - North Wing Gate',
+        'location': 'north gate pillar',
+        'installDate': '2026-08-31',
+        'status': 'active',
+        'isManualEntry': false,
+        'customSpec': {'ip': '192.168.1.101'},
+        'addedById': 'usr-123',
+        'createdAt': '2026-08-31T10:00:00.000Z',
+        'updatedAt': '2026-08-31T10:00:00.000Z',
+        'zone': {
+          'id': '1a1b8786-ce7b-4708-b340-47d8e98c3412',
+          'name': 'North Wing',
+          'clientId': '6a348679-0265-41d5-aa19-0b98f4abf635',
+        },
+        'hardwareType': {
+          'id': 'hw-ptz-01',
+          'name': 'CCTV camera',
+        },
+        'zoneName': 'North Wing',
+      };
+
+      final device = DeviceModel.fromJson(backendDeviceJson);
+
+      expect(device.id, 'e23fdc61-4365-4a33-9d22-82412878e8fc');
+      expect(device.name, 'Cam - North Wing Gate');
+      expect(device.zoneId, '1a1b8786-ce7b-4708-b340-47d8e98c3412');
+      expect(device.zoneName, 'North Wing');
+      expect(device.hardwareTypeName, 'CCTV camera');
+      expect(device.location, 'north gate pillar');
+      expect(device.status, DeviceStatus.active);
+      expect(device.specFields['ip'], '192.168.1.101');
+      expect(device.installDate, isNotNull);
+    });
+
+    test('4. HardwareTypeModel & IssueCategoryModel parse catalogue data correctly', () {
+      final backendHwJson = {
+        'id': 'hw-01',
+        'name': 'CCTV camera',
+        'specFields': {'resolution': '4K', 'lens': '2.8mm'},
+        'issueCategories': [
+          {
+            'id': 'cat-01',
+            'hardwareTypeId': 'hw-01',
+            'name': 'no power',
+          },
+          {
+            'id': 'cat-02',
+            'hardwareTypeId': 'hw-01',
+            'name': 'lens damage',
+          },
+        ],
+      };
+
+      final hw = HardwareTypeModel.fromJson(backendHwJson);
+
+      expect(hw.id, 'hw-01');
+      expect(hw.name, 'CCTV camera');
+      expect(hw.specFields['resolution'], '4K');
+      expect(hw.issueCategories.length, 2);
+      expect(hw.issueCategories[0].name, 'no power');
+      expect(hw.issueCategories[1].name, 'lens damage');
+    });
+
+    test('5. IssueModel parses backend issue with nested technician and statusHistory', () {
+      final backendIssueJson = {
+        'id': 'eaa7b74d-8474-4603-adeb-2a24e01cef02',
+        'deviceId': 'e23fdc61-4365-4a33-9d22-82412878e8fc',
+        'categoryId': 'cat-01',
+        'raisedByUserId': 'fc4349f5-eef1-4405-83c6-d43a452c725a',
+        'assignedTechnicianId': 'f2477cbb-0830-46b6-86de-f8fac2d165a2',
+        'priority': 'high',
+        'status': 'assigned',
+        'description': 'Seeded issue: no power on Cam - North Wing Gate',
+        'createdAt': '2026-08-31T12:00:00.000Z',
+        'updatedAt': '2026-08-31T12:30:00.000Z',
+        'resolvedAt': null,
+        'closedAt': null,
+        'device': {
+          'id': 'e23fdc61-4365-4a33-9d22-82412878e8fc',
+          'name': 'Cam - North Wing Gate',
+          'zoneId': '1a1b8786-ce7b-4708-b340-47d8e98c3412',
+          'hardwareTypeId': 'hw-ptz-01',
+          'zone': {'name': 'North Wing'},
+        },
+        'category': {
+          'id': 'cat-01',
+          'name': 'no power',
+        },
+        'raisedBy': {
+          'id': 'fc4349f5-eef1-4405-83c6-d43a452c725a',
+          'name': 'Ravi Kumar',
+          'email': 'ravi@cityzoo.com',
+        },
+        'assignedTechnician': {
+          'id': 'f2477cbb-0830-46b6-86de-f8fac2d165a2',
+          'specialization': 'CCTV & Network',
+          'user': {
+            'id': '646acb55-9ebf-4e6d-8423-2180bc4dae1d',
+            'name': 'Amit Shah',
+          },
+        },
+        'statusHistory': [
+          {
+            'id': 'hist-01',
+            'issueId': 'eaa7b74d-8474-4603-adeb-2a24e01cef02',
+            'fromStatus': null,
+            'toStatus': 'open',
+            'changedByUserId': 'fc4349f5-eef1-4405-83c6-d43a452c725a',
+            'changedAt': '2026-08-31T12:00:00.000Z',
+            'notes': 'Reported during morning round',
+            'changedBy': {
+              'id': 'fc4349f5-eef1-4405-83c6-d43a452c725a',
+              'name': 'Ravi Kumar',
+            },
+          },
+        ],
+      };
+
+      final issue = IssueModel.fromJson(backendIssueJson);
+
+      expect(issue.id, 'eaa7b74d-8474-4603-adeb-2a24e01cef02');
+      expect(issue.description, 'Seeded issue: no power on Cam - North Wing Gate');
+      expect(issue.priority, IssuePriority.high);
+      expect(issue.status, IssueStatus.assigned);
+      expect(issue.deviceName, 'Cam - North Wing Gate');
+      expect(issue.categoryName, 'no power');
+      expect(issue.createdByUserName, 'Ravi Kumar');
+      expect(issue.assignedTechnicianName, 'Amit Shah');
+      expect(issue.history.length, 1);
+      expect(issue.history[0].toStatus, IssueStatus.open);
+      expect(issue.history[0].comment, 'Reported during morning round');
+      expect(issue.history[0].changedByUserName, 'Ravi Kumar');
+    });
+
+    test('6. DailyStatusLogModel parses backend daily log response correctly', () {
+      final backendLogJson = {
+        'id': 'log-01',
+        'deviceId': 'e23fdc61-4365-4a33-9d22-82412878e8fc',
+        'loggedByUserId': 'fc4349f5-eef1-4405-83c6-d43a452c725a',
+        'status': 'working',
+        'logDate': '2026-08-31T00:00:00.000Z',
+        'notes': 'Lens cleaned and verified',
+        'createdAt': '2026-08-31T14:00:00.000Z',
+        'deviceName': 'Cam - North Wing Gate',
+        'loggedByName': 'Ravi Kumar',
+      };
+
+      final log = DailyStatusLogModel.fromJson(backendLogJson);
+
+      expect(log.id, 'log-01');
+      expect(log.deviceId, 'e23fdc61-4365-4a33-9d22-82412878e8fc');
+      expect(log.status, DailyLogStatus.working);
+      expect(log.deviceName, 'Cam - North Wing Gate');
+      expect(log.loggedByUserName, 'Ravi Kumar');
+      expect(log.notes, 'Lens cleaned and verified');
+    });
+
+    test('7. DashboardSummaryModel parses backend summary metrics correctly', () {
+      final backendSummaryJson = {
+        'openIssues': 7,
+        'faultyDevices': 0,
+        'devicesMissingTodayLog': 3,
+        'totalDevices': 4,
+      };
+
+      final summary = DashboardSummaryModel.fromJson(backendSummaryJson);
+
+      expect(summary.totalDevices, 4);
+      expect(summary.openIssues, 7);
+      expect(summary.faultyDevices, 0);
+      expect(summary.devicesMissingTodayLog, 3);
+    });
+  });
+}

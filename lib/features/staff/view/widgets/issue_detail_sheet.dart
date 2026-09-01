@@ -37,33 +37,45 @@ class IssueDetailSheet extends StatelessWidget {
           children: [
             // Top Bar
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      issue.id,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        issue.id.length > 8 ? '#${issue.id.substring(0, 8)} • ${issue.deviceName}' : '#${issue.id}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      issue.title,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                      const SizedBox(height: 2),
+                      Text(
+                        issue.title.isNotEmpty
+                            ? issue.title
+                            : (issue.description.isNotEmpty
+                                ? issue.description
+                                : 'Maintenance Issue'),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
+                const SizedBox(width: 8),
                 IconButton(
                   onPressed: () => Navigator.pop(context),
                   icon: const Icon(Icons.close, color: AppColors.icon),
+                  visualDensity: VisualDensity.compact,
                 ),
               ],
             ),
@@ -78,7 +90,10 @@ class IssueDetailSheet extends StatelessWidget {
                 StatusBadge.issue(issue.status),
                 StatusBadge.priority(issue.priority),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 9,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.infoLight,
                     borderRadius: BorderRadius.circular(20),
@@ -109,9 +124,17 @@ class IssueDetailSheet extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  _buildMetaRow(Icons.videocam_outlined, 'Device', issue.deviceName),
+                  _buildMetaRow(
+                    Icons.videocam_outlined,
+                    'Device',
+                    issue.deviceName,
+                  ),
                   const SizedBox(height: 8),
-                  _buildMetaRow(Icons.location_on_outlined, 'Zone', issue.zoneName),
+                  _buildMetaRow(
+                    Icons.location_on_outlined,
+                    'Zone',
+                    issue.zoneName,
+                  ),
                   const SizedBox(height: 8),
                   _buildMetaRow(
                     Icons.engineering_outlined,
@@ -129,7 +152,8 @@ class IssueDetailSheet extends StatelessWidget {
             ),
 
             // Attached Photo Preview if present
-            if (issue.imagePath != null && File(issue.imagePath!).existsSync()) ...[
+            if (issue.imagePath != null &&
+                File(issue.imagePath!).existsSync()) ...[
               const SizedBox(height: 16),
               const Text(
                 'Attached Fault Photo',
@@ -149,10 +173,7 @@ class IssueDetailSheet extends StatelessWidget {
                     border: Border.all(color: AppColors.border),
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: Image.file(
-                    File(issue.imagePath!),
-                    fit: BoxFit.cover,
-                  ),
+                  child: Image.file(File(issue.imagePath!), fit: BoxFit.cover),
                 ),
               ),
             ],
@@ -170,7 +191,9 @@ class IssueDetailSheet extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              issue.description.isNotEmpty ? issue.description : 'No description provided.',
+              issue.description.isNotEmpty
+                  ? issue.description
+                  : 'No description provided.',
               style: const TextStyle(
                 fontSize: 14,
                 color: AppColors.textSecondary,
@@ -232,7 +255,8 @@ class IssueDetailSheet extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     item.toStatus.label,
@@ -258,7 +282,8 @@ class IssueDetailSheet extends StatelessWidget {
                                   color: AppColors.textSecondary,
                                 ),
                               ),
-                              if (item.comment != null && item.comment!.isNotEmpty) ...[
+                              if (item.comment != null &&
+                                  item.comment!.isNotEmpty) ...[
                                 const SizedBox(height: 2),
                                 Text(
                                   '"${item.comment}"',
@@ -300,6 +325,8 @@ class IssueDetailSheet extends StatelessWidget {
           child: Text(
             value,
             textAlign: TextAlign.end,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: const TextStyle(
               fontSize: 13,
               color: AppColors.textPrimary,

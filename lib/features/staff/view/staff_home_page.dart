@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/providers/auth_provider.dart';
+import '../../../core/providers/daily_log_provider.dart';
+import '../../../core/providers/device_provider.dart';
+import '../../../core/providers/issue_provider.dart';
 import '../../../core/theme/colors.dart';
 import '../../../core/utils/app_snackbar.dart';
+import '../../../core/utils/hardware_icon_helper.dart';
 import '../../../core/widgets/status_badge.dart';
 import '../../../data/models/daily_log_model.dart';
 import '../../../data/models/device_model.dart';
@@ -20,207 +23,26 @@ class StaffHomePage extends ConsumerStatefulWidget {
 class _StaffHomePageState extends ConsumerState<StaffHomePage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final Map<String, TextEditingController> _logNoteControllers = {};
+  int _currentTabIndex = 0;
 
+  // Search & Filter state
   String _deviceSearchQuery = '';
   DeviceStatus? _deviceFilterStatus;
-  bool _isLoggingOut = false;
+  int _dailyCheckFilterIndex = 0; // 0: All, 1: Pending, 2: Checked Today
+  int _staffIssueFilterIndex = 0; // 0: Open, 1: Closed, 2: All
 
-  final List<DeviceModel> _devices = [
-    DeviceModel(
-      id: 'dev-cam-01',
-      zoneId: 'zone-lion-03',
-      zoneName: 'Lion Enclosure (A1.1)',
-      hardwareTypeName: '4K PTZ Dome Camera',
-      name: 'Lion Feed Area Cam #1',
-      serialNumber: 'SN-PTZ-88901',
-      location: 'North Tower - Post 4',
-      status: DeviceStatus.underMaintenance,
-      lastCheckedAt: DateTime.now().subtract(const Duration(hours: 4)),
-      specFields: const {
-        'ip': '192.168.10.21',
-        'model': 'Hikvision DS-2DF8442',
-      },
-    ),
-    DeviceModel(
-      id: 'dev-cam-02',
-      zoneId: 'zone-lion-03',
-      zoneName: 'Lion Enclosure (A1.1)',
-      hardwareTypeName: 'Fixed Bullet Camera',
-      name: 'Lion Den Night-Vision Cam #2',
-      serialNumber: 'SN-BLT-55120',
-      location: 'Cave Entrance Overhang',
-      status: DeviceStatus.active,
-      lastCheckedAt: DateTime.now().subtract(const Duration(hours: 3)),
-      specFields: const {'ip': '192.168.10.22', 'model': 'Dahua IPC-HFW5842'},
-    ),
-    DeviceModel(
-      id: 'dev-cam-03',
-      zoneId: 'zone-lion-03',
-      zoneName: 'Lion Enclosure (A1.1)',
-      hardwareTypeName: 'Thermal Sensor Camera',
-      name: 'Perimeter Fence Thermal Cam',
-      serialNumber: 'SN-THM-99104',
-      location: 'East Perimeter Fence',
-      status: DeviceStatus.faulty,
-      consecutiveFailures: 3,
-      lastCheckedAt: DateTime.now().subtract(const Duration(hours: 1)),
-      specFields: const {'ip': '192.168.10.23', 'model': 'FLIR FC-Series'},
-    ),
-    DeviceModel(
-      id: 'dev-cam-04',
-      zoneId: 'zone-tiger-04',
-      zoneName: 'Tiger Den (A1.2)',
-      hardwareTypeName: '4K PTZ Dome Camera',
-      name: 'Tiger Water Pool Cam #1',
-      serialNumber: 'SN-PTZ-88905',
-      location: 'Watering Hole Tree Mount',
-      status: DeviceStatus.underMaintenance,
-      lastCheckedAt: DateTime.now().subtract(const Duration(hours: 6)),
-      specFields: const {'ip': '192.168.10.31'},
-    ),
-    DeviceModel(
-      id: 'dev-cam-05',
-      zoneId: 'zone-tiger-04',
-      zoneName: 'Tiger Den (A1.2)',
-      hardwareTypeName: 'Panoramic 180 Cam',
-      name: 'Tiger Habitat Overview',
-      serialNumber: 'SN-PAN-33100',
-      location: 'Central Mast A',
-      status: DeviceStatus.active,
-      lastCheckedAt: DateTime.now().subtract(const Duration(hours: 5)),
-      specFields: const {'ip': '192.168.10.32'},
-    ),
-    DeviceModel(
-      id: 'dev-cam-06',
-      zoneId: 'zone-herbivore-05',
-      zoneName: 'Herbivore Sector (A2)',
-      hardwareTypeName: 'Fixed Bullet Camera',
-      name: 'Giraffe Meadow South',
-      serialNumber: 'SN-BLT-11092',
-      location: 'South Observation Deck',
-      status: DeviceStatus.active,
-      lastCheckedAt: DateTime.now().subtract(const Duration(hours: 2)),
-      specFields: const {'ip': '192.168.10.41'},
-    ),
-    DeviceModel(
-      id: 'dev-cam-07',
-      zoneId: 'zone-herbivore-05',
-      zoneName: 'Herbivore Sector (A2)',
-      hardwareTypeName: 'Fixed Bullet Camera',
-      name: 'Elephant Bathing Area',
-      serialNumber: 'SN-BLT-11095',
-      location: 'River Bank Canopy',
-      status: DeviceStatus.active,
-      lastCheckedAt: DateTime.now().subtract(const Duration(hours: 2)),
-      specFields: const {'ip': '192.168.10.42'},
-    ),
-    DeviceModel(
-      id: 'dev-cam-08',
-      zoneId: 'zone-aviary-06',
-      zoneName: 'Bird Sanctuary (A3)',
-      hardwareTypeName: 'Micro Dome Cam',
-      name: 'Tropical Dome Top Deck',
-      serialNumber: 'SN-MIC-66023',
-      location: 'Aviary Suspension Bridge',
-      status: DeviceStatus.underMaintenance,
-      lastCheckedAt: DateTime.now().subtract(const Duration(hours: 8)),
-      specFields: const {'ip': '192.168.10.51'},
-    ),
-  ];
-
-  final List<IssueModel> _issues = [
-    IssueModel(
-      id: 'ISSUE-1001',
-      title: 'PTZ Vertical Motor Jammed',
-      description:
-          'Camera will not tilt vertically beyond 45 degrees. Squeaking noise heard from gear mechanism.',
-      deviceId: 'dev-cam-01',
-      deviceName: 'Lion Feed Area Cam #1',
-      zoneId: 'zone-lion-03',
-      zoneName: 'Lion Enclosure (A1.1)',
-      categoryId: 'cat-02',
-      categoryName: 'PTZ Motor & Rotation Stuck',
-      priority: IssuePriority.critical,
-      status: IssueStatus.inProgress,
-      assignedTechnicianId: 'usr-tech-003',
-      assignedTechnicianName: 'Marcus Vance',
-      createdByUserId: 'usr-staff-002',
-      createdByUserName: 'Sarah Connor',
-      createdAt: DateTime.now().subtract(const Duration(days: 1, hours: 4)),
-      updatedAt: DateTime.now().subtract(const Duration(hours: 2)),
-      history: [
-        IssueStatusHistoryModel(
-          id: 'hist-01',
-          issueId: 'ISSUE-1001',
-          fromStatus: null,
-          toStatus: IssueStatus.open,
-          changedByUserId: 'usr-staff-002',
-          changedByUserName: 'Sarah Connor',
-          comment: 'Issue raised after morning status round',
-          createdAt: DateTime.now().subtract(const Duration(days: 1, hours: 4)),
-        ),
-        IssueStatusHistoryModel(
-          id: 'hist-02',
-          issueId: 'ISSUE-1001',
-          fromStatus: IssueStatus.open,
-          toStatus: IssueStatus.assigned,
-          changedByUserId: 'usr-admin-004',
-          changedByUserName: 'Director Vance',
-          comment: 'Assigned to Senior Tech Marcus Vance',
-          createdAt: DateTime.now().subtract(const Duration(days: 1)),
-        ),
-        IssueStatusHistoryModel(
-          id: 'hist-03',
-          issueId: 'ISSUE-1001',
-          fromStatus: IssueStatus.assigned,
-          toStatus: IssueStatus.inProgress,
-          changedByUserId: 'usr-tech-003',
-          changedByUserName: 'Marcus Vance',
-          comment: 'Arrived at Lion Enclosure post with spare gear module',
-          createdAt: DateTime.now().subtract(const Duration(hours: 2)),
-        ),
-      ],
-    ),
-    IssueModel(
-      id: 'ISSUE-1002',
-      title: 'Water Droplets / Lens Condensation',
-      description: 'Heavy fogging on interior lens glass after monsoon rain.',
-      deviceId: 'dev-cam-04',
-      deviceName: 'Tiger Water Pool Cam #1',
-      zoneId: 'zone-tiger-04',
-      zoneName: 'Tiger Den (A1.2)',
-      categoryId: 'cat-06',
-      categoryName: 'Water Ingress / Enclosure Condensation',
-      priority: IssuePriority.high,
-      status: IssueStatus.assigned,
-      assignedTechnicianId: 'usr-tech-003',
-      assignedTechnicianName: 'Marcus Vance',
-      createdByUserId: 'usr-staff-002',
-      createdByUserName: 'Sarah Connor',
-      createdAt: DateTime.now().subtract(const Duration(hours: 9)),
-      updatedAt: DateTime.now().subtract(const Duration(hours: 5)),
-      history: [
-        IssueStatusHistoryModel(
-          id: 'hist-04',
-          issueId: 'ISSUE-1002',
-          fromStatus: null,
-          toStatus: IssueStatus.open,
-          changedByUserId: 'usr-staff-002',
-          changedByUserName: 'Sarah Connor',
-          comment: 'Reported during 9:00 AM status round',
-          createdAt: DateTime.now().subtract(const Duration(hours: 9)),
-        ),
-      ],
-    ),
-  ];
+  final Set<String> _submittingDeviceLogIds = {};
+  final Set<String> _editingDeviceLogIds = {};
+  final Map<String, TextEditingController> _logNoteControllers = {};
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(() {
-      if (mounted) setState(() {});
+      if (_tabController.index != _currentTabIndex && mounted) {
+        setState(() => _currentTabIndex = _tabController.index);
+      }
     });
   }
 
@@ -234,42 +56,55 @@ class _StaffHomePageState extends ConsumerState<StaffHomePage>
   }
 
   TextEditingController _getNoteController(String deviceId) {
-    return _logNoteControllers.putIfAbsent(
-      deviceId,
-      () => TextEditingController(),
-    );
+    var controller = _logNoteControllers[deviceId];
+    if (controller == null) {
+      controller = TextEditingController();
+      _logNoteControllers[deviceId] = controller;
+    }
+    return controller;
   }
 
-  void _handleDeviceStatusLog(DeviceModel device, DailyLogStatus status) {
-    setState(() {
-      final index = _devices.indexWhere((d) => d.id == device.id);
-      if (index != -1) {
-        DeviceStatus newDeviceStatus = _devices[index].status;
-        if (status == DailyLogStatus.notWorking) {
-          newDeviceStatus = DeviceStatus.faulty;
-        } else if (status == DailyLogStatus.working &&
-            newDeviceStatus == DeviceStatus.faulty) {
-          newDeviceStatus = DeviceStatus.active;
-        }
+  Future<void> _handleDeviceStatusLog(DeviceModel device, DailyLogStatus status) async {
+    final note = _getNoteController(device.id).text.trim();
 
-        _devices[index] = _devices[index].copyWith(
-          status: newDeviceStatus,
-          lastCheckedAt: DateTime.now(),
-        );
+    setState(() => _submittingDeviceLogIds.add(device.id));
+
+    try {
+      final dailyLogRepo = ref.read(dailyLogRepositoryProvider);
+      await dailyLogRepo.createOrUpdateLog(
+        deviceId: device.id,
+        status: status,
+        notes: note.isNotEmpty ? note : null,
+      );
+
+      final msg = 'Marked ${device.name} as ${status.label}';
+      if (status == DailyLogStatus.working) {
+        AppSnackbar.success(msg);
+      } else if (status == DailyLogStatus.needsAttention) {
+        AppSnackbar.warning(msg);
+      } else {
+        AppSnackbar.error(msg);
       }
-    });
 
-    final msg = 'Marked ${device.name} as ${status.label}';
-    if (status == DailyLogStatus.working) {
-      AppSnackbar.success(msg);
-    } else if (status == DailyLogStatus.needsAttention) {
-      AppSnackbar.warning(msg);
-    } else {
-      AppSnackbar.error(msg);
-    }
+      // Refresh live devices, today's logs, and KPIs
+      ref.invalidate(todayLogsProvider);
+      ref.invalidate(staffDevicesProvider);
+      ref.invalidate(staffDashboardSummaryProvider);
 
-    if (status == DailyLogStatus.notWorking) {
-      _promptRaiseIssue(device);
+      if (status == DailyLogStatus.notWorking) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _promptRaiseIssue(device);
+        });
+      }
+    } catch (e) {
+      AppSnackbar.error('Failed to record status: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _submittingDeviceLogIds.remove(device.id);
+          _editingDeviceLogIds.remove(device.id);
+        });
+      }
     }
   }
 
@@ -281,12 +116,12 @@ class _StaffHomePageState extends ConsumerState<StaffHomePage>
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
         title: const Row(
           children: [
-            Icon(Icons.warning_amber_rounded, color: AppColors.error),
+            Icon(Icons.warning_amber_rounded, color: AppColors.error, size: 24),
             SizedBox(width: 8),
             Text(
-              'Device Down',
+              'Hardware Fault Reported',
               style: TextStyle(
-                fontSize: 17,
+                fontSize: 16,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textPrimary,
               ),
@@ -294,16 +129,13 @@ class _StaffHomePageState extends ConsumerState<StaffHomePage>
           ],
         ),
         content: Text(
-          'You marked "${device.name}" as Not Working. Would you like to raise a maintenance ticket for technicians to inspect it now?',
-          style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+          '${device.name} has been marked as Not Working.\nWould you like to raise a maintenance ticket now?',
+          style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text(
-              'Not Now',
-              style: TextStyle(color: AppColors.textSecondary),
-            ),
+            child: const Text('Later', style: TextStyle(color: AppColors.textSecondary)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -313,9 +145,9 @@ class _StaffHomePageState extends ConsumerState<StaffHomePage>
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: AppColors.textWhite,
-              minimumSize: const Size(120, 42),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            child: const Text('Raise Issue'),
+            child: const Text('Raise Ticket'),
           ),
         ],
       ),
@@ -323,212 +155,152 @@ class _StaffHomePageState extends ConsumerState<StaffHomePage>
   }
 
   void _openRaiseIssueSheet([DeviceModel? initialDevice]) {
+    final liveDevices = ref.read(staffDevicesProvider).value ?? [];
+
     RaiseIssueSheet.show(
       context,
-      devices: _devices,
+      devices: liveDevices,
       initialDevice: initialDevice,
       onIssueCreated: (newIssue) {
-        setState(() {
-          _issues.insert(0, newIssue);
-          // Set device status to under maintenance
-          final devIdx = _devices.indexWhere((d) => d.id == newIssue.deviceId);
-          if (devIdx != -1) {
-            _devices[devIdx] = _devices[devIdx].copyWith(
-              status: DeviceStatus.underMaintenance,
-            );
-          }
-        });
+        ref.invalidate(staffIssuesProvider);
+        ref.invalidate(staffDevicesProvider);
+        ref.invalidate(staffDashboardSummaryProvider);
       },
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final int activeCount = _devices
-        .where((d) => d.status == DeviceStatus.active)
-        .length;
-    final int maintCount = _devices
-        .where((d) => d.status == DeviceStatus.underMaintenance)
-        .length;
-    final int faultyCount = _devices
-        .where((d) => d.status == DeviceStatus.faulty)
-        .length;
+    final staffDevicesAsync = ref.watch(staffDevicesProvider);
+    final staffSummaryAsync = ref.watch(staffDashboardSummaryProvider);
+    final staffIssuesAsync = ref.watch(staffIssuesProvider);
+    final todayLogsAsync = ref.watch(todayLogsProvider);
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.surface,
-        elevation: 0,
-        titleSpacing: 16,
-        title: Row(
+    return Column(
+      children: [
+        // Tab Bar Navigation Header
+        Container(
+          color: AppColors.surface,
+          child: TabBar(
+            controller: _tabController,
+            onTap: (index) => setState(() => _currentTabIndex = index),
+            labelColor: AppColors.primary,
+            unselectedLabelColor: AppColors.textSecondary,
+            indicatorColor: AppColors.primary,
+            indicatorWeight: 3,
+            labelStyle: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+            ),
+            tabs: const [
+              Tab(
+                icon: Icon(Icons.checklist_rounded, size: 18),
+                text: 'Daily Checks',
+              ),
+              Tab(
+                icon: Icon(Icons.devices_other_rounded, size: 18),
+                text: 'Hardware',
+              ),
+              Tab(
+                icon: Icon(Icons.confirmation_number_outlined, size: 18),
+                text: 'Issues',
+              ),
+            ],
+          ),
+        ),
+
+        // Live KPI Metric Header Bar
+        _buildStaffKpiBar(staffSummaryAsync),
+
+        const Divider(height: 1, color: AppColors.divider),
+
+        // Active Tab View Content (Direct render without sliver conflicts)
+        Expanded(
+          child: _buildCurrentTab(staffDevicesAsync, todayLogsAsync, staffIssuesAsync),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCurrentTab(
+    AsyncValue<List<DeviceModel>> staffDevicesAsync,
+    AsyncValue<Map<String, DailyStatusLogModel>> todayLogsAsync,
+    AsyncValue<List<IssueModel>> staffIssuesAsync,
+  ) {
+    switch (_currentTabIndex) {
+      case 0:
+        return _buildStaffDailyChecklistTab(staffDevicesAsync, todayLogsAsync);
+      case 1:
+        return _buildStaffDevicesDirectoryTab(staffDevicesAsync);
+      case 2:
+        return _buildStaffIssuesTrackerTab(staffIssuesAsync);
+      default:
+        return _buildStaffDailyChecklistTab(staffDevicesAsync, todayLogsAsync);
+    }
+  }
+
+  // ==========================================
+  // STAFF KPI HEADER BAR
+  // ==========================================
+
+  Widget _buildStaffKpiBar(AsyncValue<dynamic> summaryAsync) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      color: AppColors.surface,
+      child: summaryAsync.when(
+        loading: () => Row(
           children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.primaryBg,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Icons.shield_outlined,
-                color: AppColors.primary,
-                size: 20,
-              ),
+            _buildSummaryItem(label: 'Total Hardware', value: '...', color: AppColors.primary, icon: Icons.devices),
+            _buildDivider(),
+            _buildSummaryItem(label: 'Active', value: '...', color: AppColors.successText, icon: Icons.check_circle_outline),
+            _buildDivider(),
+            _buildSummaryItem(label: 'Open Issues', value: '...', color: AppColors.warningText, icon: Icons.build_circle_outlined),
+            _buildDivider(),
+            _buildSummaryItem(label: 'Faulty', value: '...', color: AppColors.errorText, icon: Icons.error_outline),
+          ],
+        ),
+        error: (_, _) => Row(
+          children: [
+            _buildSummaryItem(label: 'Total Hardware', value: '-', color: AppColors.primary, icon: Icons.devices),
+            _buildDivider(),
+            _buildSummaryItem(label: 'Active', value: '-', color: AppColors.successText, icon: Icons.check_circle_outline),
+            _buildDivider(),
+            _buildSummaryItem(label: 'Open Issues', value: '-', color: AppColors.warningText, icon: Icons.build_circle_outlined),
+            _buildDivider(),
+            _buildSummaryItem(label: 'Faulty', value: '-', color: AppColors.errorText, icon: Icons.error_outline),
+          ],
+        ),
+        data: (summary) => Row(
+          children: [
+            _buildSummaryItem(
+              label: 'Total Hardware',
+              value: '${summary.totalDevices}',
+              color: AppColors.primary,
+              icon: Icons.devices,
             ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    ref.watch(authStateProvider).value?.name ?? 'Staff Member',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.location_on,
-                        size: 12,
-                        color: AppColors.icon,
-                      ),
-                      const SizedBox(width: 2),
-                      Expanded(
-                        child: Text(
-                          ref
-                                  .watch(authStateProvider)
-                                  .value
-                                  ?.assignedZoneName ??
-                              'Assigned Zone Scope',
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+            _buildDivider(),
+            _buildSummaryItem(
+              label: 'Active',
+              value: '${summary.activeDevices}',
+              color: AppColors.successText,
+              icon: Icons.check_circle_outline,
+            ),
+            _buildDivider(),
+            _buildSummaryItem(
+              label: 'Open Issues',
+              value: '${summary.openIssues}',
+              color: AppColors.warningText,
+              icon: Icons.build_circle_outlined,
+            ),
+            _buildDivider(),
+            _buildSummaryItem(
+              label: 'Faulty',
+              value: '${summary.faultyDevices}',
+              color: AppColors.errorText,
+              icon: Icons.error_outline,
             ),
           ],
         ),
-        actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 12),
-            child: _isLoggingOut
-                ? const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(12),
-                      child: SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.2,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ),
-                  )
-                : IconButton(
-                    icon: const Icon(Icons.logout_rounded, color: AppColors.icon),
-                    tooltip: 'Sign Out',
-                    onPressed: () async {
-                      setState(() => _isLoggingOut = true);
-                      try {
-                        await ref.read(authStateProvider.notifier).logout();
-                        AppSnackbar.info('Signed out successfully');
-                      } catch (e) {
-                        if (mounted) setState(() => _isLoggingOut = false);
-                      }
-                    },
-                  ),
-          ),
-        ],
-        bottom: TabBar(
-          controller: _tabController,
-          labelColor: AppColors.primary,
-          unselectedLabelColor: AppColors.textSecondary,
-          indicatorColor: AppColors.primary,
-          indicatorWeight: 3,
-          labelStyle: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
-          ),
-          tabs: const [
-            Tab(
-              icon: Icon(Icons.checklist_rounded, size: 18),
-              text: 'Daily Checks',
-            ),
-            Tab(icon: Icon(Icons.videocam_outlined, size: 18), text: 'Devices'),
-            Tab(
-              icon: Icon(Icons.confirmation_number_outlined, size: 18),
-              text: 'Issues',
-            ),
-          ],
-        ),
-      ),
-      body: Column(
-        children: [
-          // KPI Metric Header Bar
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            color: AppColors.surface,
-            child: Row(
-              children: [
-                _buildSummaryItem(
-                  label: 'Total Devices',
-                  value: '${_devices.length}',
-                  color: AppColors.primary,
-                  icon: Icons.devices,
-                ),
-                _buildDivider(),
-                _buildSummaryItem(
-                  label: 'Active',
-                  value: '$activeCount',
-                  color: AppColors.successText,
-                  icon: Icons.check_circle_outline,
-                ),
-                _buildDivider(),
-                _buildSummaryItem(
-                  label: 'Maintenance',
-                  value: '$maintCount',
-                  color: AppColors.warningText,
-                  icon: Icons.build_circle_outlined,
-                ),
-                _buildDivider(),
-                _buildSummaryItem(
-                  label: 'Faulty',
-                  value: '$faultyCount',
-                  color: AppColors.errorText,
-                  icon: Icons.error_outline,
-                ),
-              ],
-            ),
-          ),
-
-          const Divider(height: 1, color: AppColors.divider),
-
-          // Tab Views
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                // TAB 1: Daily Checks
-                _buildDailyCheckTab(),
-
-                // TAB 2: Devices Directory
-                _buildDevicesTab(),
-
-                // TAB 3: Issues Tracker
-                _buildIssuesTab(),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -581,213 +353,460 @@ class _StaffHomePageState extends ConsumerState<StaffHomePage>
     );
   }
 
-  // -------------------------------------------------------------
+  // ==========================================
   // TAB 1: DAILY CHECKS
-  // -------------------------------------------------------------
-  Widget _buildDailyCheckTab() {
-    return ListView.builder(
-      padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 80),
-      itemCount: _devices.length,
-      itemBuilder: (context, index) {
-        final device = _devices[index];
-        final noteController = _getNoteController(device.id);
+  // ==========================================
 
-        return Container(
-          margin: const EdgeInsets.only(bottom: 14),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.border),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildStaffDailyChecklistTab(
+    AsyncValue<List<DeviceModel>> devicesAsync,
+    AsyncValue<Map<String, DailyStatusLogModel>> todayLogsAsync,
+  ) {
+    final allDevices = devicesAsync.value ?? [];
+    final todayLogsMap = todayLogsAsync.value ?? {};
+    final isLoading = devicesAsync.isLoading;
+    final hasError = devicesAsync.hasError;
+
+    final completedCount = allDevices.where((d) => todayLogsMap.containsKey(d.id)).length;
+    final pendingCount = allDevices.length - completedCount;
+
+    var displayedDevices = allDevices;
+    if (_dailyCheckFilterIndex == 1) {
+      displayedDevices = allDevices.where((d) => !todayLogsMap.containsKey(d.id)).toList();
+    } else if (_dailyCheckFilterIndex == 2) {
+      displayedDevices = allDevices.where((d) => todayLogsMap.containsKey(d.id)).toList();
+    }
+
+    return Column(
+      children: [
+        // Segmented Status Filter Bar
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          color: AppColors.surface,
+          child: Row(
             children: [
-              // Device Header Info
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryBg,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(
-                      Icons.videocam_outlined,
-                      color: AppColors.primary,
-                      size: 22,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          device.name,
-                          style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '${device.hardwareTypeName} • ${device.location}',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                        Text(
-                          device.zoneName,
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  StatusBadge.device(device.status),
-                ],
+              _buildDailyCheckFilterChip(
+                label: 'All (${allDevices.length})',
+                index: 0,
               ),
-
-              const SizedBox(height: 12),
-              const Divider(color: AppColors.divider, height: 1),
-              const SizedBox(height: 12),
-
-              // Action Buttons: Working, Attention, Down / Fault
-              const Text(
-                'Mark Status for Today:',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textSecondary,
-                ),
+              const SizedBox(width: 8),
+              _buildDailyCheckFilterChip(
+                label: 'Pending ($pendingCount)',
+                index: 1,
+                badgeColor: pendingCount > 0 ? AppColors.warningText : null,
               ),
-              const SizedBox(height: 8),
-
-              Row(
-                children: [
-                  // 1. Working
-                  Expanded(
-                    child: _buildLogActionButton(
-                      label: 'Working',
-                      icon: Icons.check_circle_outline,
-                      bgColor: AppColors.successLight,
-                      textColor: AppColors.successText,
-                      borderColor: AppColors.success,
-                      onTap: () => _handleDeviceStatusLog(
-                        device,
-                        DailyLogStatus.working,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-
-                  // 2. Needs Attention
-                  Expanded(
-                    child: _buildLogActionButton(
-                      label: 'Attention',
-                      icon: Icons.warning_amber_rounded,
-                      bgColor: AppColors.warningLight,
-                      textColor: AppColors.warningText,
-                      borderColor: AppColors.warning,
-                      onTap: () => _handleDeviceStatusLog(
-                        device,
-                        DailyLogStatus.needsAttention,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-
-                  // 3. Not Working
-                  Expanded(
-                    child: _buildLogActionButton(
-                      label: 'Down / Fault',
-                      icon: Icons.cancel_outlined,
-                      bgColor: AppColors.errorLight,
-                      textColor: AppColors.errorText,
-                      borderColor: AppColors.error,
-                      onTap: () => _handleDeviceStatusLog(
-                        device,
-                        DailyLogStatus.notWorking,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 10),
-
-              // Optional Note Field
-              TextField(
-                controller: noteController,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.textPrimary,
-                ),
-                decoration: InputDecoration(
-                  hintText: 'Add note (e.g. lens dirty, flicker, normal)...',
-                  hintStyle: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textMuted,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  filled: true,
-                  fillColor: AppColors.cardAlt,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: AppColors.border),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: AppColors.border),
-                  ),
-                ),
+              const SizedBox(width: 8),
+              _buildDailyCheckFilterChip(
+                label: 'Checked Today ($completedCount)',
+                index: 2,
+                badgeColor: completedCount > 0 ? AppColors.successText : null,
               ),
             ],
           ),
-        );
-      },
+        ),
+        const Divider(height: 1, color: AppColors.divider),
+
+        Expanded(
+          child: RefreshIndicator(
+            color: AppColors.primary,
+            onRefresh: () async {
+              ref.invalidate(staffDevicesProvider);
+              ref.invalidate(todayLogsProvider);
+              ref.invalidate(staffDashboardSummaryProvider);
+            },
+            child: ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(16),
+              itemCount: (isLoading || hasError || displayedDevices.isEmpty) ? 1 : displayedDevices.length,
+              itemBuilder: (context, index) {
+                if (isLoading) {
+                  return const Padding(
+                    padding: EdgeInsets.only(top: 80),
+                    child: Center(
+                      child: CircularProgressIndicator(color: AppColors.primary),
+                    ),
+                  );
+                }
+
+                if (hasError) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 60),
+                    child: Center(
+                      child: Column(
+                        children: [
+                          const Icon(Icons.cloud_off_rounded, size: 48, color: AppColors.icon),
+                          const SizedBox(height: 12),
+                          const Text(
+                            'Failed to load hardware devices',
+                            style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                          ),
+                          const SizedBox(height: 12),
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              ref.invalidate(staffDevicesProvider);
+                              ref.invalidate(todayLogsProvider);
+                            },
+                            icon: const Icon(Icons.refresh, size: 16),
+                            label: const Text('Retry'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+
+                if (displayedDevices.isEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 80),
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            _dailyCheckFilterIndex == 1
+                                ? Icons.task_alt_rounded
+                                : Icons.checklist_rounded,
+                            size: 48,
+                            color: AppColors.iconLight,
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            _dailyCheckFilterIndex == 1
+                                ? 'All hardware checked for today!'
+                                : (_dailyCheckFilterIndex == 2
+                                    ? 'No hardware checked today yet'
+                                    : 'No hardware devices found'),
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+
+                final device = displayedDevices[index];
+                final noteController = _getNoteController(device.id);
+                final isSubmitting = _submittingDeviceLogIds.contains(device.id);
+                final todayLog = todayLogsMap[device.id];
+                final isEditing = _editingDeviceLogIds.contains(device.id);
+
+                return Container(
+                  key: ValueKey(device.id),
+                  margin: const EdgeInsets.only(bottom: 14),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: todayLog != null
+                          ? AppColors.success.withValues(alpha: 0.4)
+                          : AppColors.border,
+                      width: todayLog != null ? 1.4 : 1,
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: AppColors.primaryBg,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Icon(
+                                HardwareIconHelper.getIcon(device.hardwareTypeName),
+                                color: AppColors.primary,
+                                size: 20,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    device.name,
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                  ),
+                                  Text(
+                                    '${device.hardwareTypeName} • ${device.zoneName}',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            StatusBadge.device(device.status),
+                          ],
+                        ),
+
+                        // Checked Today Confirmation Banner
+                        if (todayLog != null && !isEditing) ...[
+                          const SizedBox(height: 10),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: (todayLog.status == DailyLogStatus.working
+                                      ? AppColors.success
+                                      : (todayLog.status == DailyLogStatus.needsAttention
+                                          ? AppColors.warning
+                                          : AppColors.error))
+                                  .withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: (todayLog.status == DailyLogStatus.working
+                                        ? AppColors.success
+                                        : (todayLog.status == DailyLogStatus.needsAttention
+                                            ? AppColors.warning
+                                            : AppColors.error))
+                                    .withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  todayLog.status == DailyLogStatus.working
+                                      ? Icons.check_circle_rounded
+                                      : (todayLog.status == DailyLogStatus.needsAttention
+                                          ? Icons.warning_amber_rounded
+                                          : Icons.cancel_outlined),
+                                  size: 18,
+                                  color: todayLog.status == DailyLogStatus.working
+                                      ? AppColors.success
+                                      : (todayLog.status == DailyLogStatus.needsAttention
+                                          ? AppColors.warning
+                                          : AppColors.error),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Checked Today: ${todayLog.status.label}',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.bold,
+                                          color: todayLog.status == DailyLogStatus.working
+                                              ? AppColors.successText
+                                              : (todayLog.status == DailyLogStatus.needsAttention
+                                                  ? AppColors.warningText
+                                                  : AppColors.error),
+                                        ),
+                                      ),
+                                      if (todayLog.notes != null && todayLog.notes!.isNotEmpty) ...[
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          'Note: "${todayLog.notes}"',
+                                          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                                InkWell(
+                                  onTap: () {
+                                    setState(() {
+                                      _editingDeviceLogIds.add(device.id);
+                                      if (todayLog.notes != null) {
+                                        noteController.text = todayLog.notes!;
+                                      }
+                                    });
+                                  },
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.surface,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: AppColors.border),
+                                    ),
+                                    child: const Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.edit_outlined, size: 13, color: AppColors.primary),
+                                        SizedBox(width: 4),
+                                        Text('Edit', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ] else ...[
+                          // Pending Check or Actively Editing
+                          if (isEditing) ...[
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                const Text(
+                                  'Updating today\'s check:',
+                                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primary),
+                                ),
+                                const Spacer(),
+                                TextButton(
+                                  onPressed: () => setState(() => _editingDeviceLogIds.remove(device.id)),
+                                  style: TextButton.styleFrom(
+                                    visualDensity: VisualDensity.compact,
+                                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                                  ),
+                                  child: const Text('Cancel', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                                ),
+                              ],
+                            ),
+                          ] else ...[
+                            const SizedBox(height: 12),
+                          ],
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildChecklistButton(
+                                  label: 'Working',
+                                  icon: Icons.check_circle_outline,
+                                  color: AppColors.success,
+                                  isSelected: todayLog?.status == DailyLogStatus.working,
+                                  isLoading: isSubmitting,
+                                  onTap: () => _handleDeviceStatusLog(device, DailyLogStatus.working),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: _buildChecklistButton(
+                                  label: 'Attention',
+                                  icon: Icons.warning_amber_outlined,
+                                  color: AppColors.warning,
+                                  isSelected: todayLog?.status == DailyLogStatus.needsAttention,
+                                  isLoading: isSubmitting,
+                                  onTap: () => _handleDeviceStatusLog(device, DailyLogStatus.needsAttention),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: _buildChecklistButton(
+                                  label: 'Down / Fault',
+                                  icon: Icons.cancel_outlined,
+                                  color: AppColors.error,
+                                  isSelected: todayLog?.status == DailyLogStatus.notWorking,
+                                  isLoading: isSubmitting,
+                                  onTap: () => _handleDeviceStatusLog(device, DailyLogStatus.notWorking),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          TextField(
+                            controller: noteController,
+                            style: const TextStyle(fontSize: 12, color: AppColors.textPrimary),
+                            decoration: InputDecoration(
+                              hintText: 'Add note (e.g. wire loose, lens dirty)...',
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                              filled: true,
+                              fillColor: AppColors.cardAlt,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide.none,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _buildLogActionButton({
+  Widget _buildDailyCheckFilterChip({
+    required String label,
+    required int index,
+    Color? badgeColor,
+  }) {
+    final isSelected = _dailyCheckFilterIndex == index;
+    return InkWell(
+      onTap: () => setState(() => _dailyCheckFilterIndex = index),
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primary : AppColors.cardAlt,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? AppColors.primary : AppColors.border,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            color: isSelected ? AppColors.textWhite : (badgeColor ?? AppColors.textSecondary),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChecklistButton({
     required String label,
     required IconData icon,
-    required Color bgColor,
-    required Color textColor,
-    required Color borderColor,
+    required Color color,
+    bool isSelected = false,
+    bool isLoading = false,
     required VoidCallback onTap,
   }) {
+    final bg = isSelected ? color : color.withValues(alpha: 0.1);
+    final fg = isSelected ? AppColors.textWhite : color;
+    final border = isSelected ? Colors.transparent : color.withValues(alpha: 0.3);
+
     return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      onTap: isLoading ? null : onTap,
+      borderRadius: BorderRadius.circular(10),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: borderColor.withValues(alpha: 0.4)),
+          color: bg,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: border),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 14, color: textColor),
-            const SizedBox(width: 4),
+            if (isLoading) ...[
+              SizedBox(
+                width: 12,
+                height: 12,
+                child: CircularProgressIndicator(strokeWidth: 1.5, color: fg),
+              ),
+              const SizedBox(width: 4),
+            ] else ...[
+              Icon(isSelected ? Icons.check_circle_rounded : icon, size: 14, color: fg),
+              const SizedBox(width: 4),
+            ],
             Text(
               label,
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.bold,
-                color: textColor,
+                color: fg,
               ),
             ),
           ],
@@ -796,46 +815,44 @@ class _StaffHomePageState extends ConsumerState<StaffHomePage>
     );
   }
 
-  // -------------------------------------------------------------
-  // TAB 2: DEVICES DIRECTORY
-  // -------------------------------------------------------------
-  Widget _buildDevicesTab() {
-    var filtered = _devices;
+  // ==========================================
+  // TAB 2: HARDWARE DIRECTORY
+  // ==========================================
+
+  Widget _buildStaffDevicesDirectoryTab(AsyncValue<List<DeviceModel>> devicesAsync) {
+    final devices = devicesAsync.value ?? [];
+    final isLoading = devicesAsync.isLoading;
+    final hasError = devicesAsync.hasError;
+
+    var list = devices;
     if (_deviceFilterStatus != null) {
-      filtered = filtered
-          .where((d) => d.status == _deviceFilterStatus)
-          .toList();
+      list = list.where((d) => d.status == _deviceFilterStatus).toList();
     }
+
     if (_deviceSearchQuery.trim().isNotEmpty) {
       final q = _deviceSearchQuery.toLowerCase();
-      filtered = filtered.where((d) {
+      list = list.where((d) {
         return d.name.toLowerCase().contains(q) ||
-            d.location.toLowerCase().contains(q) ||
+            d.hardwareTypeName.toLowerCase().contains(q) ||
             d.zoneName.toLowerCase().contains(q) ||
-            d.serialNumber.toLowerCase().contains(q);
+            d.location.toLowerCase().contains(q);
       }).toList();
     }
 
     return Column(
       children: [
-        // Search & Status Filters
+        // Search & Filter Box
         Container(
           padding: const EdgeInsets.all(12),
           color: AppColors.surface,
           child: Column(
             children: [
               TextField(
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: AppColors.textPrimary,
-                ),
+                style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
                 decoration: InputDecoration(
-                  hintText: 'Search devices or locations...',
+                  hintText: 'Search hardware by name, type, or zone...',
                   prefixIcon: const Icon(Icons.search, color: AppColors.icon),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 10,
-                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   filled: true,
                   fillColor: AppColors.background,
                   border: OutlineInputBorder(
@@ -850,12 +867,9 @@ class _StaffHomePageState extends ConsumerState<StaffHomePage>
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    _buildFilterChip('All Status', null),
+                    _buildFilterChip('All Hardware', null),
                     _buildFilterChip('Active', DeviceStatus.active),
-                    _buildFilterChip(
-                      'Maintenance',
-                      DeviceStatus.underMaintenance,
-                    ),
+                    _buildFilterChip('Maintenance', DeviceStatus.underMaintenance),
                     _buildFilterChip('Faulty', DeviceStatus.faulty),
                   ],
                 ),
@@ -863,155 +877,99 @@ class _StaffHomePageState extends ConsumerState<StaffHomePage>
             ],
           ),
         ),
-
         const Divider(height: 1, color: AppColors.divider),
-
-        // Device List
         Expanded(
-          child: filtered.isEmpty
-              ? const Center(
-                  child: Text(
-                    'No devices found matching filter',
-                    style: TextStyle(color: AppColors.textSecondary),
-                  ),
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.only(
-                    left: 16,
-                    right: 16,
-                    top: 12,
-                    bottom: 80,
-                  ),
-                  itemCount: filtered.length,
-                  itemBuilder: (context, index) {
-                    final device = filtered[index];
-
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.border),
-                      ),
+          child: RefreshIndicator(
+            color: AppColors.primary,
+            onRefresh: () async {
+              ref.invalidate(staffDevicesProvider);
+              ref.invalidate(staffDashboardSummaryProvider);
+            },
+            child: ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(16),
+              itemCount: (isLoading || hasError || list.isEmpty) ? 1 : list.length,
+              itemBuilder: (context, index) {
+                if (isLoading) {
+                  return const Padding(
+                    padding: EdgeInsets.only(top: 80),
+                    child: Center(
+                      child: CircularProgressIndicator(color: AppColors.primary),
+                    ),
+                  );
+                }
+                if (hasError) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 60),
+                    child: Center(
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  device.name,
-                                  style: const TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.textPrimary,
-                                  ),
-                                ),
-                              ),
-                              StatusBadge.device(device.status),
-                            ],
+                          const Icon(Icons.cloud_off_rounded, size: 48, color: AppColors.icon),
+                          const SizedBox(height: 12),
+                          const Text(
+                            'Failed to load hardware directory',
+                            style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '${device.hardwareTypeName} • SN: ${device.serialNumber}',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.location_on_outlined,
-                                size: 14,
-                                color: AppColors.icon,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                '${device.zoneName} (${device.location})',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          if (device.specFields.isNotEmpty) ...[
-                            const SizedBox(height: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.cardAlt,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                children: [
-                                  const Icon(
-                                    Icons.settings_ethernet,
-                                    size: 14,
-                                    color: AppColors.icon,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    'IP: ${device.specFields['ip'] ?? 'N/A'}',
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                  if (device.specFields['model'] != null) ...[
-                                    const SizedBox(width: 10),
-                                    Text(
-                                      'Model: ${device.specFields['model']}',
-                                      style: const TextStyle(
-                                        fontSize: 11,
-                                        color: AppColors.textSecondary,
-                                      ),
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            ),
-                          ],
-
-                          const SizedBox(height: 10),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              OutlinedButton.icon(
-                                onPressed: () => _openRaiseIssueSheet(device),
-                                icon: const Icon(
-                                  Icons.report_problem_outlined,
-                                  size: 16,
-                                ),
-                                label: const Text(
-                                  'Report Fault',
-                                  style: TextStyle(fontSize: 12),
-                                ),
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: AppColors.errorText,
-                                  side: const BorderSide(
-                                    color: AppColors.border,
-                                  ),
-                                  minimumSize: const Size(120, 36),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                  ),
-                                ),
-                              ),
-                            ],
+                          const SizedBox(height: 12),
+                          ElevatedButton.icon(
+                            onPressed: () => ref.invalidate(staffDevicesProvider),
+                            icon: const Icon(Icons.refresh, size: 16),
+                            label: const Text('Retry'),
                           ),
                         ],
                       ),
-                    );
-                  },
-                ),
+                    ),
+                  );
+                }
+                if (list.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.only(top: 80),
+                    child: Center(
+                      child: Text(
+                        'No matching hardware found',
+                        style: TextStyle(color: AppColors.textSecondary),
+                      ),
+                    ),
+                  );
+                }
+                final device = list[index];
+                return Container(
+                  key: ValueKey(device.id),
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryBg,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(
+                        HardwareIconHelper.getIcon(device.hardwareTypeName),
+                        color: AppColors.primary,
+                        size: 20,
+                      ),
+                    ),
+                    title: Text(
+                      device.name,
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textPrimary),
+                    ),
+                    subtitle: Text(
+                      '${device.hardwareTypeName} • ${device.zoneName} • ${device.location.isNotEmpty ? device.location : "Active"}',
+                      style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                    ),
+                    trailing: StatusBadge.device(device.status),
+                    onTap: () => _openRaiseIssueSheet(device),
+                  ),
+                );
+              },
+            ),
+          ),
         ),
       ],
     );
@@ -1039,153 +997,241 @@ class _StaffHomePageState extends ConsumerState<StaffHomePage>
     );
   }
 
-  // -------------------------------------------------------------
+  // ==========================================
   // TAB 3: ISSUES TRACKER
-  // -------------------------------------------------------------
-  Widget _buildIssuesTab() {
-    if (_issues.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.check_circle_outline,
-              size: 48,
-              color: AppColors.success,
-            ),
-            const SizedBox(height: 12),
-            const Text(
-              'No Issues Reported in Zone',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+  // ==========================================
+
+  Widget _buildStaffIssuesTrackerTab(AsyncValue<List<IssueModel>> issuesAsync) {
+    final allIssues = issuesAsync.value ?? [];
+    final isLoading = issuesAsync.isLoading;
+    final hasError = issuesAsync.hasError;
+
+    final openIssues = allIssues
+        .where((i) => i.status != IssueStatus.closed && i.status != IssueStatus.resolved)
+        .toList();
+    final closedIssues = allIssues
+        .where((i) => i.status == IssueStatus.closed || i.status == IssueStatus.resolved)
+        .toList();
+
+    final displayedIssues = _staffIssueFilterIndex == 0
+        ? openIssues
+        : (_staffIssueFilterIndex == 1 ? closedIssues : allIssues);
+
+    return Column(
+      children: [
+        // Segmented Issue Filter Bar
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          color: AppColors.surface,
+          child: Row(
+            children: [
+              _buildStaffIssueFilterChip(
+                label: 'Open (${openIssues.length})',
+                index: 0,
+                badgeColor: openIssues.isNotEmpty ? AppColors.warningText : null,
               ),
-            ),
-            const SizedBox(height: 4),
-            const Text(
-              'All devices in this zone are running normally',
-              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: () => _openRaiseIssueSheet(),
-              icon: const Icon(Icons.add, size: 18),
-              label: const Text('Raise Issue Ticket'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: AppColors.textWhite,
-                minimumSize: const Size(160, 44),
+              const SizedBox(width: 8),
+              _buildStaffIssueFilterChip(
+                label: 'Closed (${closedIssues.length})',
+                index: 1,
+                badgeColor: closedIssues.isNotEmpty ? AppColors.successText : null,
               ),
-            ),
-          ],
+              const SizedBox(width: 8),
+              _buildStaffIssueFilterChip(
+                label: 'All (${allIssues.length})',
+                index: 2,
+              ),
+            ],
+          ),
         ),
-      );
-    }
+        const Divider(height: 1, color: AppColors.divider),
 
-    return ListView.builder(
-      padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 80),
-      itemCount: _issues.length,
-      itemBuilder: (context, index) {
-        final issue = _issues[index];
-
-        return InkWell(
-          onTap: () => IssueDetailSheet.show(context, issue),
-          borderRadius: BorderRadius.circular(16),
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 12),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.border),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      issue.id,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
+        Expanded(
+          child: RefreshIndicator(
+            color: AppColors.primary,
+            onRefresh: () async {
+              ref.invalidate(staffIssuesProvider);
+              ref.invalidate(staffDashboardSummaryProvider);
+            },
+            child: ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(16),
+              itemCount: (isLoading || hasError || displayedIssues.isEmpty) ? 1 : displayedIssues.length,
+              itemBuilder: (context, index) {
+                if (isLoading) {
+                  return const Padding(
+                    padding: EdgeInsets.only(top: 80),
+                    child: Center(
+                      child: CircularProgressIndicator(color: AppColors.primary),
+                    ),
+                  );
+                }
+                if (hasError) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 60),
+                    child: Center(
+                      child: Column(
+                        children: [
+                          const Icon(Icons.cloud_off_rounded, size: 48, color: AppColors.icon),
+                          const SizedBox(height: 12),
+                          const Text(
+                            'Failed to load maintenance tickets',
+                            style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                          ),
+                          const SizedBox(height: 12),
+                          ElevatedButton.icon(
+                            onPressed: () => ref.invalidate(staffIssuesProvider),
+                            icon: const Icon(Icons.refresh, size: 16),
+                            label: const Text('Retry'),
+                          ),
+                        ],
                       ),
                     ),
-                    const Spacer(),
-                    StatusBadge.priority(issue.priority),
-                    const SizedBox(width: 6),
-                    StatusBadge.issue(issue.status),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  issue.title,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${issue.deviceName} • ${issue.zoneName}',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                const Divider(color: AppColors.divider, height: 1),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.engineering_outlined,
-                          size: 14,
-                          color: AppColors.icon,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          issue.assignedTechnicianName != null
-                              ? 'Tech: ${issue.assignedTechnicianName}'
-                              : 'Tech: Unassigned',
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: AppColors.textSecondary,
+                  );
+                }
+                if (displayedIssues.isEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 80),
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            _staffIssueFilterIndex == 0
+                                ? Icons.task_alt_rounded
+                                : (_staffIssueFilterIndex == 1
+                                    ? Icons.history_toggle_off_rounded
+                                    : Icons.confirmation_number_outlined),
+                            size: 48,
+                            color: AppColors.iconLight,
                           ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.history,
-                          size: 14,
-                          color: AppColors.primary,
-                        ),
-                        const SizedBox(width: 2),
-                        Text(
-                          '${issue.history.length} updates',
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.primary,
+                          const SizedBox(height: 12),
+                          Text(
+                            _staffIssueFilterIndex == 0
+                                ? 'No open maintenance tickets in your zone'
+                                : (_staffIssueFilterIndex == 1
+                                    ? 'No closed maintenance tickets yet'
+                                    : 'No maintenance issues recorded in your zone'),
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 6),
+                          Text(
+                            _staffIssueFilterIndex == 0
+                                ? 'All reported equipment issues have been resolved'
+                                : 'Pull down to refresh tickets',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
-                ),
-              ],
+                  );
+                }
+
+                final issue = displayedIssues[index];
+                return Container(
+                  key: ValueKey(issue.id),
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: issue.priority == IssuePriority.critical
+                          ? AppColors.error.withValues(alpha: 0.5)
+                          : AppColors.border,
+                    ),
+                  ),
+                  child: InkWell(
+                    onTap: () => IssueDetailSheet.show(context, issue),
+                    borderRadius: BorderRadius.circular(14),
+                    child: Padding(
+                      padding: const EdgeInsets.all(14),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                issue.id.length > 8 ? '#${issue.id.substring(0, 8)}' : issue.id,
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppColors.primary),
+                              ),
+                              const Spacer(),
+                              StatusBadge.priority(issue.priority),
+                              const SizedBox(width: 6),
+                              StatusBadge.issue(issue.status),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            issue.title.isNotEmpty ? issue.title : (issue.description.isNotEmpty ? issue.description : 'Maintenance Issue'),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppColors.textPrimary),
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Icon(
+                                HardwareIconHelper.getIcon(issue.categoryName),
+                                size: 13,
+                                color: AppColors.icon,
+                              ),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  '${issue.deviceName} • ${issue.zoneName} ${issue.categoryName.isNotEmpty ? "• ${issue.categoryName}" : ""}',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
           ),
-        );
-      },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStaffIssueFilterChip({
+    required String label,
+    required int index,
+    Color? badgeColor,
+  }) {
+    final isSelected = _staffIssueFilterIndex == index;
+    return InkWell(
+      onTap: () => setState(() => _staffIssueFilterIndex = index),
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primary : AppColors.cardAlt,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? AppColors.primary : AppColors.border,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            color: isSelected ? AppColors.textWhite : (badgeColor ?? AppColors.textSecondary),
+          ),
+        ),
+      ),
     );
   }
 }

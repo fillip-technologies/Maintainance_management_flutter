@@ -1,28 +1,31 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../../core/providers/device_provider.dart';
+import '../../../../core/providers/issue_provider.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/utils/app_snackbar.dart';
 import '../../../../data/models/device_model.dart';
 import '../../../../data/models/issue_model.dart';
 
-class RaiseIssueSheet extends StatefulWidget {
+class RaiseIssueSheet extends ConsumerStatefulWidget {
   final List<DeviceModel> devices;
   final DeviceModel? initialDevice;
-  final Function(IssueModel newIssue) onIssueCreated;
+  final Function(IssueModel newIssue)? onIssueCreated;
 
   const RaiseIssueSheet({
     super.key,
     required this.devices,
     this.initialDevice,
-    required this.onIssueCreated,
+    this.onIssueCreated,
   });
 
   static Future<void> show(
     BuildContext context, {
     required List<DeviceModel> devices,
     DeviceModel? initialDevice,
-    required Function(IssueModel newIssue) onIssueCreated,
+    Function(IssueModel newIssue)? onIssueCreated,
   }) {
     return showModalBottomSheet(
       context: context,
@@ -40,43 +43,63 @@ class RaiseIssueSheet extends StatefulWidget {
   }
 
   @override
-  State<RaiseIssueSheet> createState() => _RaiseIssueSheetState();
+  ConsumerState<RaiseIssueSheet> createState() => _RaiseIssueSheetState();
 }
 
-class _RaiseIssueSheetState extends State<RaiseIssueSheet> {
+class _RaiseIssueSheetState extends ConsumerState<RaiseIssueSheet> {
   DeviceModel? _selectedDevice;
-  String? _selectedCategory;
+  IssueCategoryModel? _selectedCategory;
+  List<IssueCategoryModel> _categories = [];
+  bool _isLoadingCategories = false;
+  bool _isSubmitting = false;
+
   IssuePriority _selectedPriority = IssuePriority.medium;
-  final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   File? _attachedImage;
   final ImagePicker _picker = ImagePicker();
   bool _isPickingImage = false;
   String? _errorMessage;
 
-  final List<String> _categories = [
-    'Video Loss / No Signal',
-    'PTZ Motor & Rotation Stuck',
-    'Physical Lens Obstruction / Dirt',
-    'Night Vision / IR Illuminator Failure',
-    'Power Fluctuation / PoE Drop',
-    'Water Ingress / Enclosure Condensation',
-  ];
-
   @override
   void initState() {
     super.initState();
     _selectedDevice = widget.initialDevice;
-    if (widget.initialDevice != null) {
-      _titleController.text = '${widget.initialDevice!.name} Fault';
+    if (_selectedDevice != null) {
+      _loadCategoriesForDevice(_selectedDevice!);
     }
   }
 
   @override
   void dispose() {
-    _titleController.dispose();
     _descriptionController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadCategoriesForDevice(DeviceModel device) async {
+    setState(() {
+      _isLoadingCategories = true;
+      _categories = [];
+      _selectedCategory = null;
+    });
+
+    try {
+      final issueRepo = ref.read(issueRepositoryProvider);
+      final categories = await issueRepo.getCategoriesForHardwareType(device.hardwareTypeId);
+      if (mounted) {
+        setState(() {
+          _categories = categories;
+          if (categories.isNotEmpty) {
+            _selectedCategory = categories.first;
+          }
+        });
+      }
+    } catch (_) {
+      // Ignored, empty list fallback
+    } finally {
+      if (mounted) {
+        setState(() => _isLoadingCategories = false);
+      }
+    }
   }
 
   Future<void> _pickImage(ImageSource source) async {
@@ -151,7 +174,7 @@ class _RaiseIssueSheetState extends State<RaiseIssueSheet> {
                   iconColor: AppColors.primary,
                   iconBgColor: AppColors.primaryBg,
                   title: 'Take a Photo (Camera)',
-                  subtitle: 'Open camera to capture device fault',
+                  subtitle: 'Open camera to capture equipment fault',
                   onTap: () => _pickImage(ImageSource.camera),
                 ),
                 const SizedBox(height: 10),
@@ -231,57 +254,56 @@ class _RaiseIssueSheetState extends State<RaiseIssueSheet> {
     );
   }
 
-  void _submitIssue() {
+  Future<void> _submitIssue() async {
     if (_selectedDevice == null) {
-      setState(() => _errorMessage = 'Please select a device');
+      setState(() => _errorMessage = 'Please select a hardware device');
       return;
     }
     if (_selectedCategory == null) {
       setState(() => _errorMessage = 'Please select a fault category');
       return;
     }
-    if (_titleController.text.trim().isEmpty) {
-      setState(() => _errorMessage = 'Please enter a summary title');
+    if (_descriptionController.text.trim().isEmpty) {
+      setState(() => _errorMessage = 'Please enter issue observations');
       return;
     }
 
-    final newIssue = IssueModel(
-      id: 'ISSUE-${1000 + DateTime.now().millisecond}',
-      title: _titleController.text.trim(),
-      description: _descriptionController.text.trim(),
-      deviceId: _selectedDevice!.id,
-      deviceName: _selectedDevice!.name,
-      zoneId: _selectedDevice!.zoneId,
-      zoneName: _selectedDevice!.zoneName,
-      categoryId: 'cat-01',
-      categoryName: _selectedCategory!,
-      priority: _selectedPriority,
-      status: IssueStatus.open,
-      createdByUserId: 'usr-staff-001',
-      createdByUserName: 'Sarah Connor (Staff)',
-      imagePath: _attachedImage?.path,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-      history: [
-        IssueStatusHistoryModel(
-          id: 'hist-${DateTime.now().millisecondsSinceEpoch}',
-          issueId: 'ISSUE-NEW',
-          fromStatus: null,
-          toStatus: IssueStatus.open,
-          changedByUserId: 'usr-staff-001',
-          changedByUserName: 'Sarah Connor',
-          comment: _attachedImage != null
-              ? 'Reported by staff with attached photo'
-              : 'Reported by zone staff',
-          createdAt: DateTime.now(),
-        ),
-      ],
-    );
+    setState(() {
+      _errorMessage = null;
+      _isSubmitting = true;
+    });
 
-    widget.onIssueCreated(newIssue);
-    Navigator.pop(context);
+    try {
+      final issueRepo = ref.read(issueRepositoryProvider);
+      final newIssue = await issueRepo.createIssue(
+        deviceId: _selectedDevice!.id,
+        categoryId: _selectedCategory!.id,
+        priority: _selectedPriority,
+        description: _descriptionController.text.trim(),
+      );
 
-    AppSnackbar.success('Maintenance issue raised successfully!');
+      // Invalidate live lists so UI updates automatically
+      ref.invalidate(staffIssuesProvider);
+      ref.invalidate(staffDevicesProvider);
+      ref.invalidate(staffDashboardSummaryProvider);
+
+      if (widget.onIssueCreated != null) {
+        widget.onIssueCreated!(newIssue);
+      }
+
+      if (mounted) {
+        Navigator.pop(context);
+      }
+
+      AppSnackbar.success('Maintenance ticket raised successfully!');
+    } catch (e) {
+      setState(() => _errorMessage = '$e');
+      AppSnackbar.error('Failed to raise ticket: $e');
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+    }
   }
 
   @override
@@ -343,7 +365,7 @@ class _RaiseIssueSheetState extends State<RaiseIssueSheet> {
 
             // 1. Device Picker
             const Text(
-              'Select Device',
+              'Select Hardware Device',
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -376,12 +398,10 @@ class _RaiseIssueSheetState extends State<RaiseIssueSheet> {
                     );
                   }).toList(),
                   onChanged: (val) {
-                    setState(() {
-                      _selectedDevice = val;
-                      if (val != null && _titleController.text.isEmpty) {
-                        _titleController.text = '${val.name} Issue';
-                      }
-                    });
+                    setState(() => _selectedDevice = val);
+                    if (val != null) {
+                      _loadCategoriesForDevice(val);
+                    }
                   },
                 ),
               ),
@@ -389,7 +409,7 @@ class _RaiseIssueSheetState extends State<RaiseIssueSheet> {
 
             const SizedBox(height: 14),
 
-            // 2. Fault Category
+            // 2. Fault Category (Live from backend)
             const Text(
               'Fault Category',
               style: TextStyle(
@@ -406,24 +426,42 @@ class _RaiseIssueSheetState extends State<RaiseIssueSheet> {
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: AppColors.border),
               ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-                  value: _selectedCategory,
-                  hint: const Text('Select fault type...', style: TextStyle(color: AppColors.textMuted)),
-                  isExpanded: true,
-                  dropdownColor: AppColors.surface,
-                  items: _categories.map((c) {
-                    return DropdownMenuItem(
-                      value: c,
-                      child: Text(
-                        c,
-                        style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
+              child: _isLoadingCategories
+                  ? const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                          ),
+                          SizedBox(width: 10),
+                          Text('Loading fault categories...', style: TextStyle(fontSize: 13, color: AppColors.textMuted)),
+                        ],
                       ),
-                    );
-                  }).toList(),
-                  onChanged: (val) => setState(() => _selectedCategory = val),
-                ),
-              ),
+                    )
+                  : DropdownButtonHideUnderline(
+                      child: DropdownButton<IssueCategoryModel>(
+                        value: _selectedCategory,
+                        hint: Text(
+                          _categories.isEmpty ? 'No categories available' : 'Select fault category...',
+                          style: const TextStyle(color: AppColors.textMuted),
+                        ),
+                        isExpanded: true,
+                        dropdownColor: AppColors.surface,
+                        items: _categories.map((c) {
+                          return DropdownMenuItem(
+                            value: c,
+                            child: Text(
+                              c.name,
+                              style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (val) => setState(() => _selectedCategory = val),
+                      ),
+                    ),
             ),
 
             const SizedBox(height: 14),
@@ -478,29 +516,9 @@ class _RaiseIssueSheetState extends State<RaiseIssueSheet> {
 
             const SizedBox(height: 14),
 
-            // 4. Issue Summary
+            // 4. Description / Observations
             const Text(
-              'Issue Summary',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 6),
-            TextField(
-              controller: _titleController,
-              style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
-              decoration: const InputDecoration(
-                hintText: 'Brief summary of the issue...',
-              ),
-            ),
-
-            const SizedBox(height: 14),
-
-            // 5. Description
-            const Text(
-              'Detailed Description / Observations',
+              'Detailed Observations / Symptoms',
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -513,13 +531,13 @@ class _RaiseIssueSheetState extends State<RaiseIssueSheet> {
               maxLines: 3,
               style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
               decoration: const InputDecoration(
-                hintText: 'Describe symptoms, errors, physical damage...',
+                hintText: 'Describe symptoms, wire damage, physical error...',
               ),
             ),
 
             const SizedBox(height: 14),
 
-            // 6. Camera / Device Photo Section
+            // 5. Camera / Device Photo Section
             const Text(
               'Attach Device Photo (Optional)',
               style: TextStyle(
@@ -649,12 +667,19 @@ class _RaiseIssueSheetState extends State<RaiseIssueSheet> {
 
             // Submit Button
             ElevatedButton(
-              onPressed: _submitIssue,
+              onPressed: _isSubmitting ? null : _submitIssue,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: AppColors.textWhite,
+                padding: const EdgeInsets.symmetric(vertical: 14),
               ),
-              child: const Text('Submit Maintenance Ticket'),
+              child: _isSubmitting
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.textWhite),
+                    )
+                  : const Text('Submit Maintenance Ticket'),
             ),
           ],
         ),

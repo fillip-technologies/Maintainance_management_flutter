@@ -151,12 +151,11 @@ class AppColors {
         style: ElevatedButton.styleFrom(
           backgroundColor: primary,
           foregroundColor: textWhite,
-          elevation: 2,
-          minimumSize: const Size(double.infinity, 52),
+          elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(14),
           ),
-          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
         ),
       ),
 
@@ -165,10 +164,9 @@ class AppColors {
         style: OutlinedButton.styleFrom(
           backgroundColor: surface,
           foregroundColor: textPrimary,
-          minimumSize: const Size(double.infinity, 50),
           side: const BorderSide(color: border),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(14),
           ),
         ),
       ),
