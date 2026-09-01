@@ -13,7 +13,7 @@ enum IssueStatus {
 
   static IssueStatus fromString(String? status) {
     return IssueStatus.values.firstWhere(
-      (e) => e.value == status,
+      (e) => e.value == status || e.name == status,
       orElse: () => IssueStatus.open,
     );
   }
@@ -31,7 +31,7 @@ enum IssuePriority {
 
   static IssuePriority fromString(String? priority) {
     return IssuePriority.values.firstWhere(
-      (e) => e.value == priority,
+      (e) => e.value == priority || e.name == priority,
       orElse: () => IssuePriority.medium,
     );
   }
@@ -50,9 +50,9 @@ class IssueCategoryModel {
 
   factory IssueCategoryModel.fromJson(Map<String, dynamic> json) {
     return IssueCategoryModel(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      hardwareTypeId: json['hardware_type_id'] as String?,
+      id: (json['id'] as String?) ?? '',
+      name: (json['name'] as String?) ?? 'General Issue',
+      hardwareTypeId: (json['hardwareTypeId'] ?? json['hardware_type_id']) as String?,
     );
   }
 
@@ -87,17 +87,24 @@ class IssueStatusHistoryModel {
   });
 
   factory IssueStatusHistoryModel.fromJson(Map<String, dynamic> json) {
+    final changedByObj = json['changedBy'] as Map<String, dynamic>?;
+
+    final dateStr = (json['changedAt'] ?? json['changed_at'] ?? json['createdAt'] ?? json['created_at']) as String?;
+    final date = dateStr != null ? (DateTime.tryParse(dateStr) ?? DateTime.now()) : DateTime.now();
+
     return IssueStatusHistoryModel(
-      id: json['id'] as String,
-      issueId: json['issue_id'] as String,
-      fromStatus: json['from_status'] != null
-          ? IssueStatus.fromString(json['from_status'] as String)
-          : null,
-      toStatus: IssueStatus.fromString(json['to_status'] as String),
-      changedByUserId: json['changed_by_user_id'] as String,
-      changedByUserName: json['changed_by_user_name'] as String? ?? 'System',
-      comment: json['comment'] as String?,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      id: (json['id'] as String?) ?? '',
+      issueId: (json['issueId'] ?? json['issue_id']) as String? ?? '',
+      fromStatus: json['fromStatus'] != null
+          ? IssueStatus.fromString(json['fromStatus'] as String)
+          : json['from_status'] != null
+              ? IssueStatus.fromString(json['from_status'] as String)
+              : null,
+      toStatus: IssueStatus.fromString((json['toStatus'] ?? json['to_status']) as String?),
+      changedByUserId: (json['changedByUserId'] ?? json['changed_by_user_id'] ?? changedByObj?['id']) as String? ?? '',
+      changedByUserName: (json['changedByUserName'] ?? json['changed_by_user_name'] ?? changedByObj?['name']) as String? ?? 'System',
+      comment: (json['notes'] ?? json['comment']) as String?,
+      createdAt: date,
     );
   }
 
@@ -109,8 +116,8 @@ class IssueStatusHistoryModel {
       'to_status': toStatus.value,
       'changed_by_user_id': changedByUserId,
       'changed_by_user_name': changedByUserName,
-      'comment': comment,
-      'created_at': createdAt.toIso8601String(),
+      'notes': comment,
+      'changed_at': createdAt.toIso8601String(),
     };
   }
 }
@@ -134,6 +141,8 @@ class IssueModel {
   final String? imagePath;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final DateTime? resolvedAt;
+  final DateTime? closedAt;
   final List<IssueStatusHistoryModel> history;
 
   const IssueModel({
@@ -155,30 +164,52 @@ class IssueModel {
     this.imagePath,
     required this.createdAt,
     required this.updatedAt,
+    this.resolvedAt,
+    this.closedAt,
     this.history = const [],
   });
 
   factory IssueModel.fromJson(Map<String, dynamic> json) {
+    final deviceObj = json['device'] as Map<String, dynamic>?;
+    final zoneObj = deviceObj?['zone'] as Map<String, dynamic>?;
+    final categoryObj = json['category'] as Map<String, dynamic>?;
+    final raisedByObj = (json['raisedBy'] ?? json['raised_by']) as Map<String, dynamic>?;
+    final techObj = (json['assignedTechnician'] ?? json['assigned_technician']) as Map<String, dynamic>?;
+    final techUserObj = techObj?['user'] as Map<String, dynamic>?;
+
+    final createdDateStr = (json['createdAt'] ?? json['created_at']) as String?;
+    final updatedDateStr = (json['updatedAt'] ?? json['updated_at']) as String?;
+    final resolvedDateStr = (json['resolvedAt'] ?? json['resolved_at']) as String?;
+    final closedDateStr = (json['closedAt'] ?? json['closed_at']) as String?;
+
+    final historyList = (json['statusHistory'] ?? json['history']) as List<dynamic>?;
+
+    final catName = (json['categoryName'] ?? json['category_name'] ?? categoryObj?['name']) as String? ?? 'General Fault';
+    final devName = (json['deviceName'] ?? json['device_name'] ?? deviceObj?['name']) as String? ?? 'Unknown Device';
+    final defaultTitle = (json['title'] as String?) ?? '$devName - $catName';
+
     return IssueModel(
-      id: json['id'] as String,
-      title: json['title'] as String? ?? 'Maintenance Request',
-      description: json['description'] as String? ?? '',
-      deviceId: json['device_id'] as String,
-      deviceName: json['device_name'] as String? ?? 'Unknown Device',
-      zoneId: json['zone_id'] as String? ?? '',
-      zoneName: json['zone_name'] as String? ?? 'Unknown Zone',
-      categoryId: json['category_id'] as String,
-      categoryName: json['category_name'] as String? ?? 'General Fault',
-      priority: IssuePriority.fromString(json['priority'] as String?),
-      status: IssueStatus.fromString(json['status'] as String?),
-      assignedTechnicianId: json['assigned_technician_id'] as String?,
-      assignedTechnicianName: json['assigned_technician_name'] as String?,
-      createdByUserId: json['created_by_user_id'] as String? ?? '',
-      createdByUserName: json['created_by_user_name'] as String? ?? 'Staff',
-      imagePath: json['image_path'] as String?,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
-      history: (json['history'] as List<dynamic>?)
+      id: (json['id'] as String?) ?? '',
+      title: defaultTitle,
+      description: (json['description'] as String?) ?? '',
+      deviceId: (json['deviceId'] ?? json['device_id'] ?? deviceObj?['id']) as String? ?? '',
+      deviceName: devName,
+      zoneId: (json['zoneId'] ?? json['zone_id'] ?? deviceObj?['zoneId'] ?? zoneObj?['id']) as String? ?? '',
+      zoneName: (json['zoneName'] ?? json['zone_name'] ?? zoneObj?['name']) as String? ?? 'Unknown Zone',
+      categoryId: (json['categoryId'] ?? json['category_id'] ?? categoryObj?['id']) as String? ?? '',
+      categoryName: catName,
+      priority: IssuePriority.fromString((json['priority']) as String?),
+      status: IssueStatus.fromString((json['status']) as String?),
+      assignedTechnicianId: (json['assignedTechnicianId'] ?? json['assigned_technician_id'] ?? techObj?['id']) as String?,
+      assignedTechnicianName: (json['assignedTechnicianName'] ?? json['assigned_technician_name'] ?? techUserObj?['name']) as String?,
+      createdByUserId: (json['raisedByUserId'] ?? json['raised_by_user_id'] ?? json['createdByUserId'] ?? raisedByObj?['id']) as String? ?? '',
+      createdByUserName: (json['raisedByUserName'] ?? json['raised_by_user_name'] ?? json['createdByUserName'] ?? raisedByObj?['name']) as String? ?? 'Staff',
+      imagePath: (json['imagePath'] ?? json['image_path']) as String?,
+      createdAt: createdDateStr != null ? (DateTime.tryParse(createdDateStr) ?? DateTime.now()) : DateTime.now(),
+      updatedAt: updatedDateStr != null ? (DateTime.tryParse(updatedDateStr) ?? DateTime.now()) : DateTime.now(),
+      resolvedAt: resolvedDateStr != null ? DateTime.tryParse(resolvedDateStr) : null,
+      closedAt: closedDateStr != null ? DateTime.tryParse(closedDateStr) : null,
+      history: historyList
               ?.map((e) => IssueStatusHistoryModel.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
@@ -200,11 +231,13 @@ class IssueModel {
       'status': status.value,
       'assigned_technician_id': assignedTechnicianId,
       'assigned_technician_name': assignedTechnicianName,
-      'created_by_user_id': createdByUserId,
-      'created_by_user_name': createdByUserName,
+      'raised_by_user_id': createdByUserId,
+      'raised_by_user_name': createdByUserName,
       'image_path': imagePath,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
+      'resolved_at': resolvedAt?.toIso8601String(),
+      'closed_at': closedAt?.toIso8601String(),
       'history': history.map((e) => e.toJson()).toList(),
     };
   }
@@ -228,6 +261,8 @@ class IssueModel {
     String? imagePath,
     DateTime? createdAt,
     DateTime? updatedAt,
+    DateTime? resolvedAt,
+    DateTime? closedAt,
     List<IssueStatusHistoryModel>? history,
   }) {
     return IssueModel(
@@ -250,6 +285,8 @@ class IssueModel {
       imagePath: imagePath ?? this.imagePath,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      resolvedAt: resolvedAt ?? this.resolvedAt,
+      closedAt: closedAt ?? this.closedAt,
       history: history ?? this.history,
     );
   }

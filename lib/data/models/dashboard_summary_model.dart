@@ -8,6 +8,7 @@ class DashboardSummaryModel {
   final int inProgressIssues;
   final int resolvedIssues;
   final int criticalIssues;
+  final int devicesMissingTodayLog;
   final int todayLogsCompleted;
   final int todayLogsPending;
 
@@ -21,24 +22,29 @@ class DashboardSummaryModel {
     this.inProgressIssues = 0,
     this.resolvedIssues = 0,
     this.criticalIssues = 0,
+    this.devicesMissingTodayLog = 0,
     this.todayLogsCompleted = 0,
     this.todayLogsPending = 0,
   });
 
   factory DashboardSummaryModel.fromJson(Map<String, dynamic> json) {
+    final total = (json['totalDevices'] ?? json['total_devices'] as num?)?.toInt() ?? 0;
+    final missing = (json['devicesMissingTodayLog'] ?? json['devices_missing_today_log'] ?? json['today_logs_pending'] as num?)?.toInt() ?? 0;
+    final completed = (json['todayLogsCompleted'] ?? json['today_logs_completed'] as num?)?.toInt() ?? (total > missing ? total - missing : 0);
+
     return DashboardSummaryModel(
-      totalDevices: (json['total_devices'] as num?)?.toInt() ?? 0,
-      activeDevices: (json['active_devices'] as num?)?.toInt() ?? 0,
-      underMaintenanceDevices:
-          (json['under_maintenance_devices'] as num?)?.toInt() ?? 0,
-      faultyDevices: (json['faulty_devices'] as num?)?.toInt() ?? 0,
-      provisionedDevices: (json['provisioned_devices'] as num?)?.toInt() ?? 0,
-      openIssues: (json['open_issues'] as num?)?.toInt() ?? 0,
-      inProgressIssues: (json['in_progress_issues'] as num?)?.toInt() ?? 0,
-      resolvedIssues: (json['resolved_issues'] as num?)?.toInt() ?? 0,
-      criticalIssues: (json['critical_issues'] as num?)?.toInt() ?? 0,
-      todayLogsCompleted: (json['today_logs_completed'] as num?)?.toInt() ?? 0,
-      todayLogsPending: (json['today_logs_pending'] as num?)?.toInt() ?? 0,
+      totalDevices: total,
+      activeDevices: (json['activeDevices'] ?? json['active_devices'] as num?)?.toInt() ?? 0,
+      underMaintenanceDevices: (json['underMaintenanceDevices'] ?? json['under_maintenance_devices'] as num?)?.toInt() ?? 0,
+      faultyDevices: (json['faultyDevices'] ?? json['faulty_devices'] as num?)?.toInt() ?? 0,
+      provisionedDevices: (json['provisionedDevices'] ?? json['provisioned_devices'] as num?)?.toInt() ?? 0,
+      openIssues: (json['openIssues'] ?? json['open_issues'] as num?)?.toInt() ?? 0,
+      inProgressIssues: (json['inProgressIssues'] ?? json['in_progress_issues'] as num?)?.toInt() ?? 0,
+      resolvedIssues: (json['resolvedIssues'] ?? json['resolved_issues'] as num?)?.toInt() ?? 0,
+      criticalIssues: (json['criticalIssues'] ?? json['critical_issues'] as num?)?.toInt() ?? 0,
+      devicesMissingTodayLog: missing,
+      todayLogsCompleted: completed,
+      todayLogsPending: missing,
     );
   }
 
@@ -53,6 +59,7 @@ class DashboardSummaryModel {
       'in_progress_issues': inProgressIssues,
       'resolved_issues': resolvedIssues,
       'critical_issues': criticalIssues,
+      'devices_missing_today_log': devicesMissingTodayLog,
       'today_logs_completed': todayLogsCompleted,
       'today_logs_pending': todayLogsPending,
     };

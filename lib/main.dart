@@ -4,10 +4,8 @@ import 'core/providers/auth_provider.dart';
 import 'core/storage/storage_service.dart';
 import 'core/theme/colors.dart';
 import 'core/utils/app_snackbar.dart';
-import 'data/models/user_model.dart';
 import 'features/auth/view/login_page.dart';
-import 'features/staff/view/staff_home_page.dart';
-import 'features/technician/view/technician_home_page.dart';
+import 'features/home/view/global_home_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,10 +36,7 @@ class EquipmentManagementApp extends ConsumerWidget {
           if (user == null) {
             return const LoginPage();
           }
-          if (user.role == UserRole.technician) {
-            return const TechnicianHomePage();
-          }
-          return const StaffHomePage();
+          return const GlobalHomePage();
         },
         loading: () => const Scaffold(
           backgroundColor: AppColors.background,

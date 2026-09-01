@@ -10,7 +10,7 @@ enum DailyLogStatus {
 
   static DailyLogStatus fromString(String? status) {
     return DailyLogStatus.values.firstWhere(
-      (e) => e.value == status,
+      (e) => e.value == status || e.name == status,
       orElse: () => DailyLogStatus.working,
     );
   }
@@ -33,8 +33,8 @@ class DailyStatusLogModel {
     required this.id,
     required this.deviceId,
     required this.deviceName,
-    required this.zoneId,
-    required this.zoneName,
+    this.zoneId = '',
+    this.zoneName = '',
     required this.loggedByUserId,
     required this.loggedByUserName,
     required this.status,
@@ -44,18 +44,24 @@ class DailyStatusLogModel {
   });
 
   factory DailyStatusLogModel.fromJson(Map<String, dynamic> json) {
+    final devObj = json['device'] as Map<String, dynamic>?;
+    final loggedByObj = (json['loggedBy'] ?? json['logged_by']) as Map<String, dynamic>?;
+
+    final logDateStr = (json['logDate'] ?? json['log_date']) as String?;
+    final createdDateStr = (json['createdAt'] ?? json['created_at']) as String?;
+
     return DailyStatusLogModel(
-      id: json['id'] as String,
-      deviceId: json['device_id'] as String,
-      deviceName: json['device_name'] as String? ?? 'Device',
-      zoneId: json['zone_id'] as String? ?? '',
-      zoneName: json['zone_name'] as String? ?? 'Zone',
-      loggedByUserId: json['logged_by_user_id'] as String,
-      loggedByUserName: json['logged_by_user_name'] as String? ?? 'Staff',
+      id: (json['id'] as String?) ?? '',
+      deviceId: (json['deviceId'] ?? json['device_id'] ?? devObj?['id']) as String? ?? '',
+      deviceName: (json['deviceName'] ?? json['device_name'] ?? devObj?['name']) as String? ?? 'Device',
+      zoneId: (json['zoneId'] ?? json['zone_id'] ?? devObj?['zoneId']) as String? ?? '',
+      zoneName: (json['zoneName'] ?? json['zone_name']) as String? ?? 'Zone',
+      loggedByUserId: (json['loggedByUserId'] ?? json['logged_by_user_id'] ?? loggedByObj?['id']) as String? ?? '',
+      loggedByUserName: (json['loggedByName'] ?? json['logged_by_name'] ?? json['loggedByUserName'] ?? loggedByObj?['name']) as String? ?? 'Staff',
       status: DailyLogStatus.fromString(json['status'] as String?),
       notes: json['notes'] as String?,
-      logDate: DateTime.parse(json['log_date'] as String),
-      createdAt: DateTime.parse(json['created_at'] as String),
+      logDate: logDateStr != null ? (DateTime.tryParse(logDateStr) ?? DateTime.now()) : DateTime.now(),
+      createdAt: createdDateStr != null ? (DateTime.tryParse(createdDateStr) ?? DateTime.now()) : DateTime.now(),
     );
   }
 
