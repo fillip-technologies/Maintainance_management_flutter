@@ -93,6 +93,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           setState(() {
             _errorMessage = errorMsg;
           });
+          AppSnackbar.error(errorMsg);
         }
       }
     } finally {

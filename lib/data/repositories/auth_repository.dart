@@ -18,12 +18,14 @@ class AuthRepository {
     required String email,
     required String password,
   }) async {
-    AppLogger.i('🔐 [AuthRepository] Attempting login for: $email');
+    final cleanEmail = email.trim().toLowerCase();
+    AppLogger.i('🔐 [AuthRepository] Attempting login for: $cleanEmail');
+
     try {
       final response = await apiClient.dio.post(
         '/auth/login',
         data: {
-          'email': email.trim().toLowerCase(),
+          'email': cleanEmail,
           'password': password,
         },
       );
@@ -35,10 +37,12 @@ class AuthRepository {
 
         final accessToken = data['accessToken'] as String;
         final refreshToken = data['refreshToken'] as String;
-        final userJson = data['user'] as Map<String, dynamic>;
+        final userJson = Map<String, dynamic>.from(data['user'] as Map<String, dynamic>);
 
-        final user = UserModel.fromJson(userJson);
-        AppLogger.i('👤 [AuthRepository] Parsed User: ${user.name} (${user.role.value})');
+        // Backend user object might omit email, inject it
+        if (!userJson.containsKey('email') || userJson['email'] == null || (userJson['email'] as String).isEmpty) {
+          userJson['email'] = cleanEmail;
+        }
 
         // Parse zone trees if returned (for zone_incharge / zone_staff)
         final descendantsJson = data['zoneDescendants'] as List<dynamic>? ?? [];
@@ -51,6 +55,18 @@ class AuthRepository {
             .map((e) => ZoneModel.fromJson(e as Map<String, dynamic>))
             .toList();
 
+        // If zone name is not in user object, resolve it from zone tree
+        final zoneId = (userJson['zoneId'] ?? userJson['assigned_zone_id']) as String?;
+        if (zoneId != null && !userJson.containsKey('assigned_zone_name')) {
+          final matchedZone = descendants.where((z) => z.id == zoneId).firstOrNull ??
+              ancestors.where((z) => z.id == zoneId).firstOrNull;
+          if (matchedZone != null) {
+            userJson['assigned_zone_name'] = matchedZone.name;
+          }
+        }
+
+        final user = UserModel.fromJson(userJson);
+        AppLogger.i('👤 [AuthRepository] Parsed User: ${user.name} (${user.role.value}) - Zone: ${user.assignedZoneName}');
         AppLogger.i('🌳 [AuthRepository] Parsed ${descendants.length} descendants, ${ancestors.length} ancestors');
 
         // Persist session
@@ -72,12 +88,31 @@ class AuthRepository {
         throw Exception(message);
       }
     } on DioException catch (e) {
-      final message = e.response?.data?['message'] as String? ?? e.message ?? 'Network error';
-      AppLogger.e('❌ [AuthRepository] DioException during login: $message', e);
-      throw Exception(message);
+      String errorMessage = 'Network error';
+
+      if (e.response != null && e.response?.data is Map) {
+        final resData = e.response!.data as Map<String, dynamic>;
+        if (resData['details'] is List && (resData['details'] as List).isNotEmpty) {
+          final firstDetail = (resData['details'] as List).first;
+          if (firstDetail is Map && firstDetail.containsKey('message')) {
+            errorMessage = firstDetail['message'] as String;
+          }
+        } else if (resData['message'] != null) {
+          errorMessage = resData['message'] as String;
+        }
+      } else if (e.type == DioExceptionType.connectionTimeout || e.type == DioExceptionType.receiveTimeout) {
+        errorMessage = 'Connection timeout. Check server URL and network.';
+      } else if (e.type == DioExceptionType.connectionError) {
+        errorMessage = 'Cannot reach server. Check if backend is running.';
+      } else if (e.message != null) {
+        errorMessage = e.message!;
+      }
+
+      AppLogger.e('❌ [AuthRepository] DioException during login: $errorMessage', e);
+      throw Exception(errorMessage);
     } catch (e, st) {
-      AppLogger.e('💥 [AuthRepository] Unexpected parsing error: $e', e, st);
-      throw Exception('Failed to process login data: $e');
+      AppLogger.e('💥 [AuthRepository] Unexpected error during login: $e', e, st);
+      throw Exception(e.toString().replaceAll('Exception: ', ''));
     }
   }
 
