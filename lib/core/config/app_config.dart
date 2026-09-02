@@ -5,6 +5,13 @@ class AppConfig {
   static const String appTagline = 'Equipment & Maintenance Management';
   static const String appVersion = '1.0.0';
 
+  /// Toggle between local offline DemoData and live Backend REST API.
+  /// Defaults to `true` on the demo-data branch.
+  static const bool useDemoData = bool.fromEnvironment(
+    'USE_DEMO_DATA',
+    defaultValue: true,
+  );
+
   /// Default base URL can be passed at build time via:
   /// `flutter run --dart-define=API_BASE_URL=https://api.yourdomain.com/api/v1`
   static const String defaultBaseUrl = String.fromEnvironment(

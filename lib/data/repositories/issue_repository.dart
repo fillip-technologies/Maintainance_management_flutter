@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
+import '../../core/config/app_config.dart';
 import '../../core/network/api_client.dart';
 import '../../core/utils/app_logger.dart';
+import '../../demo/demo_data.dart';
 import '../models/hardware_type_model.dart';
 import '../models/issue_model.dart';
 
@@ -19,6 +21,29 @@ class IssueRepository {
     int page = 1,
     int limit = 50,
   }) async {
+    if (AppConfig.useDemoData) {
+      var list = DemoData.issues;
+      if (zoneId != null && zoneId.isNotEmpty) {
+        list = list.where((i) => i.zoneId == zoneId).toList();
+      }
+      if (status != null && status.isNotEmpty) {
+        list = list.where((i) => i.status.value == status).toList();
+      }
+      if (priority != null && priority.isNotEmpty) {
+        list = list.where((i) => i.priority.value == priority).toList();
+      }
+      if (search != null && search.trim().isNotEmpty) {
+        final q = search.trim().toLowerCase();
+        list = list
+            .where((i) =>
+                i.title.toLowerCase().contains(q) ||
+                i.deviceName.toLowerCase().contains(q) ||
+                i.description.toLowerCase().contains(q))
+            .toList();
+      }
+      return list;
+    }
+
     try {
       final queryParams = <String, dynamic>{
         'page': page,
@@ -64,6 +89,12 @@ class IssueRepository {
 
   /// Fetches issue details and full status timeline history.
   Future<IssueModel> getIssueById(String issueId) async {
+    if (AppConfig.useDemoData) {
+      final issue = DemoData.issues.where((i) => i.id == issueId).firstOrNull;
+      if (issue != null) return issue;
+      throw Exception('Issue not found');
+    }
+
     try {
       AppLogger.d('📡 [IssueRepository] GET /issues/$issueId');
 
@@ -92,6 +123,20 @@ class IssueRepository {
     required IssuePriority priority,
     required String description,
   }) async {
+    if (AppConfig.useDemoData) {
+      final user = DemoData.userRavi;
+      final newIssue = DemoData.createIssue(
+        deviceId: deviceId,
+        categoryId: categoryId,
+        priority: priority,
+        description: description,
+        userId: user.id,
+        userName: user.name,
+      );
+      AppLogger.i('🚨 [IssueRepository] [Demo Mode] Created issue: ${newIssue.id}');
+      return newIssue;
+    }
+
     try {
       final payload = {
         'deviceId': deviceId,
@@ -129,6 +174,14 @@ class IssueRepository {
 
   /// Fetches issue categories for a given hardware type.
   Future<List<IssueCategoryModel>> getCategoriesForHardwareType(String? hardwareTypeId) async {
+    if (AppConfig.useDemoData) {
+      if (hardwareTypeId == null || hardwareTypeId.isEmpty) {
+        return DemoData.hardwareTypes.expand((h) => h.issueCategories).toList();
+      }
+      final hw = DemoData.getHardwareTypeById(hardwareTypeId);
+      return hw?.issueCategories ?? DemoData.hwCctvCamera.issueCategories;
+    }
+
     try {
       if (hardwareTypeId == null || hardwareTypeId.isEmpty) {
         // Fetch all hardware types and collect categories
@@ -169,6 +222,19 @@ class IssueRepository {
     required IssueStatus toStatus,
     String? notes,
   }) async {
+    if (AppConfig.useDemoData) {
+      final user = DemoData.userRaju;
+      final updated = DemoData.updateIssueStatus(
+        issueId: issueId,
+        toStatus: toStatus,
+        notes: notes,
+        userId: user.id,
+        userName: user.name,
+      );
+      AppLogger.i('✅ [IssueRepository] [Demo Mode] Issue $issueId status changed to ${toStatus.label}');
+      return updated;
+    }
+
     try {
       final payload = {
         'toStatus': toStatus.value,

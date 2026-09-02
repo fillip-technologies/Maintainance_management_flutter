@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
+import '../../core/config/app_config.dart';
 import '../../core/network/api_client.dart';
 import '../../core/storage/storage_service.dart';
 import '../../core/utils/app_logger.dart';
+import '../../demo/demo_data.dart';
 import '../models/user_model.dart';
 import '../models/zone_model.dart';
 
@@ -21,6 +23,40 @@ class AuthRepository {
   }) async {
     final cleanEmail = email.trim().toLowerCase();
     AppLogger.i('🔐 [AuthRepository] Attempting login for: $cleanEmail');
+
+    if (AppConfig.useDemoData) {
+      final matched = DemoData.users
+          .where((u) => u.email.toLowerCase() == cleanEmail)
+          .firstOrNull;
+      final isTech = cleanEmail.contains('amit') ||
+          cleanEmail.contains('raju') ||
+          cleanEmail.contains('tech');
+
+      final user = matched ??
+          UserModel(
+            id: 'usr-demo-${DateTime.now().millisecondsSinceEpoch}',
+            name: isTech ? 'Demo Technician' : 'Demo Staff Member',
+            email: cleanEmail,
+            role: isTech ? UserRole.technician : UserRole.zoneIncharge,
+            clientId: 'cli-cityzoo-001',
+            assignedZoneId: 'zone-north-wing',
+            assignedZoneName: 'North Wing',
+            technicianId: isTech ? 'tech-demo-01' : null,
+          );
+
+      await storage.saveTokens(
+        accessToken: 'demo-jwt-access-token',
+        refreshToken: 'demo-jwt-refresh-token',
+      );
+      await storage.saveUser(user);
+      await storage.saveZoneTree(
+        descendants: DemoData.zones,
+        ancestors: [],
+      );
+
+      AppLogger.i('🎉 [AuthRepository] [Demo Mode] Logged in as: ${user.name} (${user.role.label})');
+      return user;
+    }
 
     try {
       final response = await apiClient.dio.post(

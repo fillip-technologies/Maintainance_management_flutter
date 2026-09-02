@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
+import '../../core/config/app_config.dart';
 import '../../core/network/api_client.dart';
 import '../../core/utils/app_logger.dart';
+import '../../demo/demo_data.dart';
 import '../models/daily_log_model.dart';
 
 class DailyLogRepository {
@@ -15,6 +17,19 @@ class DailyLogRepository {
     String? notes,
     bool overwrite = true,
   }) async {
+    if (AppConfig.useDemoData) {
+      final user = DemoData.userRavi;
+      final log = DemoData.recordDailyLog(
+        deviceId: deviceId,
+        status: status,
+        notes: notes,
+        userId: user.id,
+        userName: user.name,
+      );
+      AppLogger.i('✅ [DailyLogRepository] [Demo Mode] Log recorded for ${log.deviceId}: ${log.status.label}');
+      return log;
+    }
+
     try {
       final payload = {
         'deviceId': deviceId,
@@ -60,6 +75,17 @@ class DailyLogRepository {
     int page = 1,
     int limit = 50,
   }) async {
+    if (AppConfig.useDemoData) {
+      var list = DemoData.dailyLogs;
+      if (deviceId != null && deviceId.isNotEmpty) {
+        list = list.where((l) => l.deviceId == deviceId).toList();
+      }
+      if (zoneId != null && zoneId.isNotEmpty) {
+        list = list.where((l) => l.zoneId == zoneId).toList();
+      }
+      return list;
+    }
+
     try {
       final queryParams = <String, dynamic>{
         'page': page,

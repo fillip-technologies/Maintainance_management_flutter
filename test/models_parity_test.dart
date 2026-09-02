@@ -6,6 +6,7 @@ import 'package:equipment_management_system/data/models/issue_model.dart';
 import 'package:equipment_management_system/data/models/hardware_type_model.dart';
 import 'package:equipment_management_system/data/models/daily_log_model.dart';
 import 'package:equipment_management_system/data/models/dashboard_summary_model.dart';
+import 'package:equipment_management_system/demo/demo_data.dart';
 
 void main() {
   group('Backend ⟷ Frontend Model Parity Tests', () {
@@ -250,6 +251,18 @@ void main() {
       expect(summary.openIssues, 7);
       expect(summary.faultyDevices, 0);
       expect(summary.devicesMissingTodayLog, 3);
+    });
+
+    test('8. DemoData fixtures integrity test', () {
+      expect(DemoData.users.length, 5);
+      expect(DemoData.zones.length, 3);
+      expect(DemoData.hardwareTypes.length, 4);
+      expect(DemoData.devices.length, 8);
+      expect(DemoData.issues.length, 4);
+      expect(DemoData.dailyLogs.length, 4);
+      expect(DemoData.dashboardSummary.totalDevices, 8);
+      expect(DemoData.getDevicesForZone('zone-north-wing').length, 5);
+      expect(DemoData.getIssuesForTechnician('tech-raju-002').length, 3);
     });
   });
 }

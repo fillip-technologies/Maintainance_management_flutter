@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
+import '../../core/config/app_config.dart';
 import '../../core/network/api_client.dart';
 import '../../core/utils/app_logger.dart';
+import '../../demo/demo_data.dart';
 import '../models/dashboard_summary_model.dart';
 import '../models/device_model.dart';
 
@@ -18,6 +20,23 @@ class DeviceRepository {
     int page = 1,
     int limit = 100,
   }) async {
+    if (AppConfig.useDemoData) {
+      var list = DemoData.getDevicesForZone(zoneId);
+      if (status != null && status.isNotEmpty) {
+        list = list.where((d) => d.status.value == status).toList();
+      }
+      if (search != null && search.trim().isNotEmpty) {
+        final q = search.trim().toLowerCase();
+        list = list
+            .where((d) =>
+                d.name.toLowerCase().contains(q) ||
+                d.location.toLowerCase().contains(q) ||
+                d.hardwareTypeName.toLowerCase().contains(q))
+            .toList();
+      }
+      return list;
+    }
+
     try {
       final queryParams = <String, dynamic>{
         'page': page,
@@ -67,6 +86,10 @@ class DeviceRepository {
     String? clientId,
     bool includeSubzones = true,
   }) async {
+    if (AppConfig.useDemoData) {
+      return DemoData.dashboardSummary;
+    }
+
     try {
       final queryParams = <String, dynamic>{
         if (includeSubzones) 'includeSubzones': 'true',
