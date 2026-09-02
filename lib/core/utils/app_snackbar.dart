@@ -9,21 +9,23 @@ class AppSnackbar {
       GlobalKey<ScaffoldMessengerState>();
 
   static void show({
+    BuildContext? context,
     required String message,
     String? title,
     IconData? icon,
     Color? backgroundColor,
     Color? textColor,
-    Duration duration = const Duration(seconds: 3),
+    Duration duration = const Duration(seconds: 4),
     SnackBarAction? action,
   }) {
-    final state = messengerKey.currentState;
+    final state = (context != null ? ScaffoldMessenger.maybeOf(context) : null) ??
+        messengerKey.currentState;
     if (state == null) return;
 
     state.clearSnackBars();
     state.showSnackBar(
       SnackBar(
-        elevation: 6,
+        elevation: 8,
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -70,8 +72,9 @@ class AppSnackbar {
   }
 
   /// Success SnackBar (Green)
-  static void success(String message, {String? title, Duration? duration}) {
+  static void success(String message, {BuildContext? context, String? title, Duration? duration}) {
     show(
+      context: context,
       message: message,
       title: title,
       icon: Icons.check_circle_rounded,
@@ -82,8 +85,9 @@ class AppSnackbar {
   }
 
   /// Error SnackBar (Red)
-  static void error(String message, {String? title, Duration? duration}) {
+  static void error(String message, {BuildContext? context, String? title, Duration? duration}) {
     show(
+      context: context,
       message: message,
       title: title,
       icon: Icons.error_outline_rounded,
@@ -94,8 +98,9 @@ class AppSnackbar {
   }
 
   /// Warning SnackBar (Orange / Warning)
-  static void warning(String message, {String? title, Duration? duration}) {
+  static void warning(String message, {BuildContext? context, String? title, Duration? duration}) {
     show(
+      context: context,
       message: message,
       title: title,
       icon: Icons.warning_amber_rounded,
@@ -106,8 +111,9 @@ class AppSnackbar {
   }
 
   /// Info SnackBar (Primary Blue)
-  static void info(String message, {String? title, Duration? duration}) {
+  static void info(String message, {BuildContext? context, String? title, Duration? duration}) {
     show(
+      context: context,
       message: message,
       title: title,
       icon: Icons.info_outline_rounded,
@@ -118,7 +124,9 @@ class AppSnackbar {
   }
 
   /// Hide any active SnackBar immediately
-  static void hide() {
-    messengerKey.currentState?.clearSnackBars();
+  static void hide([BuildContext? context]) {
+    final state = (context != null ? ScaffoldMessenger.maybeOf(context) : null) ??
+        messengerKey.currentState;
+    state?.clearSnackBars();
   }
 }

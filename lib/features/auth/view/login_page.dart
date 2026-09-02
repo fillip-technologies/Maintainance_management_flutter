@@ -4,7 +4,6 @@ import '../../../core/config/app_config.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../../../core/theme/colors.dart';
 import '../../../core/utils/app_logger.dart';
-import '../../../core/utils/app_snackbar.dart';
 import '../../../data/models/user_model.dart';
 import 'widgets/custom_password_field.dart';
 import 'widgets/custom_text_field.dart';
@@ -17,35 +16,40 @@ class LoginPage extends ConsumerStatefulWidget {
 }
 
 class _LoginPageState extends ConsumerState<LoginPage> {
-  final _emailController = TextEditingController(text: 'ravi@cityzoo.com');
-  final _passwordController = TextEditingController(text: 'Password123!');
-  bool _isLoading = false;
-  String? _errorMessage;
+  final _emailController = TextEditingController(
+    text: 'myselfgovind116@gmail.com',
+  );
+  final _passwordController = TextEditingController(text: '@Govind123');
+  String? _localValidationError;
 
-  final List<Map<String, String>> _demoProfiles = [
+  final List<Map<String, String>> _quickLogins = const [
     {
       'name': 'Ravi Kumar',
-      'email': 'ravi@cityzoo.com',
       'role': 'Zone Incharge / Staff',
-      'scope': 'North Wing Tree (Cascading)',
+      'email': 'ravi@cityzoo.com',
+      'pass': 'Password123!',
+      'icon': 'shield',
     },
     {
       'name': 'Amit Shah',
+      'role': 'Hardware Technician',
       'email': 'amit@example.com',
-      'role': 'Technician',
-      'scope': 'Assigned Issue Queue',
+      'pass': 'Password123!',
+      'icon': 'tech',
     },
     {
-      'name': 'Priya Singh',
-      'email': 'priya@cityzoo.com',
-      'role': 'Client Admin',
-      'scope': 'City Zoo (All Zones)',
+      'name': 'Pooja Nair',
+      'role': 'Zone Incharge',
+      'email': 'pooja@cityzoo.com',
+      'pass': 'Password123!',
+      'icon': 'shield',
     },
     {
-      'name': 'Sarah Connor',
-      'email': 'staff@zoo.com',
-      'role': 'Zone Staff',
-      'scope': 'Safari Zone',
+      'name': 'System Admin',
+      'role': 'Full Platform Scope',
+      'email': 'admin@cityzoo.com',
+      'pass': 'Password123!',
+      'icon': 'admin',
     },
   ];
 
@@ -63,43 +67,29 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     AppLogger.i('👆 [LoginPage] Login triggered for: $targetEmail');
 
     if (targetEmail.isEmpty || targetPassword.isEmpty) {
-      setState(() => _errorMessage = 'Please enter both email and password');
+      setState(
+        () => _localValidationError = 'Please enter both email and password',
+      );
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
+    setState(() => _localValidationError = null);
+    ref.read(loginControllerProvider.notifier).clearError();
 
-    try {
-      // 1. Attempt Real Backend Login via Riverpod AuthProvider
-      await ref
-          .read(authStateProvider.notifier)
-          .login(email: targetEmail, password: targetPassword);
+    final success = await ref
+        .read(loginControllerProvider.notifier)
+        .login(email: targetEmail, password: targetPassword);
+
+    if (success) {
       AppLogger.i('🎉 [LoginPage] Login successful for $targetEmail');
-    } catch (e, st) {
-      AppLogger.e('💥 [LoginPage] Login failed: $e', e, st);
-
-      // 2. If backend is offline or network error during early dev, offer friendly fallback
-      if (mounted) {
-        final errorMsg = e.toString().replaceAll('Exception:', '').trim();
-
-        // If backend connection refused, let them use offline dev mode seamlessly
-        if (errorMsg.contains('Connection refused') ||
-            errorMsg.contains('SocketException') ||
-            errorMsg.contains('connection timeout')) {
-          _promptOfflineDevLogin(targetEmail);
-        } else {
-          setState(() {
-            _errorMessage = errorMsg;
-          });
-          AppSnackbar.error(errorMsg);
-        }
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
+    } else {
+      final err = ref.read(loginControllerProvider).error;
+      final errMsg = err?.toString() ?? '';
+      if (errMsg.contains('Connection refused') ||
+          errMsg.contains('SocketException') ||
+          errMsg.contains('timeout') ||
+          errMsg.contains('Cannot reach server')) {
+        _promptOfflineDevLogin(targetEmail);
       }
     }
   }
@@ -128,12 +118,23 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
     // Update state to trigger navigation
     ref.invalidate(authStateProvider);
-
-    AppSnackbar.warning('Could not reach server. Started offline dev session.');
   }
 
   @override
   Widget build(BuildContext context) {
+    final loginState = ref.watch(loginControllerProvider);
+    final isLoading = loginState.isLoading;
+
+    String? errorMessage = _localValidationError;
+    if (loginState.hasError) {
+      var raw = loginState.error
+          .toString()
+          .replaceAll('Exception:', '')
+          .replaceAll('Exception', '')
+          .trim();
+      errorMessage = raw.isNotEmpty ? raw : 'Invalid email or password';
+    }
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -188,42 +189,87 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
                 const SizedBox(height: 20),
 
-                // Error Message if any
-                if (_errorMessage != null) ...[
+                // Custom Error Banner
+                if (errorMessage != null) ...[
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 10,
-                    ),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppColors.errorLight,
-                      borderRadius: BorderRadius.circular(12),
+                      color: const Color(0xFFFEF2F2),
+                      borderRadius: BorderRadius.circular(14),
                       border: Border.all(
-                        color: AppColors.error.withValues(alpha: 0.3),
+                        color: const Color(0xFFF87171),
+                        width: 1.2,
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.red.withValues(alpha: 0.06),
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
                     ),
                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(
-                          Icons.error_outline,
-                          size: 18,
-                          color: AppColors.errorText,
+                        Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFEF4444),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.priority_high_rounded,
+                            size: 14,
+                            color: Colors.white,
+                          ),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 10),
                         Expanded(
-                          child: Text(
-                            _errorMessage!,
-                            style: const TextStyle(
-                              fontSize: 13,
-                              color: AppColors.errorText,
-                              fontWeight: FontWeight.w500,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Authentication Error',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF991B1B),
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                errorMessage,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  color: Color(0xFFB91C1C),
+                                  fontWeight: FontWeight.w500,
+                                  height: 1.3,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        InkWell(
+                          onTap: () {
+                            setState(() => _localValidationError = null);
+                            ref
+                                .read(loginControllerProvider.notifier)
+                                .clearError();
+                          },
+                          borderRadius: BorderRadius.circular(12),
+                          child: const Padding(
+                            padding: EdgeInsets.all(4),
+                            child: Icon(
+                              Icons.close,
+                              size: 18,
+                              color: Color(0xFF991B1B),
                             ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 18),
                 ],
 
                 // Email Input
@@ -272,7 +318,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 SizedBox(
                   height: 52,
                   child: ElevatedButton(
-                    onPressed: _isLoading ? null : () => _handleLogin(),
+                    onPressed: isLoading ? null : () => _handleLogin(),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: AppColors.textWhite,
@@ -280,7 +326,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                    child: _isLoading
+                    child: isLoading
                         ? const SizedBox(
                             height: 20,
                             width: 20,
@@ -325,7 +371,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 const SizedBox(height: 14),
 
                 // Quick Demo Profiles List
-                ..._demoProfiles.map((profile) {
+                ..._quickLogins.map((profile) {
                   final isStaff =
                       profile['role']!.contains('Staff') ||
                       profile['role']!.contains('Incharge');
@@ -346,12 +392,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 10),
                     child: InkWell(
-                      onTap: _isLoading
+                      onTap: isLoading
                           ? null
                           : () {
                               _emailController.text = profile['email']!;
-                              _passwordController.text = 'Password123!';
-                              _handleLogin(profile['email'], 'Password123!');
+                              _passwordController.text = profile['pass']!;
+                              _handleLogin(profile['email'], profile['pass']);
                             },
                       borderRadius: BorderRadius.circular(14),
                       child: Container(
@@ -391,7 +437,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                     ),
                                   ),
                                   Text(
-                                    '${profile['email']!} • ${profile['scope']!}',
+                                    profile['email']!,
                                     style: const TextStyle(
                                       fontSize: 11,
                                       color: AppColors.textSecondary,

@@ -30,6 +30,10 @@ class AuthNotifier extends AsyncNotifier<UserModel?> {
     return authRepo.getCurrentUser();
   }
 
+  void setUser(UserModel? user) {
+    state = AsyncValue.data(user);
+  }
+
   Future<UserModel> login({
     required String email,
     required String password,
@@ -59,6 +63,35 @@ class AuthNotifier extends AsyncNotifier<UserModel?> {
 
 final authStateProvider =
     AsyncNotifierProvider<AuthNotifier, UserModel?>(AuthNotifier.new);
+
+// 5. Dedicated Login Controller for managing login button loading and error states
+class LoginController extends AsyncNotifier<void> {
+  @override
+  Future<void> build() async {
+    return;
+  }
+
+  Future<bool> login({
+    required String email,
+    required String password,
+  }) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final authRepo = ref.read(authRepositoryProvider);
+      final user = await authRepo.login(email: email, password: password);
+      ref.read(authStateProvider.notifier).setUser(user);
+    });
+
+    return !state.hasError;
+  }
+
+  void clearError() {
+    state = const AsyncValue.data(null);
+  }
+}
+
+final loginControllerProvider =
+    AsyncNotifierProvider.autoDispose<LoginController, void>(LoginController.new);
 
 // 5. Computed / Helper Selectors
 final isAuthenticatedProvider = Provider<bool>((ref) {
