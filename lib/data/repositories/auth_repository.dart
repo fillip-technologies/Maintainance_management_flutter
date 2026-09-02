@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import '../../core/network/api_client.dart';
 import '../../core/storage/storage_service.dart';
@@ -38,6 +39,24 @@ class AuthRepository {
         final accessToken = data['accessToken'] as String;
         final refreshToken = data['refreshToken'] as String;
         final userJson = Map<String, dynamic>.from(data['user'] as Map<String, dynamic>);
+
+        // Decode JWT payload to extract technicianId, role, sub if missing in user
+        try {
+          final parts = accessToken.split('.');
+          if (parts.length >= 2) {
+            final normalizedBase64 = base64Url.normalize(parts[1]);
+            final payloadJson = utf8.decode(base64Url.decode(normalizedBase64));
+            final payload = jsonDecode(payloadJson) as Map<String, dynamic>;
+            if (payload.containsKey('technicianId') && payload['technicianId'] != null) {
+              userJson['technicianId'] ??= payload['technicianId'];
+            }
+            if (payload.containsKey('role') && payload['role'] != null) {
+              userJson['role'] ??= payload['role'];
+            }
+          }
+        } catch (e) {
+          AppLogger.w('⚠️ [AuthRepository] Could not parse JWT payload: $e');
+        }
 
         // Backend user object might omit email, inject it
         if (!userJson.containsKey('email') || userJson['email'] == null || (userJson['email'] as String).isEmpty) {

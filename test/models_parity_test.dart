@@ -31,6 +31,26 @@ void main() {
       expect(user.assignedZoneId, '052feedc-261f-4805-bfdc-1145a41cf7c8');
     });
 
+    test('1b. UserModel parses backend technician login response correctly', () {
+      final backendTechnicianJson = {
+        'id': 'ed6653dc-1069-4e1d-80a2-f300c60cbc3a',
+        'name': 'Raju mistri',
+        'role': 'technician',
+        'clientId': null,
+        'zoneId': null,
+        'technicianId': '43db2f57-7ae8-497a-b77a-b370959c779e',
+      };
+
+      final user = UserModel.fromJson(backendTechnicianJson);
+
+      expect(user.id, 'ed6653dc-1069-4e1d-80a2-f300c60cbc3a');
+      expect(user.name, 'Raju mistri');
+      expect(user.role, UserRole.technician);
+      expect(user.role.isTechnician, isTrue);
+      expect(user.role.isZoneHeadOrStaff, isFalse);
+      expect(user.technicianId, '43db2f57-7ae8-497a-b77a-b370959c779e');
+    });
+
     test('2. ZoneModel parses backend zone tree response correctly', () {
       final backendZoneJson = {
         'id': '052feedc-261f-4805-bfdc-1145a41cf7c8',

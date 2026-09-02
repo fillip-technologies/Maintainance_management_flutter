@@ -4,7 +4,6 @@ import '../../../core/config/app_config.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../../../core/theme/colors.dart';
 import '../../../core/utils/app_logger.dart';
-import '../../../data/models/user_model.dart';
 import 'widgets/custom_password_field.dart';
 import 'widgets/custom_text_field.dart';
 
@@ -16,38 +15,24 @@ class LoginPage extends ConsumerStatefulWidget {
 }
 
 class _LoginPageState extends ConsumerState<LoginPage> {
-  final _emailController = TextEditingController(text: 'rajumistrri@gmail.com');
+  final _emailController = TextEditingController(text: 'rajumistri@gmail.com');
   final _passwordController = TextEditingController(text: 'Password123!');
   String? _localValidationError;
 
   final List<Map<String, String>> _quickLogins = const [
     {
-      'name': 'Ravi Kumar',
-      'role': 'Zone Incharge / Staff',
-      'email': 'ravi@cityzoo.com',
-      'pass': 'Password123!',
-      'icon': 'shield',
-    },
-    {
-      'name': 'Amit Shah',
+      'name': 'Raju Mistri',
       'role': 'Hardware Technician',
-      'email': 'amit@example.com',
+      'email': 'rajumistri@gmail.com',
       'pass': 'Password123!',
       'icon': 'tech',
     },
     {
-      'name': 'Pooja Nair',
-      'role': 'Zone Incharge',
-      'email': 'pooja@cityzoo.com',
-      'pass': 'Password123!',
+      'name': 'Ayush Chandra',
+      'role': 'Zone Staff',
+      'email': 'myselfgovind116@gmail.com',
+      'pass': '@Govind123',
       'icon': 'shield',
-    },
-    {
-      'name': 'System Admin',
-      'role': 'Full Platform Scope',
-      'email': 'admin@cityzoo.com',
-      'pass': 'Password123!',
-      'icon': 'admin',
     },
   ];
 
@@ -80,42 +65,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
     if (success) {
       AppLogger.i('🎉 [LoginPage] Login successful for $targetEmail');
-    } else {
-      final err = ref.read(loginControllerProvider).error;
-      final errMsg = err?.toString() ?? '';
-      if (errMsg.contains('Connection refused') ||
-          errMsg.contains('SocketException') ||
-          errMsg.contains('timeout') ||
-          errMsg.contains('Cannot reach server')) {
-        _promptOfflineDevLogin(targetEmail);
-      }
     }
-  }
-
-  void _promptOfflineDevLogin(String email) {
-    final isTech =
-        email.toLowerCase().contains('amit') ||
-        email.toLowerCase().contains('tech');
-    final storage = ref.read(storageServiceProvider);
-
-    final mockUser = UserModel(
-      id: isTech ? 'usr-tech-amit' : 'usr-incharge-ravi',
-      name: isTech ? 'Amit Shah (Technician)' : 'Ravi Kumar (Zone Incharge)',
-      email: email,
-      role: isTech ? UserRole.technician : UserRole.zoneIncharge,
-      clientId: 'c2222222-2222-2222-2222-222222222222',
-      assignedZoneId: 'a0000000-0000-0000-0000-000000000001',
-      assignedZoneName: 'North Wing (Main)',
-    );
-
-    storage.saveTokens(
-      accessToken: 'offline-dev-token',
-      refreshToken: 'offline-refresh-token',
-    );
-    storage.saveUser(mockUser);
-
-    // Update state to trigger navigation
-    ref.invalidate(authStateProvider);
   }
 
   @override

@@ -11,8 +11,18 @@ enum UserRole {
   const UserRole(this.value, this.label);
 
   static UserRole fromString(String? role) {
+    if (role == null || role.trim().isEmpty) return UserRole.zoneStaff;
+    final normalized = role
+        .trim()
+        .toLowerCase()
+        .replaceAll('-', '_')
+        .replaceAll(' ', '_');
     return UserRole.values.firstWhere(
-      (e) => e.value == role || e.name == role,
+      (e) =>
+          e.value.toLowerCase() == normalized ||
+          e.name.toLowerCase() == normalized ||
+          (normalized.contains('tech') && e == UserRole.technician) ||
+          (normalized.contains('incharge') && e == UserRole.zoneIncharge),
       orElse: () => UserRole.zoneStaff,
     );
   }
