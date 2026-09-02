@@ -26,6 +26,7 @@ final technicianIssuesProvider = FutureProvider.autoDispose<List<IssueModel>>((r
   final issueRepo = ref.watch(issueRepositoryProvider);
 
   return issueRepo.getIssues(
+    scope: 'technician',
     includeSubzones: true,
   );
 });

@@ -31,7 +31,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       'name': 'Ayush Chandra',
       'role': 'Zone Staff',
       'email': 'myselfgovind116@gmail.com',
-      'pass': '@Govind123',
+      'pass': 'Password123!',
       'icon': 'shield',
     },
   ];

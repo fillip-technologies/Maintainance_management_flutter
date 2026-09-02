@@ -16,6 +16,8 @@ class IssueRepository {
     String? status,
     String? priority,
     String? search,
+    String? scope,
+    String? assignedTechnicianId,
     int page = 1,
     int limit = 50,
   }) async {
@@ -28,6 +30,9 @@ class IssueRepository {
         if (status != null && status.isNotEmpty) 'status': status,
         if (priority != null && priority.isNotEmpty) 'priority': priority,
         if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
+        if (scope != null && scope.isNotEmpty) 'scope': scope,
+        if (assignedTechnicianId != null && assignedTechnicianId.isNotEmpty)
+          'assignedTechnicianId': assignedTechnicianId,
       };
 
       AppLogger.d('📡 [IssueRepository] GET /issues with params: $queryParams');
@@ -171,7 +176,7 @@ class IssueRepository {
   }) async {
     try {
       final payload = {
-        'toStatus': toStatus.value,
+        'status': toStatus.value,
         if (notes != null && notes.trim().isNotEmpty) 'notes': notes.trim(),
       };
 
