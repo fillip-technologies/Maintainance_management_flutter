@@ -4,6 +4,10 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+    <string>We need your location to show relevant data</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>We need your location for background tracking</string>
 	<key>NSCameraUsageDescription</key>
     <string>Explanation on why the camera access is needed.</string>
     <key>NSMicrophoneUsageDescription</key>
