@@ -21,9 +21,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   final List<Map<String, String>> _quickLogins = const [
     {
-      'name': 'Raju Mistri',
+      'name': 'Raju',
       'role': 'Hardware Technician',
-      'email': 'rajumistri@gmail.com',
+      'email': 'raju@gmail.com',
       'pass': 'Password123!',
       'icon': 'tech',
     },
