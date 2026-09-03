@@ -57,6 +57,27 @@ class DemoData {
     accountStatus: 'active',
   );
 
+  static final UserModel userRajuShort = const UserModel(
+    id: 'usr-tech-raju-short',
+    name: 'Raju',
+    email: 'raju@gmail.com',
+    role: UserRole.technician,
+    clientId: null,
+    technicianId: 'tech-raju-002',
+    accountStatus: 'active',
+  );
+
+  static final UserModel userAyush = const UserModel(
+    id: 'usr-staff-ayush',
+    name: 'Ayush Chandra',
+    email: 'myselfgovind116@gmail.com',
+    role: UserRole.zoneStaff,
+    clientId: 'cli-cityzoo-001',
+    assignedZoneId: 'zone-north-wing',
+    assignedZoneName: 'North Wing',
+    accountStatus: 'active',
+  );
+
   static final UserModel userAdmin = const UserModel(
     id: 'usr-admin-priya',
     name: 'Priya Singh',
@@ -71,6 +92,8 @@ class DemoData {
     userPooja,
     userAmit,
     userRaju,
+    userRajuShort,
+    userAyush,
     userAdmin,
   ];
 

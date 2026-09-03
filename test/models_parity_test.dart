@@ -254,7 +254,7 @@ void main() {
     });
 
     test('8. DemoData fixtures integrity test', () {
-      expect(DemoData.users.length, 5);
+      expect(DemoData.users.length, 7);
       expect(DemoData.zones.length, 3);
       expect(DemoData.hardwareTypes.length, 4);
       expect(DemoData.devices.length, 8);
