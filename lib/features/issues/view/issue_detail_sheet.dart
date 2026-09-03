@@ -6,6 +6,7 @@ import '../../../core/utils/app_snackbar.dart';
 import '../../../core/widgets/status_badge.dart';
 import '../../../data/models/issue_model.dart';
 import '../../../data/models/user_model.dart';
+import '../../../l10n/app_localizations.dart';
 import '../controller/issue_controller.dart';
 import '../controller/issue_providers.dart';
 import '../widgets/issue_timeline_view.dart';
@@ -28,6 +29,7 @@ class IssueDetailSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final user = ref.watch(authStateProvider).value;
     final isTechnician = user?.role == UserRole.technician;
     final liveIssueAsync = ref.watch(issueDetailProvider(issue.id));
@@ -151,19 +153,19 @@ class IssueDetailSheet extends ConsumerWidget {
                   // Equipment & Location Metadata
                   _buildMetaRow(
                     Icons.place_outlined,
-                    'Zone Location',
+                    l10n.zoneLocation,
                     currentIssue.zoneName,
                   ),
                   const SizedBox(height: 8),
                   _buildMetaRow(
                     Icons.devices_other_outlined,
-                    'Equipment Unit',
+                    l10n.equipmentUnit,
                     currentIssue.deviceName,
                   ),
                   const SizedBox(height: 8),
                   _buildMetaRow(
                     Icons.person_outline,
-                    'Reported By',
+                    l10n.reportedBy,
                     currentIssue.raisedByName.isNotEmpty
                         ? currentIssue.raisedByName
                         : 'Staff Member',
@@ -171,20 +173,20 @@ class IssueDetailSheet extends ConsumerWidget {
                   const SizedBox(height: 8),
                   _buildMetaRow(
                     Icons.engineering_outlined,
-                    'Assigned Tech',
+                    l10n.assignedTech,
                     (currentIssue.assignedTechnicianName != null &&
                             currentIssue.assignedTechnicianName!.isNotEmpty)
                         ? currentIssue.assignedTechnicianName!
-                        : 'Unassigned (Organization Queue)',
+                        : l10n.unassignedQueue,
                   ),
 
                   const SizedBox(height: 14),
 
                   // Defect Description
                   if (currentIssue.description.isNotEmpty) ...[
-                    const Text(
-                      'Defect Description',
-                      style: TextStyle(
+                    Text(
+                      l10n.defectDescription,
+                      style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textSecondary,
@@ -216,9 +218,9 @@ class IssueDetailSheet extends ConsumerWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Status History & Timeline',
-                        style: TextStyle(
+                      Text(
+                        l10n.timelineHistory,
+                        style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textPrimary,
@@ -228,15 +230,15 @@ class IssueDetailSheet extends ConsumerWidget {
                         onTap: () =>
                             ref.invalidate(issueHistoryProvider(currentIssue.id)),
                         borderRadius: BorderRadius.circular(8),
-                        child: const Padding(
-                          padding: EdgeInsets.all(4),
+                        child: Padding(
+                          padding: const EdgeInsets.all(4),
                           child: Row(
                             children: [
-                              Icon(Icons.refresh, size: 14, color: AppColors.primary),
-                              SizedBox(width: 4),
+                              const Icon(Icons.refresh, size: 14, color: AppColors.primary),
+                              const SizedBox(width: 4),
                               Text(
-                                'Refresh',
-                                style: TextStyle(
+                                l10n.refresh,
+                                style: const TextStyle(
                                   fontSize: 11,
                                   color: AppColors.primary,
                                   fontWeight: FontWeight.w600,
@@ -285,7 +287,7 @@ class IssueDetailSheet extends ConsumerWidget {
                         );
                       },
                       icon: const Icon(Icons.edit_note, size: 18),
-                      label: const Text('Update Ticket Status / Add Work Log'),
+                      label: Text(l10n.btnUpdateStatus),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         foregroundColor: AppColors.textWhite,

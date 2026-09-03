@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../../../core/theme/colors.dart';
 import '../../../core/utils/app_snackbar.dart';
+import '../../../core/widgets/language_switcher_button.dart';
 import '../../../data/models/user_model.dart';
 import '../../staff/view/staff_home_page.dart';
 import '../../technician/view/technician_home_page.dart';
@@ -92,6 +93,10 @@ class _GlobalHomePageState extends ConsumerState<GlobalHomePage> {
           ],
         ),
         actions: [
+          const Center(
+            child: LanguageSwitcherButton(isCompact: true),
+          ),
+          const SizedBox(width: 4),
           Container(
             margin: const EdgeInsets.only(right: 8),
             child: _isLoggingOut

@@ -5,6 +5,7 @@ import '../../../core/utils/app_snackbar.dart';
 import '../../../core/utils/hardware_icon_helper.dart';
 import '../../../core/widgets/status_badge.dart';
 import '../../../data/models/issue_model.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../issues/issues.dart';
 
 class TechnicianHomePage extends ConsumerStatefulWidget {
@@ -71,6 +72,7 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final issuesAsync = ref.watch(technicianIssuesProvider);
     final issues = issuesAsync.value ?? [];
     final isLoading = issuesAsync.isLoading;
@@ -109,15 +111,15 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage>
             tabs: [
               Tab(
                 icon: const Icon(Icons.assignment_outlined, size: 18),
-                text: 'Active (${activeIssues.length})',
+                text: '${l10n.tabActiveQueue} (${activeIssues.length})',
               ),
               Tab(
                 icon: const Icon(Icons.pause_circle_outline, size: 18),
-                text: 'On Hold (${onHoldIssues.length})',
+                text: '${l10n.tabOnHold} (${onHoldIssues.length})',
               ),
               Tab(
                 icon: const Icon(Icons.task_alt, size: 18),
-                text: 'Resolved (${resolvedIssues.length})',
+                text: '${l10n.tabResolvedHistory} (${resolvedIssues.length})',
               ),
             ],
           ),
@@ -142,7 +144,7 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage>
               TextField(
                 style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
                 decoration: InputDecoration(
-                  hintText: 'Search tickets, devices, zones...',
+                  hintText: l10n.searchTickets,
                   prefixIcon: const Icon(Icons.search, color: AppColors.icon),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   filled: true,
@@ -159,11 +161,11 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage>
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    _buildPriorityFilterChip('All Priorities', null),
-                    _buildPriorityFilterChip('Critical', IssuePriority.critical),
-                    _buildPriorityFilterChip('High', IssuePriority.high),
-                    _buildPriorityFilterChip('Medium', IssuePriority.medium),
-                    _buildPriorityFilterChip('Low', IssuePriority.low),
+                    _buildPriorityFilterChip(l10n.priorityAll, null),
+                    _buildPriorityFilterChip(l10n.priorityCritical, IssuePriority.critical),
+                    _buildPriorityFilterChip(l10n.priorityHigh, IssuePriority.high),
+                    _buildPriorityFilterChip(l10n.priorityMedium, IssuePriority.medium),
+                    _buildPriorityFilterChip(l10n.priorityLow, IssuePriority.low),
                   ],
                 ),
               ),
@@ -230,34 +232,35 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage>
     required int onHold,
     required int resolved,
   }) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       color: AppColors.surface,
       child: Row(
         children: [
           _buildSummaryItem(
-            label: 'Total',
+            label: l10n.kpiTotal,
             value: '$total',
             color: AppColors.primary,
             icon: Icons.assignment_outlined,
           ),
           _buildDivider(),
           _buildSummaryItem(
-            label: 'Open',
+            label: l10n.kpiOpen,
             value: '$open',
             color: AppColors.warningText,
             icon: Icons.sync,
           ),
           _buildDivider(),
           _buildSummaryItem(
-            label: 'On Hold',
+            label: l10n.kpiOnHold,
             value: '$onHold',
             color: AppColors.purpleText,
             icon: Icons.pause_circle_outline,
           ),
           _buildDivider(),
           _buildSummaryItem(
-            label: 'Resolved',
+            label: l10n.kpiResolved,
             value: '$resolved',
             color: AppColors.successText,
             icon: Icons.check_circle_outline,
@@ -371,6 +374,7 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage>
         padding: const EdgeInsets.all(16),
         itemCount: (isLoading || hasError || filtered.isEmpty) ? 1 : filtered.length,
         itemBuilder: (context, index) {
+          final l10n = AppLocalizations.of(context)!;
           if (isLoading) {
             return const Padding(
               padding: EdgeInsets.only(top: 80),
@@ -535,7 +539,7 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage>
                               ElevatedButton.icon(
                                 onPressed: () => _openUpdateStatusSheet(issue, IssueStatus.inProgress),
                                 icon: const Icon(Icons.play_arrow_rounded, size: 15),
-                                label: const Text('Start Work', style: TextStyle(fontSize: 12)),
+                                label: Text(l10n.btnStartWork, style: const TextStyle(fontSize: 12)),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: AppColors.warning,
                                   foregroundColor: AppColors.textWhite,
@@ -554,13 +558,13 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage>
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                 ),
-                                child: const Text('Hold', style: TextStyle(fontSize: 12)),
+                                child: Text(l10n.btnHold, style: const TextStyle(fontSize: 12)),
                               ),
                               const SizedBox(width: 8),
                               ElevatedButton.icon(
                                 onPressed: () => _openUpdateStatusSheet(issue, IssueStatus.resolved),
                                 icon: const Icon(Icons.check, size: 15),
-                                label: const Text('Resolve', style: TextStyle(fontSize: 12)),
+                                label: Text(l10n.btnResolve, style: const TextStyle(fontSize: 12)),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: AppColors.success,
                                   foregroundColor: AppColors.textWhite,
@@ -573,7 +577,7 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage>
                               ElevatedButton.icon(
                                 onPressed: () => _openUpdateStatusSheet(issue, IssueStatus.inProgress),
                                 icon: const Icon(Icons.play_arrow_rounded, size: 15),
-                                label: const Text('Resume', style: TextStyle(fontSize: 12)),
+                                label: Text(l10n.btnStartWork, style: const TextStyle(fontSize: 12)),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: AppColors.primary,
                                   foregroundColor: AppColors.textWhite,

@@ -5,8 +5,10 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/providers/device_provider.dart';
 import '../../../core/theme/colors.dart';
 import '../../../core/utils/app_snackbar.dart';
+import '../../../core/widgets/status_badge.dart';
 import '../../../data/models/device_model.dart';
 import '../../../data/models/issue_model.dart';
+import '../../../l10n/app_localizations.dart';
 import '../controller/issue_controller.dart';
 import '../controller/issue_providers.dart';
 
@@ -539,7 +541,7 @@ class _RaiseIssueSheetState extends ConsumerState<RaiseIssueSheet> {
                         ),
                         alignment: Alignment.center,
                         child: Text(
-                          priority.label,
+                          priority.localized(context),
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,

@@ -4,6 +4,8 @@ import '../../../core/config/app_config.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../../../core/theme/colors.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../core/widgets/language_switcher_button.dart';
+import '../../../l10n/app_localizations.dart';
 import 'widgets/custom_password_field.dart';
 import 'widgets/custom_text_field.dart';
 
@@ -72,6 +74,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   Widget build(BuildContext context) {
     final loginState = ref.watch(loginControllerProvider);
     final isLoading = loginState.isLoading;
+    final l10n = AppLocalizations.of(context)!;
 
     String? errorMessage = _localValidationError;
     if (loginState.hasError) {
@@ -92,6 +95,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // Top Language Switcher
+                const Align(
+                  alignment: Alignment.topRight,
+                  child: LanguageSwitcherButton(isCompact: true),
+                ),
+                const SizedBox(height: 8),
+
                 // Header Brand Icon
                 Center(
                   child: Container(
@@ -113,10 +123,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 const SizedBox(height: 20),
 
                 // Title & Subtitle
-                const Text(
-                  AppConfig.appName,
+                Text(
+                  l10n.appName,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 30,
                     fontWeight: FontWeight.bold,
                     letterSpacing: -0.5,
@@ -126,10 +136,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
                 const SizedBox(height: 6),
 
-                const Text(
-                  AppConfig.appTagline,
+                Text(
+                  l10n.appTagline,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 14,
                     color: AppColors.textSecondary,
                   ),
@@ -176,9 +186,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                'Authentication Error',
-                                style: TextStyle(
+                              Text(
+                                l10n.authError,
+                                style: const TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.bold,
                                   color: Color(0xFF991B1B),
@@ -224,7 +234,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 CustomTextField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
-                  labelText: "Email Address",
+                  labelText: l10n.email,
                   hintText: "ravi@cityzoo.com",
                   prefixIcon: Icons.email_outlined,
                 ),
@@ -234,7 +244,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 // Password Input
                 CustomPasswordField(
                   controller: _passwordController,
-                  labelText: "Password",
+                  labelText: l10n.password,
                   hintText: "••••••••",
                   prefixIcon: Icons.lock_outline,
                 ),
@@ -285,9 +295,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               ),
                             ),
                           )
-                        : const Text(
-                            "Sign In",
-                            style: TextStyle(
+                        : Text(
+                            l10n.signIn,
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                             ),
@@ -304,8 +314,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: Text(
-                        "Backend Seed Accounts (Tap to auto-login)",
-                        style: TextStyle(
+                        l10n.demoQuickLogin,
+                        style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textMuted,

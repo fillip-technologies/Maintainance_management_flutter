@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/config/app_config.dart';
 import 'core/providers/auth_provider.dart';
+import 'core/providers/locale_provider.dart';
 import 'core/storage/storage_service.dart';
 import 'core/theme/colors.dart';
 import 'core/utils/app_snackbar.dart';
 import 'features/auth/view/login_page.dart';
 import 'features/home/view/global_home_page.dart';
+import 'l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,12 +28,16 @@ class EquipmentManagementApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authStateProvider);
+    final currentLocale = ref.watch(localeProvider);
 
     return MaterialApp(
       scaffoldMessengerKey: AppSnackbar.messengerKey,
       debugShowCheckedModeBanner: false,
       title: AppConfig.appName,
       theme: AppColors.theme,
+      locale: currentLocale,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: authState.when(
         data: (user) {
           if (user == null) {
