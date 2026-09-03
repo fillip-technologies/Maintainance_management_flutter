@@ -10,8 +10,7 @@ import '../../../core/widgets/status_badge.dart';
 import '../../../data/models/daily_log_model.dart';
 import '../../../data/models/device_model.dart';
 import '../../../data/models/issue_model.dart';
-import 'widgets/issue_detail_sheet.dart';
-import 'widgets/raise_issue_sheet.dart';
+import '../../issues/issues.dart';
 
 class StaffHomePage extends ConsumerStatefulWidget {
   const StaffHomePage({super.key});

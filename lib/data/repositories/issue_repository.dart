@@ -67,7 +67,7 @@ class IssueRepository {
     }
   }
 
-  /// Fetches issue details and full status timeline history.
+  /// Fetches issue details.
   Future<IssueModel> getIssueById(String issueId) async {
     try {
       AppLogger.d('📡 [IssueRepository] GET /issues/$issueId');
@@ -87,6 +87,39 @@ class IssueRepository {
       throw Exception(message);
     } catch (e) {
       throw Exception('Failed to load issue: $e');
+    }
+  }
+
+  /// Fetches chronological status timeline history for an issue.
+  Future<List<IssueStatusHistoryModel>> getIssueHistory(String issueId) async {
+    try {
+      AppLogger.d('📡 [IssueRepository] GET /issues/$issueId/history');
+
+      final response = await apiClient.dio.get('/issues/$issueId/history');
+
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        final data = response.data['data'];
+        final List<dynamic> items = data is List
+            ? data
+            : (data is Map<String, dynamic> ? (data['items'] as List<dynamic>? ?? []) : []);
+
+        final historyList = items
+            .map((e) => IssueStatusHistoryModel.fromJson(e as Map<String, dynamic>))
+            .toList();
+
+        AppLogger.i('📜 [IssueRepository] Fetched ${historyList.length} timeline events for issue $issueId');
+        return historyList;
+      } else {
+        final msg = response.data['message'] as String? ?? 'Failed to load issue history';
+        throw Exception(msg);
+      }
+    } on DioException catch (e) {
+      final message = e.response?.data?['message'] as String? ?? e.message ?? 'Network error';
+      AppLogger.e('❌ [IssueRepository] DioException in getIssueHistory: $message', e);
+      return [];
+    } catch (e) {
+      AppLogger.w('⚠️ [IssueRepository] Error fetching history: $e');
+      return [];
     }
   }
 

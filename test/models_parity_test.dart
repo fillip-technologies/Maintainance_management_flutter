@@ -251,5 +251,31 @@ void main() {
       expect(summary.faultyDevices, 0);
       expect(summary.devicesMissingTodayLog, 3);
     });
+
+    test('8. IssueStatusHistoryModel parses backend timeline response correctly', () {
+      final backendHistoryItem = {
+        'id': 'hist-uuid-01',
+        'issueId': 'iss-uuid-01',
+        'fromStatus': 'open',
+        'toStatus': 'in_progress',
+        'changedByUserId': 'user-uuid-02',
+        'changedAt': '2026-09-03T06:14:51.242Z',
+        'notes': 'Technician arrived on site and started diagnosis',
+        'changedBy': {
+          'id': 'user-uuid-02',
+          'name': 'Raju mistri',
+        },
+      };
+
+      final history = IssueStatusHistoryModel.fromJson(backendHistoryItem);
+
+      expect(history.id, 'hist-uuid-01');
+      expect(history.issueId, 'iss-uuid-01');
+      expect(history.fromStatus, IssueStatus.open);
+      expect(history.toStatus, IssueStatus.inProgress);
+      expect(history.changedByUserName, 'Raju mistri');
+      expect(history.comment, 'Technician arrived on site and started diagnosis');
+      expect(history.createdAt.year, 2026);
+    });
   });
 }

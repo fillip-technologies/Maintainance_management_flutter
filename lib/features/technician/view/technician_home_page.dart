@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/providers/issue_provider.dart';
 import '../../../core/theme/colors.dart';
 import '../../../core/utils/app_snackbar.dart';
 import '../../../core/utils/hardware_icon_helper.dart';
 import '../../../core/widgets/status_badge.dart';
 import '../../../data/models/issue_model.dart';
-import '../../staff/view/widgets/issue_detail_sheet.dart';
-import 'widgets/update_status_sheet.dart';
+import '../../issues/issues.dart';
 
 class TechnicianHomePage extends ConsumerStatefulWidget {
   const TechnicianHomePage({super.key});
@@ -79,11 +77,17 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage>
     final hasError = issuesAsync.hasError;
 
     final activeIssues = issues
-        .where((i) => i.status == IssueStatus.assigned || i.status == IssueStatus.inProgress)
+        .where((i) =>
+            i.status == IssueStatus.open ||
+            i.status == IssueStatus.assigned ||
+            i.status == IssueStatus.inProgress ||
+            i.status == IssueStatus.reopened)
         .toList();
-    final onHoldIssues = issues.where((i) => i.status == IssueStatus.onHold).toList();
+    final onHoldIssues =
+        issues.where((i) => i.status == IssueStatus.onHold).toList();
     final resolvedIssues = issues
-        .where((i) => i.status == IssueStatus.resolved || i.status == IssueStatus.closed)
+        .where(
+            (i) => i.status == IssueStatus.resolved || i.status == IssueStatus.closed)
         .toList();
 
     return Column(
@@ -121,8 +125,8 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage>
 
         // Live KPI Metric Header Bar
         _buildTechnicianKpiBar(
-          assigned: issues.length,
-          inProgress: issues.where((i) => i.status == IssueStatus.inProgress).length,
+          total: issues.length,
+          open: issues.where((i) => i.status == IssueStatus.open || i.status == IssueStatus.assigned || i.status == IssueStatus.inProgress || i.status == IssueStatus.reopened).length,
           onHold: onHoldIssues.length,
           resolved: resolvedIssues.length,
         ),
@@ -221,8 +225,8 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage>
   // ==========================================
 
   Widget _buildTechnicianKpiBar({
-    required int assigned,
-    required int inProgress,
+    required int total,
+    required int open,
     required int onHold,
     required int resolved,
   }) {
@@ -232,15 +236,15 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage>
       child: Row(
         children: [
           _buildSummaryItem(
-            label: 'Assigned',
-            value: '$assigned',
+            label: 'Total',
+            value: '$total',
             color: AppColors.primary,
             icon: Icons.assignment_outlined,
           ),
           _buildDivider(),
           _buildSummaryItem(
-            label: 'In Progress',
-            value: '$inProgress',
+            label: 'Open',
+            value: '$open',
             color: AppColors.warningText,
             icon: Icons.sync,
           ),
@@ -525,7 +529,9 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage>
                         ),
                         Row(
                           children: [
-                            if (issue.status == IssueStatus.assigned) ...[
+                            if (issue.status == IssueStatus.open ||
+                                issue.status == IssueStatus.assigned ||
+                                issue.status == IssueStatus.reopened) ...[
                               ElevatedButton.icon(
                                 onPressed: () => _openUpdateStatusSheet(issue, IssueStatus.inProgress),
                                 icon: const Icon(Icons.play_arrow_rounded, size: 15),

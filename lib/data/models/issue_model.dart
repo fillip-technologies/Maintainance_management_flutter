@@ -290,4 +290,6 @@ class IssueModel {
       history: history ?? this.history,
     );
   }
+
+  String get raisedByName => createdByUserName;
 }

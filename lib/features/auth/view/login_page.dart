@@ -15,15 +15,15 @@ class LoginPage extends ConsumerStatefulWidget {
 }
 
 class _LoginPageState extends ConsumerState<LoginPage> {
-  final _emailController = TextEditingController(text: 'rajumistri@gmail.com');
+  final _emailController = TextEditingController(text: 'ankit@gmail.com');
   final _passwordController = TextEditingController(text: 'Password123!');
   String? _localValidationError;
 
   final List<Map<String, String>> _quickLogins = const [
     {
-      'name': 'Raju Mistri',
+      'name': 'Ankit',
       'role': 'Hardware Technician',
-      'email': 'rajumistri@gmail.com',
+      'email': 'ankit@gmail.com',
       'pass': 'Password123!',
       'icon': 'tech',
     },
