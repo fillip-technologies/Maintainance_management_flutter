@@ -733,6 +733,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Retired'**
   String get deviceStatusRetired;
+
+  /// No description provided for @profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get profile;
+
+  /// No description provided for @workScope.
+  ///
+  /// In en, this message translates to:
+  /// **'Work & Assignment Scope'**
+  String get workScope;
+
+  /// No description provided for @preferencesSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferences & System'**
+  String get preferencesSystem;
+
+  /// No description provided for @securitySession.
+  ///
+  /// In en, this message translates to:
+  /// **'Security & Session'**
+  String get securitySession;
+
+  /// No description provided for @organizationId.
+  ///
+  /// In en, this message translates to:
+  /// **'Organization ID'**
+  String get organizationId;
+
+  /// No description provided for @userId.
+  ///
+  /// In en, this message translates to:
+  /// **'User ID'**
+  String get userId;
+
+  /// No description provided for @assignedLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned Location'**
+  String get assignedLocation;
+
+  /// No description provided for @accountStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Status'**
+  String get accountStatus;
+
+  /// No description provided for @activeStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get activeStatus;
+
+  /// No description provided for @appVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'App Version'**
+  String get appVersion;
+
+  /// No description provided for @copiedToClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied to clipboard'**
+  String get copiedToClipboard;
+
+  /// No description provided for @role.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get role;
+
+  /// No description provided for @orgWideQueue.
+  ///
+  /// In en, this message translates to:
+  /// **'Organization Wide Queue'**
+  String get orgWideQueue;
+
+  /// No description provided for @unassignedScope.
+  ///
+  /// In en, this message translates to:
+  /// **'Unassigned Scope'**
+  String get unassignedScope;
 }
 
 class _AppLocalizationsDelegate

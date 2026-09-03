@@ -332,4 +332,46 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deviceStatusRetired => 'Retired';
+
+  @override
+  String get profile => 'Profile';
+
+  @override
+  String get workScope => 'Work & Assignment Scope';
+
+  @override
+  String get preferencesSystem => 'Preferences & System';
+
+  @override
+  String get securitySession => 'Security & Session';
+
+  @override
+  String get organizationId => 'Organization ID';
+
+  @override
+  String get userId => 'User ID';
+
+  @override
+  String get assignedLocation => 'Assigned Location';
+
+  @override
+  String get accountStatus => 'Account Status';
+
+  @override
+  String get activeStatus => 'Active';
+
+  @override
+  String get appVersion => 'App Version';
+
+  @override
+  String get copiedToClipboard => 'Copied to clipboard';
+
+  @override
+  String get role => 'Role';
+
+  @override
+  String get orgWideQueue => 'Organization Wide Queue';
+
+  @override
+  String get unassignedScope => 'Unassigned Scope';
 }

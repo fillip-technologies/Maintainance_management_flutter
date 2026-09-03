@@ -116,5 +116,20 @@
   "deviceStatusMaintenance": "रखरखाव",
   "deviceStatusFaulty": "खराब",
   "deviceStatusProvisioned": "स्थापित",
-  "deviceStatusRetired": "सेवामुक्त"
+  "deviceStatusRetired": "सेवामुक्त",
+
+  "profile": "प्रोफ़ाइल",
+  "workScope": "कार्य एवं असाइनमेंट विवरण",
+  "preferencesSystem": "प्राथमिकताएं एवं सिस्टम",
+  "securitySession": "सुरक्षा एवं सत्र",
+  "organizationId": "संस्था आईडी",
+  "userId": "यूज़र आईडी",
+  "assignedLocation": "असाइन किया गया स्थान",
+  "accountStatus": "खाते की स्थिति",
+  "activeStatus": "सक्रिय",
+  "appVersion": "ऐप संस्करण",
+  "copiedToClipboard": "क्लिपबोर्ड पर कॉपी किया गया",
+  "role": "भूमिका (Role)",
+  "orgWideQueue": "संस्था-स्तरीय कार्य सूची (Organization Wide)",
+  "unassignedScope": "अनिर्दिष्ट क्षेत्र (Unassigned)"
 }

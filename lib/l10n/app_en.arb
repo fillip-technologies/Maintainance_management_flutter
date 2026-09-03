@@ -129,5 +129,20 @@
   "deviceStatusMaintenance": "Maintenance",
   "deviceStatusFaulty": "Faulty",
   "deviceStatusProvisioned": "Provisioned",
-  "deviceStatusRetired": "Retired"
+  "deviceStatusRetired": "Retired",
+
+  "profile": "Profile",
+  "workScope": "Work & Assignment Scope",
+  "preferencesSystem": "Preferences & System",
+  "securitySession": "Security & Session",
+  "organizationId": "Organization ID",
+  "userId": "User ID",
+  "assignedLocation": "Assigned Location",
+  "accountStatus": "Account Status",
+  "activeStatus": "Active",
+  "appVersion": "App Version",
+  "copiedToClipboard": "Copied to clipboard",
+  "role": "Role",
+  "orgWideQueue": "Organization Wide Queue",
+  "unassignedScope": "Unassigned Scope"
 }

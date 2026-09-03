@@ -332,4 +332,46 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get deviceStatusRetired => 'सेवामुक्त';
+
+  @override
+  String get profile => 'प्रोफ़ाइल';
+
+  @override
+  String get workScope => 'कार्य एवं असाइनमेंट विवरण';
+
+  @override
+  String get preferencesSystem => 'प्राथमिकताएं एवं सिस्टम';
+
+  @override
+  String get securitySession => 'सुरक्षा एवं सत्र';
+
+  @override
+  String get organizationId => 'संस्था आईडी';
+
+  @override
+  String get userId => 'यूज़र आईडी';
+
+  @override
+  String get assignedLocation => 'असाइन किया गया स्थान';
+
+  @override
+  String get accountStatus => 'खाते की स्थिति';
+
+  @override
+  String get activeStatus => 'सक्रिय';
+
+  @override
+  String get appVersion => 'ऐप संस्करण';
+
+  @override
+  String get copiedToClipboard => 'क्लिपबोर्ड पर कॉपी किया गया';
+
+  @override
+  String get role => 'भूमिका (Role)';
+
+  @override
+  String get orgWideQueue => 'संस्था-स्तरीय कार्य सूची (Organization Wide)';
+
+  @override
+  String get unassignedScope => 'अनिर्दिष्ट क्षेत्र (Unassigned)';
 }
