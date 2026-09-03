@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/colors.dart';
+import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/utils/hardware_icon_helper.dart';
 import '../../../../core/widgets/status_badge.dart';
 import '../../../../data/models/device_model.dart';
@@ -77,9 +78,11 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
                 child: Row(
                   children: [
                     _buildFilterChip('All Hardware', null),
-                    _buildFilterChip('Active', DeviceStatus.active),
-                    _buildFilterChip('Maintenance', DeviceStatus.underMaintenance),
-                    _buildFilterChip('Faulty', DeviceStatus.faulty),
+                    _buildFilterChip(l10n?.deviceStatusActive ?? 'Active', DeviceStatus.active),
+                    _buildFilterChip(l10n?.deviceStatusMaintenance ?? 'Maintenance', DeviceStatus.underMaintenance),
+                    _buildFilterChip(l10n?.deviceStatusFaulty ?? 'Faulty', DeviceStatus.faulty),
+                    _buildFilterChip(l10n?.deviceStatusProvisioned ?? 'In Stock', DeviceStatus.provisioned),
+                    _buildFilterChip(l10n?.deviceStatusRetired ?? 'Removed', DeviceStatus.retired),
                   ],
                 ),
               ),
@@ -170,7 +173,13 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
                       style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                     ),
                     trailing: StatusBadge.device(device.status),
-                    onTap: () => widget.onOpenRaiseIssue(device),
+                    onTap: () {
+                      if (device.status == DeviceStatus.retired) {
+                        AppSnackbar.warning('Cannot raise a defect on a retired or decommissioned unit.');
+                        return;
+                      }
+                      widget.onOpenRaiseIssue(device);
+                    },
                   ),
                 );
               },

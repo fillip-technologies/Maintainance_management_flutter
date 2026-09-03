@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/providers/device_provider.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../data/models/issue_model.dart';
 import 'issue_providers.dart';
@@ -82,11 +83,13 @@ class IssueActionController extends Notifier<IssueActionState> {
         notes: notes,
       );
 
-      // Invalidate queues, single detail, and history timeline
+      // Invalidate queues, single detail, device inventory, and history timeline
       ref.invalidate(staffIssuesProvider);
       ref.invalidate(technicianIssuesProvider);
       ref.invalidate(issueDetailProvider(issueId));
       ref.invalidate(issueHistoryProvider(issueId));
+      ref.invalidate(staffDevicesProvider);
+      ref.invalidate(staffDashboardSummaryProvider);
 
       state = state.copyWith(isLoading: false, lastUpdatedIssue: updatedIssue);
       return updatedIssue;

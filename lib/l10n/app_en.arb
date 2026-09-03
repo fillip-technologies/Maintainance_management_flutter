@@ -128,8 +128,8 @@
   "deviceStatusActive": "Active",
   "deviceStatusMaintenance": "Maintenance",
   "deviceStatusFaulty": "Faulty",
-  "deviceStatusProvisioned": "Provisioned",
-  "deviceStatusRetired": "Retired",
+  "deviceStatusProvisioned": "In Stock",
+  "deviceStatusRetired": "Removed / Retired",
 
   "profile": "Profile",
   "workScope": "Work & Assignment Scope",
@@ -144,5 +144,22 @@
   "copiedToClipboard": "Copied to clipboard",
   "role": "Role",
   "orgWideQueue": "Organization Wide Queue",
-  "unassignedScope": "Unassigned Scope"
+  "unassignedScope": "Unassigned Scope",
+
+  "btnDecommissionReplace": "Decommission & Replace",
+  "decommissionHeading": "Decommission Equipment",
+  "decommissionReason": "Reason for Removal",
+  "reasonPhysicalDamage": "Physical Damage / Smashed",
+  "reasonBurntWater": "Burnt / Water Damage",
+  "reasonUnrepairable": "Unrepairable Defect",
+  "reasonObsolete": "Obsolete / Scrapped",
+  "replacementOptions": "Replacement Option",
+  "replacementOptionSpares": "Select Spare from Stock",
+  "replacementOptionNew": "Register New Hardware",
+  "replacementOptionNone": "Decommission Only (No Replacement)",
+  "replacementSuccess": "Hardware decommissioned & replacement logged",
+  "hardwareStatus": "Hardware Status",
+  "filterRetired": "Removed",
+  "hardwareCode": "Hardware Code",
+  "deploySpareTitle": "Available Spares in Stock"
 }

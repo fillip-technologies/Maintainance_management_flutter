@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../data/models/daily_log_model.dart';
 import '../../../../data/models/device_model.dart';
-import '../../../../l10n/app_localizations.dart';
 import 'staff_device_check_card.dart';
 
 class StaffDailyChecklistTab extends StatefulWidget {
@@ -42,7 +41,6 @@ class _StaffDailyChecklistTabState extends State<StaffDailyChecklistTab> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     final completedCount = widget.allDevices.where((d) => widget.todayLogsMap.containsKey(d.id)).length;
     final pendingCount = widget.allDevices.length - completedCount;
 

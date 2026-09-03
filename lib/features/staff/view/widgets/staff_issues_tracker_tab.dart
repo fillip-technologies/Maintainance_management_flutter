@@ -3,7 +3,6 @@ import '../../../../core/theme/colors.dart';
 import '../../../../core/utils/hardware_icon_helper.dart';
 import '../../../../core/widgets/status_badge.dart';
 import '../../../../data/models/issue_model.dart';
-import '../../../issues/issues.dart';
 
 class StaffIssuesTrackerTab extends StatefulWidget {
   final List<IssueModel> issues;

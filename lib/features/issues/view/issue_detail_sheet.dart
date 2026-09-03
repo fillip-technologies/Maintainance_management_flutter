@@ -10,6 +10,7 @@ import '../../../l10n/app_localizations.dart';
 import '../controller/issue_controller.dart';
 import '../controller/issue_providers.dart';
 import '../widgets/issue_timeline_view.dart';
+import 'replace_device_sheet.dart';
 import 'update_status_sheet.dart';
 
 class IssueDetailSheet extends ConsumerWidget {
@@ -128,6 +129,8 @@ class IssueDetailSheet extends ConsumerWidget {
                     children: [
                       StatusBadge.issue(currentIssue.status),
                       StatusBadge.priority(currentIssue.priority),
+                      if (currentIssue.deviceStatus != null)
+                        StatusBadge.device(currentIssue.deviceStatus!),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                         decoration: BoxDecoration(
@@ -160,8 +163,16 @@ class IssueDetailSheet extends ConsumerWidget {
                   _buildMetaRow(
                     Icons.devices_other_outlined,
                     l10n.equipmentUnit,
-                    currentIssue.deviceName,
+                    '${currentIssue.deviceName}${currentIssue.deviceCode != null ? " (${currentIssue.deviceCode})" : ""}',
                   ),
+                  if (currentIssue.deviceStatus != null) ...[
+                    const SizedBox(height: 8),
+                    _buildMetaWidget(
+                      Icons.settings_suggest_outlined,
+                      l10n.hardwareStatus,
+                      StatusBadge.device(currentIssue.deviceStatus!),
+                    ),
+                  ],
                   const SizedBox(height: 8),
                   _buildMetaRow(
                     Icons.person_outline,
@@ -297,6 +308,52 @@ class IssueDetailSheet extends ConsumerWidget {
                         ),
                       ),
                     ),
+                    if (currentIssue.status != IssueStatus.closed && currentIssue.status != IssueStatus.resolved) ...[
+                      const SizedBox(height: 10),
+                      OutlinedButton.icon(
+                        onPressed: () {
+                          ReplaceDeviceSheet.show(
+                            context,
+                            issue: currentIssue,
+                            onConfirm: ({
+                              required reason,
+                              required notes,
+                              required replacementChoice,
+                              spareDeviceId,
+                              newDeviceName,
+                              newDeviceSerial,
+                              proofPhoto,
+                            }) async {
+                              final replacementText = switch (replacementChoice) {
+                                ReplacementChoice.inStock => 'Installed in-stock spare unit ($spareDeviceId).',
+                                ReplacementChoice.newDevice => 'Installed new hardware unit: $newDeviceName ($newDeviceSerial).',
+                                ReplacementChoice.none => 'No replacement installed; slot left vacant.',
+                              };
+                              final fullComment = '[HARDWARE DECOMMISSIONED - ${reason.name.toUpperCase()}] $notes. $replacementText';
+                              await ref
+                                  .read(issueActionControllerProvider.notifier)
+                                  .updateStatus(
+                                    issueId: currentIssue.id,
+                                    toStatus: IssueStatus.resolved,
+                                    notes: fullComment,
+                                  );
+                              AppSnackbar.success(
+                                l10n.replacementSuccess,
+                              );
+                            },
+                          );
+                        },
+                        icon: const Icon(Icons.broken_image_outlined, size: 18, color: AppColors.error),
+                        label: Text(l10n.btnDecommissionReplace, style: const TextStyle(color: AppColors.errorText)),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: AppColors.error),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ],
               ),
@@ -304,6 +361,25 @@ class IssueDetailSheet extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildMetaWidget(IconData icon, String label, Widget trailing) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: AppColors.icon),
+        const SizedBox(width: 8),
+        Text(
+          '$label: ',
+          style: const TextStyle(
+            fontSize: 13,
+            color: AppColors.textSecondary,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const Spacer(),
+        trailing,
+      ],
     );
   }
 

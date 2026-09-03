@@ -328,10 +328,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get deviceStatusFaulty => 'खराब';
 
   @override
-  String get deviceStatusProvisioned => 'स्थापित';
+  String get deviceStatusProvisioned => 'स्टॉक में';
 
   @override
-  String get deviceStatusRetired => 'सेवामुक्त';
+  String get deviceStatusRetired => 'हटाया गया / सेवामुक्त';
 
   @override
   String get profile => 'प्रोफ़ाइल';
@@ -374,4 +374,52 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get unassignedScope => 'अनिर्दिष्ट क्षेत्र (Unassigned)';
+
+  @override
+  String get btnDecommissionReplace => 'उपकरण बदलें / हटाएं';
+
+  @override
+  String get decommissionHeading => 'उपकरण सेवामुक्त / निष्कासन';
+
+  @override
+  String get decommissionReason => 'हटाने का कारण';
+
+  @override
+  String get reasonPhysicalDamage => 'भौतिक क्षति / टूटा हुआ';
+
+  @override
+  String get reasonBurntWater => 'जला हुआ / पानी से क्षतिग्रस्त';
+
+  @override
+  String get reasonUnrepairable => 'मरम्मत से परे खराबी';
+
+  @override
+  String get reasonObsolete => 'अप्रचलित / स्क्रैप';
+
+  @override
+  String get replacementOptions => 'प्रतिस्थापन विकल्प';
+
+  @override
+  String get replacementOptionSpares => 'स्टॉक से स्पेयर यूनिट चुनें';
+
+  @override
+  String get replacementOptionNew => 'नया उपकरण दर्ज करें';
+
+  @override
+  String get replacementOptionNone => 'केवल हटाएं (कोई बदलाव नहीं)';
+
+  @override
+  String get replacementSuccess => 'उपकरण हटाया गया और बदलाव दर्ज किया गया';
+
+  @override
+  String get hardwareStatus => 'उपकरण स्थिति';
+
+  @override
+  String get filterRetired => 'हटाए गए';
+
+  @override
+  String get hardwareCode => 'उपकरण कोड';
+
+  @override
+  String get deploySpareTitle => 'स्टॉक में उपलब्ध स्पेयर यूनिट';
 }

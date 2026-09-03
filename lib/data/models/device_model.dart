@@ -3,7 +3,7 @@ enum DeviceStatus {
   active('active', 'Active'),
   underMaintenance('under_maintenance', 'Under Maintenance'),
   faulty('faulty', 'Faulty'),
-  retired('retired', 'Retired');
+  retired('retired', 'Removed / Retired');
 
   final String value;
   final String label;

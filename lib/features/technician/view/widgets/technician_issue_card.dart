@@ -80,7 +80,7 @@ class TechnicianIssueCard extends StatelessWidget {
               ),
               const SizedBox(height: 4),
 
-              // Equipment Info & Zone
+              // Equipment Info, Zone & Hardware State
               Row(
                 children: [
                   Icon(
@@ -91,7 +91,7 @@ class TechnicianIssueCard extends StatelessWidget {
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
-                      '${issue.deviceName} • ${issue.zoneName} ${issue.categoryName.isNotEmpty ? "• ${issue.categoryName}" : ""}',
+                      '${issue.deviceName}${issue.deviceCode != null ? " (${issue.deviceCode})" : ""} • ${issue.zoneName}',
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontSize: 12,
@@ -99,6 +99,10 @@ class TechnicianIssueCard extends StatelessWidget {
                       ),
                     ),
                   ),
+                  if (issue.deviceStatus != null) ...[
+                    const SizedBox(width: 6),
+                    StatusBadge.device(issue.deviceStatus!),
+                  ],
                 ],
               ),
 

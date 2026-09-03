@@ -277,5 +277,38 @@ void main() {
       expect(history.comment, 'Technician arrived on site and started diagnosis');
       expect(history.createdAt.year, 2026);
     });
+
+    test('9. DeviceStatus handles retired and provisioned states correctly', () {
+      expect(DeviceStatus.fromString('retired'), DeviceStatus.retired);
+      expect(DeviceStatus.retired.label, 'Removed / Retired');
+      expect(DeviceStatus.fromString('provisioned'), DeviceStatus.provisioned);
+      expect(DeviceStatus.provisioned.label, 'Provisioned');
+    });
+
+    test('10. IssueModel parses nested deviceStatus and deviceCode correctly', () {
+      final backendIssueJson = {
+        'id': 'iss-001',
+        'title': 'Camera destroyed',
+        'description': 'Camera physically smashed',
+        'device': {
+          'id': 'dev-001',
+          'name': 'Gate 1 Camera',
+          'code': 'CAM-000123',
+          'status': 'under_maintenance',
+          'zone': {'id': 'z-1', 'name': 'North Wing'},
+        },
+        'category': {'id': 'cat-1', 'name': 'CCTV'},
+        'priority': 'critical',
+        'status': 'in_progress',
+        'createdAt': '2026-09-03T10:00:00.000Z',
+      };
+
+      final issue = IssueModel.fromJson(backendIssueJson);
+      expect(issue.deviceId, 'dev-001');
+      expect(issue.deviceName, 'Gate 1 Camera');
+      expect(issue.deviceCode, 'CAM-000123');
+      expect(issue.deviceStatus, DeviceStatus.underMaintenance);
+      expect(issue.priority, IssuePriority.critical);
+    });
   });
 }

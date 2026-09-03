@@ -1,3 +1,5 @@
+import 'device_model.dart';
+
 enum IssueStatus {
   open('open', 'Open'),
   assigned('assigned', 'Assigned'),
@@ -141,6 +143,8 @@ class IssueModel {
   final String? imagePath;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final DeviceStatus? deviceStatus;
+  final String? deviceCode;
   final DateTime? resolvedAt;
   final DateTime? closedAt;
   final List<IssueStatusHistoryModel> history;
@@ -151,6 +155,8 @@ class IssueModel {
     required this.description,
     required this.deviceId,
     required this.deviceName,
+    this.deviceStatus,
+    this.deviceCode,
     required this.zoneId,
     required this.zoneName,
     required this.categoryId,
@@ -194,6 +200,8 @@ class IssueModel {
       description: (json['description'] as String?) ?? '',
       deviceId: (json['deviceId'] ?? json['device_id'] ?? deviceObj?['id']) as String? ?? '',
       deviceName: devName,
+      deviceStatus: DeviceStatus.fromString((json['deviceStatus'] ?? json['device_status'] ?? deviceObj?['status']) as String?),
+      deviceCode: (json['deviceCode'] ?? json['device_code'] ?? deviceObj?['code']) as String?,
       zoneId: (json['zoneId'] ?? json['zone_id'] ?? deviceObj?['zoneId'] ?? zoneObj?['id']) as String? ?? '',
       zoneName: (json['zoneName'] ?? json['zone_name'] ?? zoneObj?['name']) as String? ?? 'Unknown Zone',
       categoryId: (json['categoryId'] ?? json['category_id'] ?? categoryObj?['id']) as String? ?? '',
@@ -223,6 +231,8 @@ class IssueModel {
       'description': description,
       'device_id': deviceId,
       'device_name': deviceName,
+      'device_status': deviceStatus?.value,
+      'device_code': deviceCode,
       'zone_id': zoneId,
       'zone_name': zoneName,
       'category_id': categoryId,

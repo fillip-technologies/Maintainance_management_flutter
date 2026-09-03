@@ -21,14 +21,12 @@ class StatusBadge extends StatelessWidget {
     required this.backgroundColor,
     required this.textColor,
     this.icon,
-  })  : priority = null,
-        issueStatus = null,
-        dailyLogStatus = null,
-        deviceStatus = null;
+  }) : priority = null,
+       issueStatus = null,
+       dailyLogStatus = null,
+       deviceStatus = null;
 
   const StatusBadge._internal({
-    super.key,
-    this.text,
     required this.backgroundColor,
     required this.textColor,
     this.icon,
@@ -36,35 +34,35 @@ class StatusBadge extends StatelessWidget {
     this.issueStatus,
     this.dailyLogStatus,
     this.deviceStatus,
-  });
+  }) : text = null;
 
   factory StatusBadge.device(DeviceStatus status) {
     final (bg, textCol, icon) = switch (status) {
       DeviceStatus.active => (
-          AppColors.successLight,
-          AppColors.successText,
-          Icons.check_circle_outline
-        ),
+        AppColors.successLight,
+        AppColors.successText,
+        Icons.check_circle_outline,
+      ),
       DeviceStatus.underMaintenance => (
-          AppColors.warningLight,
-          AppColors.warningText,
-          Icons.build_circle_outlined
-        ),
+        AppColors.warningLight,
+        AppColors.warningText,
+        Icons.build_circle_outlined,
+      ),
       DeviceStatus.faulty => (
-          AppColors.errorLight,
-          AppColors.errorText,
-          Icons.error_outline
-        ),
+        AppColors.errorLight,
+        AppColors.errorText,
+        Icons.error_outline,
+      ),
       DeviceStatus.provisioned => (
-          AppColors.infoLight,
-          AppColors.infoText,
-          Icons.pending_outlined
-        ),
+        AppColors.infoLight,
+        AppColors.infoText,
+        Icons.pending_outlined,
+      ),
       DeviceStatus.retired => (
-          AppColors.neutralLight,
-          AppColors.neutralText,
-          Icons.archive_outlined
-        ),
+        AppColors.neutralLight,
+        AppColors.neutralText,
+        Icons.archive_outlined,
+      ),
     };
 
     return StatusBadge._internal(
@@ -78,40 +76,40 @@ class StatusBadge extends StatelessWidget {
   factory StatusBadge.issue(IssueStatus status) {
     final (bg, textCol, icon) = switch (status) {
       IssueStatus.open => (
-          AppColors.errorLight,
-          AppColors.errorText,
-          Icons.fiber_new
-        ),
+        AppColors.errorLight,
+        AppColors.errorText,
+        Icons.fiber_new,
+      ),
       IssueStatus.assigned => (
-          AppColors.infoLight,
-          AppColors.infoText,
-          Icons.assignment_ind_outlined
-        ),
+        AppColors.infoLight,
+        AppColors.infoText,
+        Icons.assignment_ind_outlined,
+      ),
       IssueStatus.inProgress => (
-          AppColors.warningLight,
-          AppColors.warningText,
-          Icons.sync
-        ),
+        AppColors.warningLight,
+        AppColors.warningText,
+        Icons.sync,
+      ),
       IssueStatus.onHold => (
-          AppColors.purpleLight,
-          AppColors.purpleText,
-          Icons.pause_circle_outline
-        ),
+        AppColors.purpleLight,
+        AppColors.purpleText,
+        Icons.pause_circle_outline,
+      ),
       IssueStatus.resolved => (
-          AppColors.successLight,
-          AppColors.successText,
-          Icons.check_circle_outline
-        ),
+        AppColors.successLight,
+        AppColors.successText,
+        Icons.check_circle_outline,
+      ),
       IssueStatus.closed => (
-          AppColors.neutralLight,
-          AppColors.neutralText,
-          Icons.lock_outline
-        ),
+        AppColors.neutralLight,
+        AppColors.neutralText,
+        Icons.lock_outline,
+      ),
       IssueStatus.reopened => (
-          AppColors.orangeLight,
-          AppColors.orangeText,
-          Icons.replay
-        ),
+        AppColors.orangeLight,
+        AppColors.orangeText,
+        Icons.replay,
+      ),
     };
 
     return StatusBadge._internal(
@@ -125,25 +123,21 @@ class StatusBadge extends StatelessWidget {
   factory StatusBadge.priority(IssuePriority priority) {
     final (bg, textCol, icon) = switch (priority) {
       IssuePriority.critical => (
-          AppColors.errorText,
-          AppColors.textWhite,
-          Icons.warning_amber_rounded
-        ),
-      IssuePriority.high => (
-          AppColors.errorLight,
-          AppColors.errorText,
-          null
-        ),
+        AppColors.errorText,
+        AppColors.textWhite,
+        Icons.warning_amber_rounded,
+      ),
+      IssuePriority.high => (AppColors.errorLight, AppColors.errorText, null),
       IssuePriority.medium => (
-          AppColors.warningLight,
-          AppColors.warningText,
-          null
-        ),
+        AppColors.warningLight,
+        AppColors.warningText,
+        null,
+      ),
       IssuePriority.low => (
-          AppColors.neutralLight,
-          AppColors.neutralText,
-          null
-        ),
+        AppColors.neutralLight,
+        AppColors.neutralText,
+        null,
+      ),
     };
 
     return StatusBadge._internal(
@@ -157,20 +151,20 @@ class StatusBadge extends StatelessWidget {
   factory StatusBadge.dailyLog(DailyLogStatus status) {
     final (bg, textCol, icon) = switch (status) {
       DailyLogStatus.working => (
-          AppColors.successLight,
-          AppColors.successText,
-          Icons.check_circle
-        ),
+        AppColors.successLight,
+        AppColors.successText,
+        Icons.check_circle,
+      ),
       DailyLogStatus.notWorking => (
-          AppColors.errorLight,
-          AppColors.errorText,
-          Icons.cancel
-        ),
+        AppColors.errorLight,
+        AppColors.errorText,
+        Icons.cancel,
+      ),
       DailyLogStatus.needsAttention => (
-          AppColors.warningLight,
-          AppColors.warningText,
-          Icons.warning
-        ),
+        AppColors.warningLight,
+        AppColors.warningText,
+        Icons.warning,
+      ),
     };
 
     return StatusBadge._internal(
@@ -207,15 +201,18 @@ class StatusBadge extends StatelessWidget {
       labelText = switch (dailyLogStatus!) {
         DailyLogStatus.working => l10n?.logStatusWorking ?? 'Working',
         DailyLogStatus.notWorking => l10n?.logStatusNotWorking ?? 'Not Working',
-        DailyLogStatus.needsAttention => l10n?.logStatusNeedsAttention ?? 'Needs Attention',
+        DailyLogStatus.needsAttention =>
+          l10n?.logStatusNeedsAttention ?? 'Needs Attention',
       };
     } else if (deviceStatus != null) {
       labelText = switch (deviceStatus!) {
         DeviceStatus.active => l10n?.deviceStatusActive ?? 'Active',
-        DeviceStatus.underMaintenance => l10n?.deviceStatusMaintenance ?? 'Maintenance',
+        DeviceStatus.underMaintenance =>
+          l10n?.deviceStatusMaintenance ?? 'Maintenance',
         DeviceStatus.faulty => l10n?.deviceStatusFaulty ?? 'Faulty',
-        DeviceStatus.provisioned => l10n?.deviceStatusProvisioned ?? 'Provisioned',
-        DeviceStatus.retired => l10n?.deviceStatusRetired ?? 'Retired',
+        DeviceStatus.provisioned => l10n?.deviceStatusProvisioned ?? 'In Stock',
+        DeviceStatus.retired =>
+          l10n?.deviceStatusRetired ?? 'Removed / Retired',
       };
     }
 

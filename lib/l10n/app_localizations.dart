@@ -725,13 +725,13 @@ abstract class AppLocalizations {
   /// No description provided for @deviceStatusProvisioned.
   ///
   /// In en, this message translates to:
-  /// **'Provisioned'**
+  /// **'In Stock'**
   String get deviceStatusProvisioned;
 
   /// No description provided for @deviceStatusRetired.
   ///
   /// In en, this message translates to:
-  /// **'Retired'**
+  /// **'Removed / Retired'**
   String get deviceStatusRetired;
 
   /// No description provided for @profile.
@@ -817,6 +817,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unassigned Scope'**
   String get unassignedScope;
+
+  /// No description provided for @btnDecommissionReplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Decommission & Replace'**
+  String get btnDecommissionReplace;
+
+  /// No description provided for @decommissionHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Decommission Equipment'**
+  String get decommissionHeading;
+
+  /// No description provided for @decommissionReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason for Removal'**
+  String get decommissionReason;
+
+  /// No description provided for @reasonPhysicalDamage.
+  ///
+  /// In en, this message translates to:
+  /// **'Physical Damage / Smashed'**
+  String get reasonPhysicalDamage;
+
+  /// No description provided for @reasonBurntWater.
+  ///
+  /// In en, this message translates to:
+  /// **'Burnt / Water Damage'**
+  String get reasonBurntWater;
+
+  /// No description provided for @reasonUnrepairable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unrepairable Defect'**
+  String get reasonUnrepairable;
+
+  /// No description provided for @reasonObsolete.
+  ///
+  /// In en, this message translates to:
+  /// **'Obsolete / Scrapped'**
+  String get reasonObsolete;
+
+  /// No description provided for @replacementOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Replacement Option'**
+  String get replacementOptions;
+
+  /// No description provided for @replacementOptionSpares.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Spare from Stock'**
+  String get replacementOptionSpares;
+
+  /// No description provided for @replacementOptionNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Register New Hardware'**
+  String get replacementOptionNew;
+
+  /// No description provided for @replacementOptionNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Decommission Only (No Replacement)'**
+  String get replacementOptionNone;
+
+  /// No description provided for @replacementSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Hardware decommissioned & replacement logged'**
+  String get replacementSuccess;
+
+  /// No description provided for @hardwareStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Hardware Status'**
+  String get hardwareStatus;
+
+  /// No description provided for @filterRetired.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed'**
+  String get filterRetired;
+
+  /// No description provided for @hardwareCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Hardware Code'**
+  String get hardwareCode;
+
+  /// No description provided for @deploySpareTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Available Spares in Stock'**
+  String get deploySpareTitle;
 }
 
 class _AppLocalizationsDelegate

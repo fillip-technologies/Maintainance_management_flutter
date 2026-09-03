@@ -328,10 +328,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deviceStatusFaulty => 'Faulty';
 
   @override
-  String get deviceStatusProvisioned => 'Provisioned';
+  String get deviceStatusProvisioned => 'In Stock';
 
   @override
-  String get deviceStatusRetired => 'Retired';
+  String get deviceStatusRetired => 'Removed / Retired';
 
   @override
   String get profile => 'Profile';
@@ -374,4 +374,53 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get unassignedScope => 'Unassigned Scope';
+
+  @override
+  String get btnDecommissionReplace => 'Decommission & Replace';
+
+  @override
+  String get decommissionHeading => 'Decommission Equipment';
+
+  @override
+  String get decommissionReason => 'Reason for Removal';
+
+  @override
+  String get reasonPhysicalDamage => 'Physical Damage / Smashed';
+
+  @override
+  String get reasonBurntWater => 'Burnt / Water Damage';
+
+  @override
+  String get reasonUnrepairable => 'Unrepairable Defect';
+
+  @override
+  String get reasonObsolete => 'Obsolete / Scrapped';
+
+  @override
+  String get replacementOptions => 'Replacement Option';
+
+  @override
+  String get replacementOptionSpares => 'Select Spare from Stock';
+
+  @override
+  String get replacementOptionNew => 'Register New Hardware';
+
+  @override
+  String get replacementOptionNone => 'Decommission Only (No Replacement)';
+
+  @override
+  String get replacementSuccess =>
+      'Hardware decommissioned & replacement logged';
+
+  @override
+  String get hardwareStatus => 'Hardware Status';
+
+  @override
+  String get filterRetired => 'Removed';
+
+  @override
+  String get hardwareCode => 'Hardware Code';
+
+  @override
+  String get deploySpareTitle => 'Available Spares in Stock';
 }
