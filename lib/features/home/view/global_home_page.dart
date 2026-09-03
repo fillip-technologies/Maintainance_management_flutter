@@ -24,12 +24,13 @@ class GlobalHomePage extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: AppColors.surface,
         elevation: 0,
+        scrolledUnderElevation: 0.0,
         titleSpacing: 16,
         title: InkWell(
           onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const ProfilePage()),
-            );
+            Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const ProfilePage()));
           },
           borderRadius: BorderRadius.circular(14),
           child: Padding(
@@ -96,7 +97,7 @@ class GlobalHomePage extends ConsumerWidget {
                               isTechnician
                                   ? 'Hardware Technician • Assigned Queue'
                                   : (user?.assignedZoneName ??
-                                      'Assigned Zone Scope'),
+                                        'Assigned Zone Scope'),
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
                                 fontSize: 12,
@@ -114,9 +115,7 @@ class GlobalHomePage extends ConsumerWidget {
           ),
         ),
         actions: const [
-          Center(
-            child: LanguageSwitcherButton(isCompact: true),
-          ),
+          Center(child: LanguageSwitcherButton(isCompact: true)),
           SizedBox(width: 14),
         ],
       ),
