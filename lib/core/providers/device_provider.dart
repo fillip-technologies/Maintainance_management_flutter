@@ -36,3 +36,9 @@ final staffDashboardSummaryProvider = FutureProvider.autoDispose<DashboardSummar
     includeSubzones: true,
   );
 });
+
+// 4. Available Spares Provider (Devices with status 'provisioned' in inventory)
+final availableSparesProvider = FutureProvider.autoDispose<List<DeviceModel>>((ref) async {
+  final deviceRepo = ref.watch(deviceRepositoryProvider);
+  return deviceRepo.getDevices(status: 'provisioned');
+});

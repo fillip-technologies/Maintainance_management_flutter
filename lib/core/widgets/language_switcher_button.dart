@@ -48,15 +48,6 @@ class LanguageSwitcherButton extends ConsumerWidget {
                 color: AppColors.primary,
               ),
             ),
-            const SizedBox(width: 4),
-            Text(
-              isHindi ? '(EN)' : '(HI)',
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-                color: AppColors.primary.withValues(alpha: 0.7),
-              ),
-            ),
           ],
         ),
       ),

@@ -194,6 +194,18 @@ abstract class AppLocalizations {
   /// **'Sign In'**
   String get signIn;
 
+  /// No description provided for @forgotPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot Password?'**
+  String get forgotPassword;
+
+  /// No description provided for @secureConnectionNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Enterprise Maintenance Network'**
+  String get secureConnectionNotice;
+
   /// No description provided for @email.
   ///
   /// In en, this message translates to:
@@ -311,7 +323,7 @@ abstract class AppLocalizations {
   /// No description provided for @tabResolvedHistory.
   ///
   /// In en, this message translates to:
-  /// **'Resolved / History'**
+  /// **'Resolved'**
   String get tabResolvedHistory;
 
   /// No description provided for @searchTickets.
@@ -961,6 +973,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View Ticket'**
   String get viewTicket;
+
+  /// No description provided for @stepWhatHappened.
+  ///
+  /// In en, this message translates to:
+  /// **'1. What happened to the equipment?'**
+  String get stepWhatHappened;
+
+  /// No description provided for @stepWhatDidYouDo.
+  ///
+  /// In en, this message translates to:
+  /// **'2. What action did you take?'**
+  String get stepWhatDidYouDo;
+
+  /// No description provided for @actionRemovedOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed Only (Slot Left Empty)'**
+  String get actionRemovedOnly;
+
+  /// No description provided for @actionRemovedOnlySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Uninstalled from mounting; no spare available'**
+  String get actionRemovedOnlySub;
+
+  /// No description provided for @actionReplacedFromStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Replaced with Spare from Inventory'**
+  String get actionReplacedFromStock;
+
+  /// No description provided for @actionReplacedFromStockSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Installed working spare unit from stockroom'**
+  String get actionReplacedFromStockSub;
+
+  /// No description provided for @availableSparesHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Available Spares in Stockroom'**
+  String get availableSparesHeading;
+
+  /// No description provided for @noSparesAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No spare units available in stockroom'**
+  String get noSparesAvailable;
+
+  /// No description provided for @selectSparePrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to select the spare unit installed:'**
+  String get selectSparePrompt;
+
+  /// No description provided for @selectSpareToProceed.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a spare unit from the list to continue'**
+  String get selectSpareToProceed;
+
+  /// No description provided for @optionalNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional technician note...'**
+  String get optionalNoteHint;
+
+  /// No description provided for @btnSubmitAndClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Done • Submit & Close Ticket'**
+  String get btnSubmitAndClose;
+
+  /// No description provided for @submittingDecommission.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitting...'**
+  String get submittingDecommission;
+
+  /// No description provided for @selectedSpareBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'SELECTED'**
+  String get selectedSpareBadge;
+
+  /// No description provided for @searchSparesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search spare by name or code...'**
+  String get searchSparesHint;
 }
 
 class _AppLocalizationsDelegate

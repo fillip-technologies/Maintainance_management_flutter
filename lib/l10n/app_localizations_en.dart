@@ -57,6 +57,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get signIn => 'Sign In';
 
   @override
+  String get forgotPassword => 'Forgot Password?';
+
+  @override
+  String get secureConnectionNotice => 'Enterprise Maintenance Network';
+
+  @override
   String get email => 'Email Address';
 
   @override
@@ -114,7 +120,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tabOnHold => 'On Hold';
 
   @override
-  String get tabResolvedHistory => 'Resolved / History';
+  String get tabResolvedHistory => 'Resolved';
 
   @override
   String get searchTickets => 'Search ticket ID or device...';
@@ -447,4 +453,52 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get viewTicket => 'View Ticket';
+
+  @override
+  String get stepWhatHappened => '1. What happened to the equipment?';
+
+  @override
+  String get stepWhatDidYouDo => '2. What action did you take?';
+
+  @override
+  String get actionRemovedOnly => 'Removed Only (Slot Left Empty)';
+
+  @override
+  String get actionRemovedOnlySub =>
+      'Uninstalled from mounting; no spare available';
+
+  @override
+  String get actionReplacedFromStock => 'Replaced with Spare from Inventory';
+
+  @override
+  String get actionReplacedFromStockSub =>
+      'Installed working spare unit from stockroom';
+
+  @override
+  String get availableSparesHeading => 'Available Spares in Stockroom';
+
+  @override
+  String get noSparesAvailable => 'No spare units available in stockroom';
+
+  @override
+  String get selectSparePrompt => 'Tap to select the spare unit installed:';
+
+  @override
+  String get selectSpareToProceed =>
+      'Please select a spare unit from the list to continue';
+
+  @override
+  String get optionalNoteHint => 'Optional technician note...';
+
+  @override
+  String get btnSubmitAndClose => 'Done • Submit & Close Ticket';
+
+  @override
+  String get submittingDecommission => 'Submitting...';
+
+  @override
+  String get selectedSpareBadge => 'SELECTED';
+
+  @override
+  String get searchSparesHint => 'Search spare by name or code...';
 }

@@ -24,6 +24,8 @@
   "switchToEnglish": "English",
 
   "signIn": "Sign In",
+  "forgotPassword": "Forgot Password?",
+  "secureConnectionNotice": "Enterprise Maintenance Network",
   "email": "Email Address",
   "password": "Password",
   "enterEmail": "Enter your registered email",
@@ -45,7 +47,7 @@
   "kpiResolved": "Resolved",
   "tabActiveQueue": "Active Queue",
   "tabOnHold": "On Hold",
-  "tabResolvedHistory": "Resolved / History",
+  "tabResolvedHistory": "Resolved",
   "searchTickets": "Search ticket ID or device...",
   "filterPriority": "Filter Priority",
   "priorityAll": "All",
@@ -169,5 +171,21 @@
   "issueStartedAlert": "Technician started work on equipment",
   "issueResolvedAlert": "Issue marked resolved by technician",
   "deviceCheckedLive": "Unit verified by colleague",
-  "viewTicket": "View Ticket"
+  "viewTicket": "View Ticket",
+
+  "stepWhatHappened": "1. What happened to the equipment?",
+  "stepWhatDidYouDo": "2. What action did you take?",
+  "actionRemovedOnly": "Removed Only (Slot Left Empty)",
+  "actionRemovedOnlySub": "Uninstalled from mounting; no spare available",
+  "actionReplacedFromStock": "Replaced with Spare from Inventory",
+  "actionReplacedFromStockSub": "Installed working spare unit from stockroom",
+  "availableSparesHeading": "Available Spares in Stockroom",
+  "noSparesAvailable": "No spare units available in stockroom",
+  "selectSparePrompt": "Tap to select the spare unit installed:",
+  "selectSpareToProceed": "Please select a spare unit from the list to continue",
+  "optionalNoteHint": "Optional technician note...",
+  "btnSubmitAndClose": "Done • Submit & Close Ticket",
+  "submittingDecommission": "Submitting...",
+  "selectedSpareBadge": "SELECTED",
+  "searchSparesHint": "Search spare by name or code..."
 }

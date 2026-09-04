@@ -33,6 +33,9 @@ class DeviceModel {
   final DateTime? lastCheckedAt;
   final int consecutiveFailures;
 
+  String get code => serialNumber;
+  String get categoryName => hardwareTypeName;
+
   const DeviceModel({
     required this.id,
     required this.zoneId,
@@ -52,16 +55,16 @@ class DeviceModel {
 
   factory DeviceModel.fromJson(Map<String, dynamic> json) {
     final zoneObj = json['zone'] as Map<String, dynamic>?;
-    final hwTypeObj = (json['hardwareType'] ?? json['hardware_type']) as Map<String, dynamic>?;
+    final hwTypeObj = (json['hardwareType'] ?? json['hardware_type'] ?? json['category']) as Map<String, dynamic>?;
 
     return DeviceModel(
       id: (json['id'] as String?) ?? '',
       zoneId: (json['zoneId'] ?? json['zone_id'] ?? zoneObj?['id']) as String? ?? '',
       zoneName: (json['zoneName'] ?? json['zone_name'] ?? zoneObj?['name']) as String? ?? 'Unknown Zone',
       hardwareTypeId: (json['hardwareTypeId'] ?? json['hardware_type_id'] ?? hwTypeObj?['id']) as String?,
-      hardwareTypeName: (json['hardwareTypeName'] ?? json['hardware_type_name'] ?? hwTypeObj?['name']) as String? ?? 'CCTV Camera',
+      hardwareTypeName: (json['hardwareTypeName'] ?? json['hardware_type_name'] ?? json['categoryName'] ?? hwTypeObj?['name']) as String? ?? 'CCTV Camera',
       name: (json['name'] as String?) ?? 'Unknown Device',
-      serialNumber: (json['serialNumber'] ?? json['serial_number']) as String? ?? '',
+      serialNumber: (json['serialNumber'] ?? json['serial_number'] ?? json['code']) as String? ?? '',
       location: (json['location'] as String?) ?? '',
       status: DeviceStatus.fromString(json['status'] as String?),
       isManualEntry: (json['isManualEntry'] ?? json['is_manual_entry']) as bool? ?? false,

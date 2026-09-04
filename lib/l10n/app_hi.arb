@@ -18,6 +18,8 @@
   "switchToEnglish": "English",
 
   "signIn": "लॉग इन करें",
+  "forgotPassword": "पासवर्ड भूल गए?",
+  "secureConnectionNotice": "एंटरप्राइज़ रखरखाव नेटवर्क",
   "email": "ईमेल पता",
   "password": "पासवर्ड",
   "enterEmail": "अपना पंजीकृत ईमेल दर्ज करें",
@@ -39,7 +41,7 @@
   "kpiResolved": "हल किया गया",
   "tabActiveQueue": "सक्रिय सूची",
   "tabOnHold": "रोके गए टिकट",
-  "tabResolvedHistory": "हल किए गए / इतिहास",
+  "tabResolvedHistory": "हल किए गए",
   "searchTickets": "टिकट आईडी या उपकरण खोजें...",
   "filterPriority": "प्राथमिकता फ़िल्टर",
   "priorityAll": "सभी",
@@ -156,5 +158,21 @@
   "issueStartedAlert": "तकनीशियन ने उपकरण पर कार्य शुरू किया",
   "issueResolvedAlert": "तकनीशियन द्वारा समस्या हल की गई",
   "deviceCheckedLive": "सहकर्मी द्वारा उपकरण जांचा गया",
-  "viewTicket": "टिकट देखें"
+  "viewTicket": "टिकट देखें",
+
+  "stepWhatHappened": "1. उपकरण के साथ क्या हुआ?",
+  "stepWhatDidYouDo": "2. आपने क्या कार्रवाई की?",
+  "actionRemovedOnly": "सिर्फ निकाल दिया (स्थान खाली है)",
+  "actionRemovedOnlySub": "दीवार/माउंटिंग से उतार लिया; कोई स्पेयर उपलब्ध नहीं",
+  "actionReplacedFromStock": "स्टॉक से स्पेयर उपकरण लगाया",
+  "actionReplacedFromStockSub": "स्टोररूम से उपलब्ध स्पेयर यूनिट लगाई",
+  "availableSparesHeading": "स्टोररूम में उपलब्ध स्पेयर यूनिट",
+  "noSparesAvailable": "स्टॉक में कोई स्पेयर यूनिट उपलब्ध नहीं है",
+  "selectSparePrompt": "लगाए गए स्पेयर उपकरण पर टैप करें:",
+  "selectSpareToProceed": "आगे बढ़ने के लिए कृपया सूची से स्पेयर उपकरण चुनें",
+  "optionalNoteHint": "अतिरिक्त टिप्पणी (वैकल्पिक)...",
+  "btnSubmitAndClose": "कार्य संपन्न • टिकट बंद करें",
+  "submittingDecommission": "दर्ज हो रहा है...",
+  "selectedSpareBadge": "चयनित",
+  "searchSparesHint": "नाम या कोड से स्पेयर खोजें..."
 }

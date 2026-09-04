@@ -57,6 +57,12 @@ class AppLocalizationsHi extends AppLocalizations {
   String get signIn => 'लॉग इन करें';
 
   @override
+  String get forgotPassword => 'पासवर्ड भूल गए?';
+
+  @override
+  String get secureConnectionNotice => 'एंटरप्राइज़ रखरखाव नेटवर्क';
+
+  @override
   String get email => 'ईमेल पता';
 
   @override
@@ -114,7 +120,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get tabOnHold => 'रोके गए टिकट';
 
   @override
-  String get tabResolvedHistory => 'हल किए गए / इतिहास';
+  String get tabResolvedHistory => 'हल किए गए';
 
   @override
   String get searchTickets => 'टिकट आईडी या उपकरण खोजें...';
@@ -446,4 +452,52 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get viewTicket => 'टिकट देखें';
+
+  @override
+  String get stepWhatHappened => '1. उपकरण के साथ क्या हुआ?';
+
+  @override
+  String get stepWhatDidYouDo => '2. आपने क्या कार्रवाई की?';
+
+  @override
+  String get actionRemovedOnly => 'सिर्फ निकाल दिया (स्थान खाली है)';
+
+  @override
+  String get actionRemovedOnlySub =>
+      'दीवार/माउंटिंग से उतार लिया; कोई स्पेयर उपलब्ध नहीं';
+
+  @override
+  String get actionReplacedFromStock => 'स्टॉक से स्पेयर उपकरण लगाया';
+
+  @override
+  String get actionReplacedFromStockSub =>
+      'स्टोररूम से उपलब्ध स्पेयर यूनिट लगाई';
+
+  @override
+  String get availableSparesHeading => 'स्टोररूम में उपलब्ध स्पेयर यूनिट';
+
+  @override
+  String get noSparesAvailable => 'स्टॉक में कोई स्पेयर यूनिट उपलब्ध नहीं है';
+
+  @override
+  String get selectSparePrompt => 'लगाए गए स्पेयर उपकरण पर टैप करें:';
+
+  @override
+  String get selectSpareToProceed =>
+      'आगे बढ़ने के लिए कृपया सूची से स्पेयर उपकरण चुनें';
+
+  @override
+  String get optionalNoteHint => 'अतिरिक्त टिप्पणी (वैकल्पिक)...';
+
+  @override
+  String get btnSubmitAndClose => 'कार्य संपन्न • टिकट बंद करें';
+
+  @override
+  String get submittingDecommission => 'दर्ज हो रहा है...';
+
+  @override
+  String get selectedSpareBadge => 'चयनित';
+
+  @override
+  String get searchSparesHint => 'नाम या कोड से स्पेयर खोजें...';
 }

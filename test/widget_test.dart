@@ -25,5 +25,23 @@ void main() {
 
     expect(find.text(AppConfig.appName), findsOneWidget);
     expect(find.text('Sign In'), findsOneWidget);
+    expect(find.text('English'), findsOneWidget);
+    expect(find.text('हिन्दी'), findsOneWidget);
+
+    // Tap Hindi segment
+    await tester.tap(find.text('हिन्दी'));
+    await tester.pumpAndSettle();
+
+    // Verify UI switched to Hindi
+    expect(find.text('लॉग इन करें'), findsOneWidget);
+    expect(find.text('उपकरण और रखरखाव प्रबंधन'), findsOneWidget);
+
+    // Tap English segment back
+    await tester.tap(find.text('English'));
+    await tester.pumpAndSettle();
+
+    // Verify UI switched back to English
+    expect(find.text('Sign In'), findsOneWidget);
+    expect(find.text('Equipment & Maintenance Management'), findsOneWidget);
   });
 }

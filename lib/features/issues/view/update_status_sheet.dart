@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+// import 'package:image_picker/image_picker.dart';
 import '../../../core/theme/colors.dart';
-import '../../../core/utils/app_snackbar.dart';
+// import '../../../core/utils/app_snackbar.dart';
 import '../../../data/models/issue_model.dart';
 import 'replace_device_sheet.dart';
 
@@ -44,9 +44,13 @@ class UpdateStatusSheet extends StatefulWidget {
 class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
   late IssueStatus _selectedStatus;
   final _commentController = TextEditingController();
-  File? _resolutionImage;
-  final ImagePicker _picker = ImagePicker();
-  bool _isPickingImage = false;
+  // =========================================================================
+  // CAMERA PROOF CAPTURE (COMMENTED OUT FOR NOW - WILL BE ENABLED IN FUTURE)
+  // =========================================================================
+  // File? _resolutionImage;
+  // final ImagePicker _picker = ImagePicker();
+  // bool _isPickingImage = false;
+  // =========================================================================
   String? _errorMessage;
 
   @override
@@ -92,155 +96,35 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
     };
   }
 
-  Future<void> _pickImage(ImageSource source) async {
-    Navigator.pop(context);
-    setState(() => _isPickingImage = true);
-
-    try {
-      final XFile? pickedFile = await _picker.pickImage(
-        source: source,
-        maxWidth: 1800,
-        maxHeight: 1800,
-        imageQuality: 85,
-      );
-
-      if (pickedFile != null) {
-        setState(() {
-          _resolutionImage = File(pickedFile.path);
-        });
-      }
-    } catch (e) {
-      AppSnackbar.error('Failed to capture photo: $e');
-    } finally {
-      if (mounted) setState(() => _isPickingImage = false);
-    }
-  }
-
-  void _showImageSourceModal() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (ctx) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: AppColors.border,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Proof / Verification Photo',
-                  style: TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                const Text(
-                  'Attach a photo of the repaired equipment',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                _buildSourceOption(
-                  icon: Icons.camera_alt_rounded,
-                  iconColor: AppColors.primary,
-                  iconBgColor: AppColors.primaryBg,
-                  title: 'Take Photo (Camera)',
-                  subtitle: 'Capture current device status',
-                  onTap: () => _pickImage(ImageSource.camera),
-                ),
-                const SizedBox(height: 10),
-                _buildSourceOption(
-                  icon: Icons.photo_library_rounded,
-                  iconColor: AppColors.purple,
-                  iconBgColor: AppColors.purpleLight,
-                  title: 'Choose from Gallery',
-                  subtitle: 'Select from photo library',
-                  onTap: () => _pickImage(ImageSource.gallery),
-                ),
-                const SizedBox(height: 8),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildSourceOption({
-    required IconData icon,
-    required Color iconColor,
-    required Color iconBgColor,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: AppColors.cardAlt,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: iconBgColor,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(icon, color: iconColor, size: 22),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Icon(Icons.chevron_right_rounded, color: AppColors.iconLight, size: 20),
-          ],
-        ),
-      ),
-    );
-  }
+  // =========================================================================
+  // CAMERA PROOF CAPTURE (COMMENTED OUT FOR NOW - WILL BE ENABLED IN FUTURE)
+  // =========================================================================
+  // Future<void> _pickImage(ImageSource source) async {
+  //   Navigator.pop(context);
+  //   setState(() => _isPickingImage = true);
+  //   try {
+  //     final XFile? pickedFile = await _picker.pickImage(
+  //       source: source,
+  //       maxWidth: 1800,
+  //       maxHeight: 1800,
+  //       imageQuality: 85,
+  //     );
+  //     if (pickedFile != null) {
+  //       setState(() {
+  //         _resolutionImage = File(pickedFile.path);
+  //       });
+  //     }
+  //   } catch (e) {
+  //     AppSnackbar.error('Failed to capture photo: $e');
+  //   } finally {
+  //     if (mounted) setState(() => _isPickingImage = false);
+  //   }
+  // }
+  //
+  // void _showImageSourceModal() {
+  //   ...
+  // }
+  // =========================================================================
 
   void _handleSubmit() {
     final comment = _commentController.text.trim();
@@ -249,7 +133,7 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
       return;
     }
 
-    widget.onStatusUpdated(_selectedStatus, comment, _resolutionImage);
+    widget.onStatusUpdated(_selectedStatus, comment, null);
     Navigator.pop(context);
   }
 
@@ -360,13 +244,7 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
                           newDeviceSerial,
                           proofPhoto,
                         }) async {
-                          final replacementText = switch (replacementChoice) {
-                            ReplacementChoice.inStock => 'Installed in-stock spare unit ($spareDeviceId).',
-                            ReplacementChoice.newDevice => 'Installed new hardware unit: $newDeviceName ($newDeviceSerial).',
-                            ReplacementChoice.none => 'No replacement installed; slot left vacant.',
-                          };
-                          final fullComment = '[HARDWARE DECOMMISSIONED - ${reason.name.toUpperCase()}] $notes. $replacementText';
-                          widget.onStatusUpdated(IssueStatus.resolved, fullComment, proofPhoto);
+                          widget.onStatusUpdated(IssueStatus.resolved, notes, null);
                         },
                       );
                     },
@@ -498,109 +376,20 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
 
                   const SizedBox(height: 14),
 
-                  // 3. Optional Resolution Photo
-                  const Text(
-                    'Proof / Verification Photo (Optional)',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-
-                  if (_isPickingImage)
-                    Container(
-                      height: 70,
-                      decoration: BoxDecoration(
-                        color: AppColors.cardAlt,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Center(
-                        child: CircularProgressIndicator(color: AppColors.primary),
-                      ),
-                    )
-                  else if (_resolutionImage != null)
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: AppColors.cardAlt,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: AppColors.border),
-                      ),
-                      child: Row(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: Image.file(
-                              _resolutionImage!,
-                              width: 60,
-                              height: 60,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          const Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(Icons.check_circle, color: AppColors.success, size: 16),
-                                    SizedBox(width: 4),
-                                    Text(
-                                      'Verification Photo Added',
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.textPrimary,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 2),
-                                Text(
-                                  'Will be attached to update log',
-                                  style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                                ),
-                              ],
-                            ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete_outline, color: AppColors.error),
-                            onPressed: () => setState(() => _resolutionImage = null),
-                          ),
-                        ],
-                      ),
-                    )
-                  else
-                    InkWell(
-                      onTap: _showImageSourceModal,
-                      borderRadius: BorderRadius.circular(14),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
-                        decoration: BoxDecoration(
-                          color: AppColors.surface,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: AppColors.border),
-                        ),
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.camera_alt_outlined, color: AppColors.primary, size: 18),
-                            SizedBox(width: 8),
-                            Text(
-                              'Attach Verification Photo (Camera / Gallery)',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                  // =========================================================================
+                  // CAMERA PROOF CAPTURE (COMMENTED OUT FOR NOW - WILL BE ENABLED IN FUTURE)
+                  // =========================================================================
+                  // const Text(
+                  //   'Proof / Verification Photo (Optional)',
+                  //   style: TextStyle(
+                  //     fontSize: 13,
+                  //     fontWeight: FontWeight.w600,
+                  //     color: AppColors.textSecondary,
+                  //   ),
+                  // ),
+                  // const SizedBox(height: 8),
+                  // ... (Camera / Gallery Picker)
+                  // =========================================================================
 
                   const SizedBox(height: 20),
 
