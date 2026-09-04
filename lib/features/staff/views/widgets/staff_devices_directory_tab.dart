@@ -74,6 +74,7 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
           padding: const EdgeInsets.all(12),
           color: AppColors.surface,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TextField(
                 controller: _searchController,

@@ -215,12 +215,12 @@ class _StaffHomePageState extends ConsumerState<StaffHomePage>
             ),
             tabs: [
               Tab(
-                icon: const Icon(Icons.checklist_rounded, size: 18),
-                text: l10n?.tabDailyChecklist ?? 'Daily Checks',
-              ),
-              Tab(
                 icon: const Icon(Icons.devices_other_rounded, size: 18),
                 text: l10n?.tabCatalogue ?? 'Hardware',
+              ),
+              Tab(
+                icon: const Icon(Icons.checklist_rounded, size: 18),
+                text: l10n?.tabDailyChecklist ?? 'Daily Checks',
               ),
               Tab(
                 icon: const Icon(Icons.confirmation_number_outlined, size: 18),
@@ -238,7 +238,14 @@ class _StaffHomePageState extends ConsumerState<StaffHomePage>
         // Active Tab View Content
         Expanded(
           child: switch (_currentTabIndex) {
-            0 => StaffDailyChecklistTab(
+            0 => StaffDevicesDirectoryTab(
+                devices: staffDevicesAsync.value ?? [],
+                isLoading: staffDevicesAsync.isLoading,
+                hasError: staffDevicesAsync.hasError,
+                onRefresh: () async => dashboardVm.refreshDevices(),
+                onOpenRaiseIssue: _openRaiseIssueSheet,
+              ),
+            1 => StaffDailyChecklistTab(
                 allDevices: staffDevicesAsync.value ?? [],
                 todayLogsMap: todayLogsAsync.value ?? {},
                 isLoading: staffDevicesAsync.isLoading,
@@ -250,13 +257,6 @@ class _StaffHomePageState extends ConsumerState<StaffHomePage>
                 onToggleEdit: checklistNotifier.startEditing,
                 onCancelEdit: checklistNotifier.cancelEditing,
                 onRefresh: () async => dashboardVm.refreshAll(),
-              ),
-            1 => StaffDevicesDirectoryTab(
-                devices: staffDevicesAsync.value ?? [],
-                isLoading: staffDevicesAsync.isLoading,
-                hasError: staffDevicesAsync.hasError,
-                onRefresh: () async => dashboardVm.refreshDevices(),
-                onOpenRaiseIssue: _openRaiseIssueSheet,
               ),
             2 => StaffIssuesTrackerTab(
                 issues: staffIssuesAsync.value ?? [],

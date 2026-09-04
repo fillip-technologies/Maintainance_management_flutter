@@ -59,6 +59,7 @@ class _TechnicianSearchFilterBarState extends State<TechnicianSearchFilterBar> {
       padding: const EdgeInsets.all(12),
       color: AppColors.surface,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           TextField(
             controller: _searchController,
