@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../data/models/user_model.dart';
-import '../../data/models/zone_model.dart';
+import '../../features/auth/auth.dart';
+import '../../features/devices/devices.dart';
 
 class StorageService {
   final SharedPreferences _prefs;

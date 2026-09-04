@@ -1,9 +1,10 @@
-export 'controller/issue_controller.dart';
-export 'controller/issue_providers.dart';
-export 'view/issue_detail_sheet.dart';
-export 'view/raise_issue_sheet.dart';
-export 'view/replace_device_sheet.dart';
-export 'view/update_status_sheet.dart';
-export 'widgets/issue_card.dart';
-export 'widgets/issue_timeline_view.dart';
-
+export 'models/issue_model.dart';
+export 'repositories/issue_repository.dart';
+export 'viewmodels/issue_action_viewmodel.dart';
+export 'viewmodels/issue_query_viewmodel.dart';
+export 'views/issue_detail_sheet.dart';
+export 'views/raise_issue_sheet.dart';
+export 'views/replace_device_sheet.dart';
+export 'views/update_status_sheet.dart';
+export 'views/widgets/issue_card.dart';
+export 'views/widgets/issue_timeline_view.dart';

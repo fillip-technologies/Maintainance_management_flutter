@@ -1,14 +1,11 @@
 import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:equipment_management_system/data/models/user_model.dart';
-import 'package:equipment_management_system/data/models/zone_model.dart';
-import 'package:equipment_management_system/data/models/device_model.dart';
-import 'package:equipment_management_system/data/models/issue_model.dart';
-import 'package:equipment_management_system/data/models/hardware_type_model.dart';
+import 'package:equipment_management_system/features/auth/auth.dart';
+import 'package:equipment_management_system/features/devices/devices.dart';
+import 'package:equipment_management_system/features/issues/issues.dart';
+import 'package:equipment_management_system/features/daily_logs/daily_logs.dart';
+import 'package:equipment_management_system/features/realtime/realtime.dart';
 import 'package:equipment_management_system/core/config/app_config.dart';
-import 'package:equipment_management_system/data/models/daily_log_model.dart';
-import 'package:equipment_management_system/data/models/dashboard_summary_model.dart';
-import 'package:equipment_management_system/data/models/socket_event_model.dart';
 import 'package:equipment_management_system/core/utils/jwt_helper.dart';
 
 void main() {
