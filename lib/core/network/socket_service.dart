@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:socket_io_client/socket_io_client.dart' as io;
-import '../../data/models/daily_log_model.dart';
-import '../../data/models/issue_model.dart';
-import '../../data/models/socket_event_model.dart';
+import '../../features/daily_logs/daily_logs.dart';
+import '../../features/issues/issues.dart';
+import '../../features/realtime/models/socket_event_model.dart';
 import '../utils/app_logger.dart';
 
 /// Manages the real-time Socket.IO WebSocket connection with JWT handshake authentication

@@ -1,3 +1,10 @@
-export 'view/profile_page.dart';
-export 'widgets/profile_header_card.dart';
-export 'widgets/profile_info_tile.dart';
+// Models
+export 'models/profile_state.dart';
+
+// ViewModels
+export 'viewmodels/locale_viewmodel.dart';
+export 'viewmodels/profile_viewmodel.dart';
+
+// Views
+export 'views/profile_page.dart';
+export 'views/widgets/widgets.dart';

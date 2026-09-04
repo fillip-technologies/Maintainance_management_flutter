@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/config/app_config.dart';
-import 'core/providers/auth_provider.dart';
-import 'core/providers/locale_provider.dart';
 import 'core/storage/storage_service.dart';
 import 'core/theme/colors.dart';
 import 'core/utils/app_snackbar.dart';
-import 'features/auth/view/login_page.dart';
-import 'features/home/view/global_home_page.dart';
+import 'features/auth/auth.dart';
+import 'features/home/home.dart';
+import 'features/profile/profile.dart';
 import 'l10n/app_localizations.dart';
 
 void main() async {

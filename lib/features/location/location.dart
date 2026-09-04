@@ -9,7 +9,7 @@ class LocationPage extends StatefulWidget {
 }
 
 class _LocationPageState extends State<LocationPage> {
-  LocationHelper _locationHelper = LocationHelper();
+  final LocationHelper _locationHelper = LocationHelper();
   Map<String, dynamic>? _userLocation;
 
   Future<void> getLoation() async {
@@ -17,13 +17,13 @@ class _LocationPageState extends State<LocationPage> {
     if (location != null) {
       setState(() {
         _userLocation = location;
-        print(
+        debugPrint(
           'User Location: ${location['latitude']}, ${location['longitude']}',
         );
       });
       setState(() {});
     } else {
-      print('Failed to get user location.');
+      debugPrint('Failed to get user location.');
     }
   }
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/locale_provider.dart';
+import '../../features/profile/profile.dart';
 import '../theme/colors.dart';
 
 class LanguageSegmentedControl extends ConsumerWidget {

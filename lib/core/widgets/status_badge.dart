@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../data/models/daily_log_model.dart';
-import '../../data/models/device_model.dart';
-import '../../data/models/issue_model.dart';
+import '../../features/daily_logs/daily_logs.dart';
+import '../../features/devices/devices.dart';
+import '../../features/issues/issues.dart';
 import '../../l10n/app_localizations.dart';
 import '../theme/colors.dart';
 

@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:equipment_management_system/core/config/app_config.dart';
-import 'package:equipment_management_system/core/providers/auth_provider.dart';
+import 'package:equipment_management_system/features/auth/auth.dart';
 import 'package:equipment_management_system/core/storage/storage_service.dart';
 import 'package:equipment_management_system/main.dart';
 
