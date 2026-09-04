@@ -30,11 +30,32 @@ final staffDashboardSummaryProvider = FutureProvider.autoDispose<DashboardSummar
   final zoneId = authUser?.assignedZoneId;
   final clientId = authUser?.clientId;
 
-  return deviceRepo.getDashboardSummary(
+  final summary = await deviceRepo.getDashboardSummary(
     zoneId: zoneId,
     clientId: clientId,
     includeSubzones: true,
   );
+
+  // Cross-reference with live devices to ensure 100% accurate status breakdown matching the list
+  final devicesAsync = ref.watch(staffDevicesProvider);
+  if (devicesAsync.hasValue && devicesAsync.value != null && devicesAsync.value!.isNotEmpty) {
+    final devices = devicesAsync.value!;
+    final activeCount = devices.where((d) => d.status == DeviceStatus.active).length;
+    final faultyCount = devices.where((d) => d.status == DeviceStatus.faulty).length;
+    final underMaintCount = devices.where((d) => d.status == DeviceStatus.underMaintenance).length;
+    final provCount = devices.where((d) => d.status == DeviceStatus.provisioned).length;
+    final nonRetiredTotal = devices.where((d) => d.status != DeviceStatus.retired).length;
+
+    return summary.copyWith(
+      totalDevices: nonRetiredTotal > 0 ? nonRetiredTotal : summary.totalDevices,
+      activeDevices: activeCount,
+      faultyDevices: faultyCount > 0 ? faultyCount : summary.faultyDevices,
+      underMaintenanceDevices: underMaintCount,
+      provisionedDevices: provCount,
+    );
+  }
+
+  return summary;
 });
 
 // 4. Available Spares Provider (Devices with status 'provisioned' in inventory)

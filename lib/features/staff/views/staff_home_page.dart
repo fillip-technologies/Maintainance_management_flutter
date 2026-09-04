@@ -231,7 +231,10 @@ class _StaffHomePageState extends ConsumerState<StaffHomePage>
         ),
 
         // Live KPI Metric Header Bar
-        StaffKpiBar(summaryAsync: staffSummaryAsync),
+        StaffKpiBar(
+          summaryAsync: staffSummaryAsync,
+          devices: staffDevicesAsync.value,
+        ),
 
         const Divider(height: 1, color: AppColors.divider),
 

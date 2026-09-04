@@ -164,6 +164,100 @@ class IssueRepository {
     }
   }
 
+  /// Creates multiple maintenance issue tickets in bulk for several devices.
+  Future<List<IssueModel>> createBulkIssues({
+    required List<String> deviceIds,
+    required String categoryId,
+    required IssuePriority priority,
+    required String description,
+  }) async {
+    try {
+      final payload = {
+        'deviceIds': deviceIds,
+        'categoryId': categoryId,
+        'priority': priority.value,
+        'description': description.trim(),
+      };
+
+      AppLogger.d('📡 [IssueRepository] POST /issues/bulk with: $payload');
+
+      final response = await apiClient.dio.post(
+        '/issues/bulk',
+        data: payload,
+      );
+
+      if (response.statusCode == 201 || (response.statusCode == 200 && response.data['success'] == true)) {
+        final List<dynamic> dataList = response.data['data'] as List<dynamic>;
+        final newIssues = dataList
+            .map((item) => IssueModel.fromJson(item as Map<String, dynamic>))
+            .toList();
+        AppLogger.i('🚨 [IssueRepository] ${newIssues.length} bulk issues created successfully');
+        return newIssues;
+      } else {
+        final msg = response.data['message'] as String? ?? 'Failed to raise bulk issues';
+        AppLogger.w('⚠️ [IssueRepository] Error: $msg');
+        throw Exception(msg);
+      }
+    } on DioException catch (e) {
+      final message = e.response?.data?['message'] as String? ?? e.message ?? 'Network error creating bulk issues';
+      AppLogger.e('❌ [IssueRepository] DioException in createBulkIssues: $message', e);
+      throw Exception(message);
+    } catch (e, st) {
+      AppLogger.e('💥 [IssueRepository] Error creating bulk issues: $e', e, st);
+      throw Exception('Failed to raise bulk issues: $e');
+    }
+  }
+
+  /// Transitions status for multiple issues simultaneously via PATCH /issues/bulk-status.
+  /// Returns a record with `updated` (`List<IssueModel>`) and `errors` (`List<Map<String, dynamic>>`).
+  Future<({List<IssueModel> updated, List<Map<String, dynamic>> errors})> bulkUpdateStatus({
+    required List<String> issueIds,
+    required IssueStatus status,
+    String? notes,
+  }) async {
+    try {
+      final payload = <String, dynamic>{
+        'ids': issueIds,
+        'status': status.value,
+        if (notes != null && notes.trim().isNotEmpty) 'notes': notes.trim(),
+      };
+
+      AppLogger.d('📡 [IssueRepository] PATCH /issues/bulk-status with: $payload');
+
+      final response = await apiClient.dio.patch(
+        '/issues/bulk-status',
+        data: payload,
+      );
+
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        final data = response.data['data'] as Map<String, dynamic>? ?? {};
+        final rawUpdated = data['updated'] as List<dynamic>? ?? [];
+        final rawErrors = data['errors'] as List<dynamic>? ?? [];
+
+        final updatedList = rawUpdated
+            .map((item) => IssueModel.fromJson(item as Map<String, dynamic>))
+            .toList();
+        final errorsList = rawErrors
+            .map((item) => Map<String, dynamic>.from(item as Map))
+            .toList();
+
+        AppLogger.i('🚨 [IssueRepository] Bulk status updated: ${updatedList.length} success, ${errorsList.length} errors');
+        return (updated: updatedList, errors: errorsList);
+      } else {
+        final msg = response.data['message'] as String? ?? 'Failed to bulk update issue status';
+        AppLogger.w('⚠️ [IssueRepository] Bulk status error: $msg');
+        throw Exception(msg);
+      }
+    } on DioException catch (e) {
+      final message = e.response?.data?['message'] as String? ?? e.message ?? 'Network error updating bulk issues';
+      AppLogger.e('❌ [IssueRepository] DioException in bulkUpdateStatus: $message', e);
+      throw Exception(message);
+    } catch (e, st) {
+      AppLogger.e('💥 [IssueRepository] Error in bulkUpdateStatus: $e', e, st);
+      throw Exception('Failed to bulk update status: $e');
+    }
+  }
+
   /// Fetches issue categories from the backend `/issue-categories` endpoint.
   /// If a [deviceId] is provided, returns global defect categories plus any categories
   /// specific to that device's product category.

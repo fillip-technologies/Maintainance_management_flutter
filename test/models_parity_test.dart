@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:equipment_management_system/l10n/app_localizations.dart';
 import 'package:equipment_management_system/features/auth/auth.dart';
 import 'package:equipment_management_system/features/devices/devices.dart';
 import 'package:equipment_management_system/features/issues/issues.dart';
@@ -248,6 +250,7 @@ void main() {
       final summary = DashboardSummaryModel.fromJson(backendSummaryJson);
 
       expect(summary.totalDevices, 4);
+      expect(summary.activeDevices, 4);
       expect(summary.openIssues, 7);
       expect(summary.faultyDevices, 0);
       expect(summary.devicesMissingTodayLog, 3);
@@ -370,6 +373,346 @@ void main() {
 
       // Malformed token:
       expect(JwtHelper.isExpired('invalid-token'), true);
+    });
+
+    test('14. IssueModel deserializes bulk issue creation response list correctly', () {
+      final backendBulkResponse = {
+        'success': true,
+        'data': [
+          {
+            'id': 'issue-bulk-01',
+            'deviceId': 'dev-cam-01',
+            'categoryId': 'cat-pwr-01',
+            'priority': 'critical',
+            'status': 'open',
+            'description': 'Power surge knocked out sector cameras',
+            'device': {
+              'id': 'dev-cam-01',
+              'name': 'North Gate Cam 1',
+              'zoneId': 'zone-north',
+              'zone': {'name': 'North Perimeter'},
+            },
+            'category': {
+              'id': 'cat-pwr-01',
+              'name': 'Power Outage',
+            },
+            'statusHistory': [
+              {
+                'id': 'hist-01',
+                'issueId': 'issue-bulk-01',
+                'fromStatus': null,
+                'toStatus': 'open',
+                'changedByUserId': 'user-staff-01',
+                'changedAt': '2026-09-04T10:00:00.000Z',
+              },
+            ],
+          },
+          {
+            'id': 'issue-bulk-02',
+            'deviceId': 'dev-cam-02',
+            'categoryId': 'cat-pwr-01',
+            'priority': 'critical',
+            'status': 'open',
+            'description': 'Power surge knocked out sector cameras',
+            'device': {
+              'id': 'dev-cam-02',
+              'name': 'North Gate Cam 2',
+              'zoneId': 'zone-north',
+              'zone': {'name': 'North Perimeter'},
+            },
+            'category': {
+              'id': 'cat-pwr-01',
+              'name': 'Power Outage',
+            },
+            'statusHistory': [
+              {
+                'id': 'hist-02',
+                'issueId': 'issue-bulk-02',
+                'fromStatus': null,
+                'toStatus': 'open',
+                'changedByUserId': 'user-staff-01',
+                'changedAt': '2026-09-04T10:00:00.000Z',
+              },
+            ],
+          },
+        ],
+      };
+
+      final dataList = backendBulkResponse['data'] as List<dynamic>;
+      final issues = dataList
+          .map((item) => IssueModel.fromJson(item as Map<String, dynamic>))
+          .toList();
+
+      expect(issues.length, 2);
+      expect(issues[0].id, 'issue-bulk-01');
+      expect(issues[0].deviceName, 'North Gate Cam 1');
+      expect(issues[0].priority, IssuePriority.critical);
+      expect(issues[0].status, IssueStatus.open);
+      expect(issues[0].description, 'Power surge knocked out sector cameras');
+
+      expect(issues[1].id, 'issue-bulk-02');
+      expect(issues[1].deviceName, 'North Gate Cam 2');
+      expect(issues[1].priority, IssuePriority.critical);
+      expect(issues[1].status, IssueStatus.open);
+    });
+
+    test('15. AppLocalizationsEn and AppLocalizationsHi have complete parity for Bulk Issue reporting', () async {
+      final en = await AppLocalizations.delegate.load(const Locale('en'));
+      final hi = await AppLocalizations.delegate.load(const Locale('hi'));
+
+      expect(en.btnBulkDefect, 'Bulk Defect');
+      expect(hi.btnBulkDefect, 'थोक समस्या');
+
+      expect(en.raiseBulkDefectTitle, 'Raise Bulk Defect');
+      expect(hi.raiseBulkDefectTitle, 'थोक उपकरण समस्या रिपोर्ट करें');
+
+      expect(en.raiseBulkDefectSubtitle, 'Report identical issue on multiple units (1–50)');
+      expect(hi.raiseBulkDefectSubtitle, 'एकाधिक उपकरणों पर समान समस्या दर्ज करें (1–50)');
+
+      expect(en.selectEquipmentUnits(5), 'Select Equipment (5/50)');
+      expect(hi.selectEquipmentUnits(5), 'उपकरण चुनें (5/50)');
+
+      expect(en.selectAll, 'Select All');
+      expect(hi.selectAll, 'सभी चुनें');
+
+      expect(en.clearSelection, 'Clear');
+      expect(hi.clearSelection, 'हटाएं');
+
+      expect(en.searchUnitsHint, 'Search unit by name, serial number or type...');
+      expect(hi.searchUnitsHint, 'नाम, सीरियल नंबर या प्रकार से खोजें...');
+
+      expect(en.noMatchingUnits, 'No matching equipment units found');
+      expect(hi.noMatchingUnits, 'कोई मेल खाने वाला उपकरण नहीं मिला');
+
+      expect(en.loadingCategories, 'Loading defect categories...');
+      expect(hi.loadingCategories, 'दोष श्रेणियां लोड हो रही हैं...');
+
+      expect(en.noCategoriesFound, 'No defect categories found. Please contact an administrator.');
+      expect(hi.noCategoriesFound, 'कोई दोष श्रेणी नहीं मिली। कृपया व्यवस्थापक से संपर्क करें।');
+
+      expect(en.selectCategoryHint, 'Select Defect Category');
+      expect(hi.selectCategoryHint, 'दोष की श्रेणी चुनें');
+
+      expect(en.bulkDefectDescriptionLabel, 'Defect Description & Shared Symptoms');
+      expect(hi.bulkDefectDescriptionLabel, 'दोष का विवरण एवं सामान्य लक्षण');
+
+      expect(en.btnSelectUnitsFirst, 'Select Units Above to Report Defect');
+      expect(hi.btnSelectUnitsFirst, 'समस्या दर्ज करने हेतु ऊपर उपकरण चुनें');
+
+      expect(en.btnRaiseBulkDefect(3), 'Raise Defect Ticket on 3 Unit(s)');
+      expect(hi.btnRaiseBulkDefect(3), '3 उपकरणों के लिए समस्या टिकट दर्ज करें');
+
+      expect(en.submittingBulkDefect, 'Raising Defects...');
+      expect(hi.submittingBulkDefect, 'समस्याएं दर्ज हो रही हैं...');
+
+      expect(en.errSelectAtLeastOneUnit, 'Please select at least 1 equipment unit');
+      expect(hi.errSelectAtLeastOneUnit, 'कृपया कम से कम 1 उपकरण चुनें');
+
+      expect(en.errMaxUnitsLimit, 'Maximum limit of 50 units reached for a single bulk ticket');
+      expect(hi.errMaxUnitsLimit, 'एक साथ अधिकतम 50 उपकरण चुने जा सकते हैं');
+
+      expect(en.errRetiredUnitSelected, 'Cannot raise defects on retired equipment');
+      expect(hi.errRetiredUnitSelected, 'सेवामुक्त उपकरणों पर समस्या दर्ज नहीं की जा सकती');
+
+      expect(en.errSelectCategory, 'Please select a defect category');
+      expect(hi.errSelectCategory, 'कृपया दोष श्रेणी चुनें');
+
+      expect(en.errProvideDescription, 'Please provide a clear description of the defect');
+      expect(hi.errProvideDescription, 'कृपया दोष का स्पष्ट विवरण दर्ज करें');
+
+      expect(en.bulkDefectSuccessMsg(4), '4 bulk defect tickets raised successfully');
+      expect(hi.bulkDefectSuccessMsg(4), '4 थोक समस्या टिकट सफलतापूर्वक दर्ज किए गए');
+
+      expect(en.errFailedToRaiseBulk, 'Failed to raise bulk issues');
+      expect(hi.errFailedToRaiseBulk, 'थोक समस्या टिकट दर्ज करने में विफल');
+
+      expect(en.errFailedToLoadCategories, 'Failed to load defect categories');
+      expect(hi.errFailedToLoadCategories, 'दोष श्रेणियां लोड करने में विफल');
+    });
+
+    test('16. DeviceGroup.fromDevices correctly aggregates multi-quantity devices by hardware type', () {
+      final sampleDevices = <DeviceModel>[
+        const DeviceModel(
+          id: 'cam-1',
+          name: 'Gate Cam 1',
+          serialNumber: 'SN-CAM-1',
+          hardwareTypeName: 'CCTV Camera',
+          location: 'Main Gate',
+          status: DeviceStatus.active,
+          zoneId: 'z1',
+          zoneName: 'Zone A',
+        ),
+        const DeviceModel(
+          id: 'cam-2',
+          name: 'Fence Cam 2',
+          serialNumber: 'SN-CAM-2',
+          hardwareTypeName: 'CCTV Camera',
+          location: 'Fence Line',
+          status: DeviceStatus.faulty,
+          zoneId: 'z1',
+          zoneName: 'Zone A',
+        ),
+        const DeviceModel(
+          id: 'fan-1',
+          name: 'Exhaust Fan 1',
+          serialNumber: 'SN-FAN-1',
+          hardwareTypeName: 'Cooling Fan',
+          location: 'Enclosure B',
+          status: DeviceStatus.underMaintenance,
+          zoneId: 'z1',
+          zoneName: 'Zone A',
+        ),
+        const DeviceModel(
+          id: 'fan-2',
+          name: 'Exhaust Fan 2',
+          serialNumber: 'SN-FAN-2',
+          hardwareTypeName: 'Cooling Fan',
+          location: 'Enclosure B',
+          status: DeviceStatus.active,
+          zoneId: 'z1',
+          zoneName: 'Zone A',
+        ),
+        const DeviceModel(
+          id: 'fan-3',
+          name: 'Exhaust Fan 3',
+          serialNumber: 'SN-FAN-3',
+          hardwareTypeName: 'Cooling Fan',
+          location: 'Enclosure B',
+          status: DeviceStatus.provisioned,
+          zoneId: 'z1',
+          zoneName: 'Zone A',
+        ),
+      ];
+
+      final groups = DeviceGroup.fromDevices(sampleDevices);
+
+      expect(groups.length, 2);
+      expect(groups[0].hardwareTypeName, 'CCTV Camera');
+      expect(groups[0].totalCount, 2);
+      expect(groups[0].activeCount, 1);
+      expect(groups[0].faultyCount, 1);
+      expect(groups[0].maintenanceCount, 0);
+
+      expect(groups[1].hardwareTypeName, 'Cooling Fan');
+      expect(groups[1].totalCount, 3);
+      expect(groups[1].activeCount, 1);
+      expect(groups[1].maintenanceCount, 1);
+      expect(groups[1].inStockCount, 1);
+      expect(groups[1].faultyCount, 0);
+    });
+
+    test('17. AppLocalizationsEn and AppLocalizationsHi have complete parity for Grouped View and Batch Selection', () async {
+      final en = await AppLocalizations.delegate.load(const Locale('en'));
+      final hi = await AppLocalizations.delegate.load(const Locale('hi'));
+
+      expect(en.viewGrouped, 'Grouped');
+      expect(hi.viewGrouped, 'समूहबद्ध');
+
+      expect(en.viewFlat, 'List');
+      expect(hi.viewFlat, 'सूची');
+
+      expect(en.unitsCount(10), '10 Units');
+      expect(hi.unitsCount(10), '10 उपकरण');
+
+      expect(en.singleUnitCount, '1 Unit');
+      expect(hi.singleUnitCount, '1 उपकरण');
+
+      expect(en.selectAllInGroup, 'Select Group');
+      expect(hi.selectAllInGroup, 'समूह चुनें');
+
+      expect(en.deselectGroup, 'Deselect');
+      expect(hi.deselectGroup, 'हटाएं');
+
+      expect(en.groupSelectedCount(3, 8), '3/8 selected');
+      expect(hi.groupSelectedCount(3, 8), '3/8 चयनित');
+
+      expect(en.filterByHardwareType, 'Filter by Type');
+      expect(hi.filterByHardwareType, 'प्रकार अनुसार फ़िल्टर');
+
+      expect(en.allTypes, 'All Types');
+      expect(hi.allTypes, 'सभी प्रकार');
+
+      expect(en.collapseAll, 'Collapse All');
+      expect(hi.collapseAll, 'सभी समेटें');
+
+      expect(en.expandAll, 'Expand All');
+      expect(hi.expandAll, 'सभी खोलें');
+
+      expect(en.allHardware, 'All Hardware');
+      expect(hi.allHardware, 'सभी हार्डवेयर');
+
+      expect(en.singleCategory, '1 Category');
+      expect(hi.singleCategory, '1 श्रेणी');
+
+      expect(en.categoriesCount(3), '3 Categories');
+      expect(hi.categoriesCount(3), '3 श्रेणियां');
+
+      expect(en.unitsAffectedBadge(5), '5 Units Affected');
+      expect(hi.unitsAffectedBadge(5), '5 उपकरण प्रभावित');
+
+      expect(en.quantityLabel, 'Quantity');
+      expect(hi.quantityLabel, 'मात्रा');
+
+      expect(en.applyToSelected, 'Apply to Selected');
+      expect(hi.applyToSelected, 'चयनित पर लागू करें');
+
+      expect(en.selectMode, 'Select');
+      expect(hi.selectMode, 'चुनें');
+
+      expect(en.doneSelecting, 'Done');
+      expect(hi.doneSelecting, 'पूर्ण');
+    });
+
+    test('18. Issue description parsing extracts Units affected count matching web format', () {
+      const webFormattedDescription = 'Product: CCTV Camera · Units affected: 5\nDefect type: No Power\nCameras in north wing lost power simultaneously.';
+      final match = RegExp(r'Units affected:\s*(\d+)').firstMatch(webFormattedDescription);
+
+      expect(match, isNotNull);
+      expect(int.parse(match!.group(1)!), 5);
+    });
+
+    test('19. IssueModel parses real backend payload with unitsAffected and displayDescription', () {
+      final json = {
+        'id': '91fa83bc-4d41-4ea2-b0ea-741e8b6e1b6f',
+        'deviceId': '00a5f066-4272-4f77-a755-f56c730e0402',
+        'categoryId': '25fda868-6145-4cb7-add1-14ee451caf15',
+        'priority': 'medium',
+        'status': 'open',
+        'description': 'Product: Camera · Units affected: 3\nhello hunnu bunny',
+        'device': {
+          'id': '00a5f066-4272-4f77-a755-f56c730e0402',
+          'name': 'PTZ CAMERA',
+          'zone': {'name': 'North Gate'},
+        },
+        'category': {
+          'id': '25fda868-6145-4cb7-add1-14ee451caf15',
+          'name': 'Needs inspection',
+        },
+      };
+
+      final issue = IssueModel.fromJson(json);
+
+      expect(issue.id, '91fa83bc-4d41-4ea2-b0ea-741e8b6e1b6f');
+      expect(issue.unitsAffected, 3);
+      expect(issue.displayDescription, 'hello hunnu bunny');
+      expect(issue.deviceName, 'PTZ CAMERA');
+    });
+
+    test('20. Technician Bulk Resolve localization keys parity between EN and HI', () {
+      final en = lookupAppLocalizations(const Locale('en'));
+      final hi = lookupAppLocalizations(const Locale('hi'));
+
+      expect(en.btnBulkResolve, 'Bulk Resolve');
+      expect(hi.btnBulkResolve, 'थोक समाधान');
+
+      expect(en.bulkResolveTitle, 'Bulk Resolve Issues');
+      expect(hi.bulkResolveTitle, 'थोक समस्याएं हल करें');
+
+      expect(en.bulkStatusSuccessMsg(4, 'Resolved'), '4 tickets updated to Resolved');
+      expect(hi.bulkStatusSuccessMsg(4, 'समाधान'), '4 टिकट समाधान में सफलतापूर्वक अपडेट किए गए');
+
+      expect(en.selectTickets(3), 'Select Tickets (3/50)');
+      expect(hi.selectTickets(3), 'टिकट चुनें (3/50)');
     });
   });
 }

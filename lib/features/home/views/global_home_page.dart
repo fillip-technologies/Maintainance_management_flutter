@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/colors.dart';
 import '../../../core/widgets/language_switcher_button.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../auth/auth.dart';
+import '../../issues/issues.dart';
 import '../../profile/profile.dart';
 import '../../realtime/realtime.dart';
 import '../../staff/staff.dart';
@@ -16,6 +18,7 @@ class GlobalHomePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final user = ref.watch(authStateProvider).value;
     final isTechnician = user?.role == UserRole.technician;
 
@@ -122,6 +125,35 @@ class GlobalHomePage extends ConsumerWidget {
         ],
       ),
       body: isTechnician ? const TechnicianHomePage() : const StaffHomePage(),
+      floatingActionButton: isTechnician
+          ? FloatingActionButton.extended(
+              onPressed: () => BulkResolveIssuesSheet.show(context),
+              backgroundColor: AppColors.success,
+              foregroundColor: AppColors.textWhite,
+              elevation: 4,
+              icon: const Icon(Icons.task_alt_rounded),
+              label: Text(
+                l10n?.btnBulkResolve ?? 'Bulk Resolve',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.3,
+                ),
+              ),
+            )
+          : FloatingActionButton.extended(
+              onPressed: () => RaiseBulkIssueSheet.show(context),
+              backgroundColor: AppColors.error,
+              foregroundColor: AppColors.textWhite,
+              elevation: 4,
+              icon: const Icon(Icons.playlist_add_rounded),
+              label: Text(
+                l10n?.btnBulkDefect ?? 'Bulk Defect',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.3,
+                ),
+              ),
+            ),
     );
   }
 }

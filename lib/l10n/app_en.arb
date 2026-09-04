@@ -187,5 +187,146 @@
   "btnSubmitAndClose": "Done • Submit & Close Ticket",
   "submittingDecommission": "Submitting...",
   "selectedSpareBadge": "SELECTED",
-  "searchSparesHint": "Search spare by name or code..."
+  "searchSparesHint": "Search spare by name or code...",
+
+  "btnBulkDefect": "Bulk Defect",
+  "raiseBulkDefectTitle": "Raise Bulk Defect",
+  "raiseBulkDefectSubtitle": "Report identical issue on multiple units (1–50)",
+  "selectEquipmentUnits": "Select Equipment ({count}/50)",
+  "@selectEquipmentUnits": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectAll": "Select All",
+  "clearSelection": "Clear",
+  "searchUnitsHint": "Search unit by name, serial number or type...",
+  "noMatchingUnits": "No matching equipment units found",
+  "loadingCategories": "Loading defect categories...",
+  "noCategoriesFound": "No defect categories found. Please contact an administrator.",
+  "selectCategoryHint": "Select Defect Category",
+  "bulkDefectDescriptionLabel": "Defect Description & Shared Symptoms",
+  "bulkDefectDescriptionHint": "Describe common symptoms, power failure, batch damage, network outage...",
+  "btnSelectUnitsFirst": "Select Units Above to Report Defect",
+  "btnRaiseBulkDefect": "Raise Defect Ticket on {count} Unit(s)",
+  "@btnRaiseBulkDefect": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "submittingBulkDefect": "Raising Defects...",
+  "errSelectAtLeastOneUnit": "Please select at least 1 equipment unit",
+  "errMaxUnitsLimit": "Maximum limit of 50 units reached for a single bulk ticket",
+  "errRetiredUnitSelected": "Cannot raise defects on retired equipment",
+  "errSelectCategory": "Please select a defect category",
+  "errProvideDescription": "Please provide a clear description of the defect",
+  "bulkDefectSuccessMsg": "{count} bulk defect tickets raised successfully",
+  "@bulkDefectSuccessMsg": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "errFailedToRaiseBulk": "Failed to raise bulk issues",
+  "errFailedToLoadCategories": "Failed to load defect categories",
+  "viewGrouped": "Grouped",
+  "viewFlat": "List",
+  "unitsCount": "{count} Units",
+  "@unitsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "singleUnitCount": "1 Unit",
+  "selectAllInGroup": "Select Group",
+  "deselectGroup": "Deselect",
+  "groupSelectedCount": "{selected}/{total} selected",
+  "@groupSelectedCount": {
+    "placeholders": {
+      "selected": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "filterByHardwareType": "Filter by Type",
+  "allTypes": "All Types",
+  "collapseAll": "Collapse All",
+  "expandAll": "Expand All",
+  "allHardware": "All Hardware",
+  "categoriesCount": "{count} Categories",
+  "@categoriesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "singleCategory": "1 Category",
+  "unitsAffectedBadge": "{count} Units Affected",
+  "@unitsAffectedBadge": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "quantityLabel": "Quantity",
+  "applyToSelected": "Apply to Selected",
+  "actionMarkResolved": "Mark Resolved",
+  "actionStartWork": "Start Work",
+  "actionHold": "Place on Hold",
+  "selectMode": "Select",
+  "doneSelecting": "Done",
+  "btnBulkResolve": "Bulk Resolve",
+  "bulkResolveTitle": "Bulk Resolve Issues",
+  "bulkResolveSubtitle": "Batch update status for multiple tickets (1–50)",
+  "selectTickets": "Select Tickets ({count}/50)",
+  "@selectTickets": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "searchTicketsHint": "Search ticket by ID, device, category or zone...",
+  "resolutionNotesLabel": "Technician Resolution / Work Notes",
+  "resolutionNotesHint": "Explain steps taken, repairs made, or reason for status update...",
+  "btnApplyStatusToTickets": "Apply {status} to {count} Ticket(s)",
+  "@btnApplyStatusToTickets": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bulkStatusSuccessMsg": "{count} tickets updated to {status}",
+  "@bulkStatusSuccessMsg": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "errSelectAtLeastOneTicket": "Please select at least 1 ticket",
+  "errMaxTicketsLimit": "Maximum limit of 50 tickets can be updated at once",
+  "presetPowerRestored": "Main power supply restored",
+  "presetBatchRepaired": "Batch repair completed and verified",
+  "presetFirmwareUpdated": "Firmware updated & rebooted",
+  "presetCablesTested": "Cables re-seated & connectivity verified"
 }

@@ -10,6 +10,9 @@ class TechnicianIssueCard extends StatelessWidget {
   final VoidCallback onTap;
   final void Function(IssueStatus newStatus) onUpdateStatus;
   final VoidCallback onOpenTimeline;
+  final bool isSelectable;
+  final bool isSelected;
+  final ValueChanged<bool?>? onSelect;
 
   const TechnicianIssueCard({
     super.key,
@@ -17,11 +20,17 @@ class TechnicianIssueCard extends StatelessWidget {
     required this.onTap,
     required this.onUpdateStatus,
     required this.onOpenTimeline,
+    this.isSelectable = false,
+    this.isSelected = false,
+    this.onSelect,
   });
+
+  int? get _unitsAffected => issue.unitsAffected;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final unitsCount = _unitsAffected;
     final startWorkLabel = l10n?.btnStartWork ?? 'Start Work';
     final holdLabel = l10n?.btnHold ?? 'Hold';
     final resolveLabel = l10n?.btnResolve ?? 'Resolve';
@@ -31,17 +40,19 @@ class TechnicianIssueCard extends StatelessWidget {
       key: ValueKey(issue.id),
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: isSelected ? AppColors.primaryBg.withValues(alpha: 0.15) : AppColors.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: issue.priority == IssuePriority.critical
-              ? AppColors.error.withValues(alpha: 0.5)
-              : AppColors.border,
-          width: issue.priority == IssuePriority.critical ? 1.5 : 1,
+          color: isSelected
+              ? AppColors.primary
+              : (issue.priority == IssuePriority.critical
+                  ? AppColors.error.withValues(alpha: 0.5)
+                  : AppColors.border),
+          width: (isSelected || issue.priority == IssuePriority.critical) ? 1.5 : 1,
         ),
       ),
       child: InkWell(
-        onTap: onTap,
+        onTap: isSelectable ? () => onSelect?.call(!isSelected) : onTap,
         borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -51,6 +62,21 @@ class TechnicianIssueCard extends StatelessWidget {
               // Header Row: Ticket ID, Priority, Status
               Row(
                 children: [
+                  if (isSelectable) ...[
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: Checkbox(
+                          value: isSelected,
+                          onChanged: onSelect,
+                          activeColor: AppColors.primary,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                        ),
+                      ),
+                    ),
+                  ],
                   Text(
                     issue.id.length > 8 ? '#${issue.id.substring(0, 8)}' : issue.id,
                     style: const TextStyle(
@@ -59,6 +85,32 @@ class TechnicianIssueCard extends StatelessWidget {
                       color: AppColors.primary,
                     ),
                   ),
+                  if (unitsCount != null && unitsCount > 1) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: AppColors.purpleLight,
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: AppColors.purple.withValues(alpha: 0.3)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.layers_outlined, size: 11, color: AppColors.purpleText),
+                          const SizedBox(width: 3),
+                          Text(
+                            l10n?.unitsAffectedBadge(unitsCount) ?? '$unitsCount Units Affected',
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.purpleText,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                   const Spacer(),
                   StatusBadge.priority(issue.priority),
                   const SizedBox(width: 6),
@@ -71,7 +123,7 @@ class TechnicianIssueCard extends StatelessWidget {
               Text(
                 issue.title.isNotEmpty
                     ? issue.title
-                    : (issue.description.isNotEmpty ? issue.description : 'Maintenance Issue'),
+                    : (issue.displayDescription.isNotEmpty ? issue.displayDescription : 'Maintenance Issue'),
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -130,10 +182,10 @@ class TechnicianIssueCard extends StatelessWidget {
                 ],
               ),
 
-              if (issue.description.isNotEmpty) ...[
+              if (issue.displayDescription.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Text(
-                  issue.description,
+                  issue.displayDescription,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(

@@ -305,4 +305,29 @@ class IssueModel {
   }
 
   String get raisedByName => createdByUserName;
+
+  /// Extracts the number of units affected if recorded in the description header
+  /// (e.g. from bulk defect reporting: `Product: Camera · Units affected: 3`).
+  int? get unitsAffected {
+    final match = RegExp(r'Units affected:\s*(\d+)').firstMatch(description);
+    if (match != null) {
+      return int.tryParse(match.group(1)!);
+    }
+    return null;
+  }
+
+  /// Returns user comments with automated metadata headers
+  /// (`Product: ... · Units affected: ...`) stripped out, leaving only
+  /// the technician/staff actual notes.
+  String get displayDescription {
+    if (description.isEmpty) return '';
+    final lines = description.split('\n');
+    final userLines = lines.where((l) {
+      final trimmed = l.trim();
+      return !trimmed.startsWith('Product:') &&
+          !trimmed.contains('Units affected:') &&
+          !trimmed.startsWith('Defect type:');
+    }).join('\n').trim();
+    return userLines.isNotEmpty ? userLines : description;
+  }
 }

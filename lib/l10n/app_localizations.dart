@@ -1063,6 +1063,372 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Search spare by name or code...'**
   String get searchSparesHint;
+
+  /// No description provided for @btnBulkDefect.
+  ///
+  /// In en, this message translates to:
+  /// **'Bulk Defect'**
+  String get btnBulkDefect;
+
+  /// No description provided for @raiseBulkDefectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Raise Bulk Defect'**
+  String get raiseBulkDefectTitle;
+
+  /// No description provided for @raiseBulkDefectSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report identical issue on multiple units (1–50)'**
+  String get raiseBulkDefectSubtitle;
+
+  /// No description provided for @selectEquipmentUnits.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Equipment ({count}/50)'**
+  String selectEquipmentUnits(int count);
+
+  /// No description provided for @selectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Select All'**
+  String get selectAll;
+
+  /// No description provided for @clearSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clearSelection;
+
+  /// No description provided for @searchUnitsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search unit by name, serial number or type...'**
+  String get searchUnitsHint;
+
+  /// No description provided for @noMatchingUnits.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching equipment units found'**
+  String get noMatchingUnits;
+
+  /// No description provided for @loadingCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading defect categories...'**
+  String get loadingCategories;
+
+  /// No description provided for @noCategoriesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No defect categories found. Please contact an administrator.'**
+  String get noCategoriesFound;
+
+  /// No description provided for @selectCategoryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Defect Category'**
+  String get selectCategoryHint;
+
+  /// No description provided for @bulkDefectDescriptionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Defect Description & Shared Symptoms'**
+  String get bulkDefectDescriptionLabel;
+
+  /// No description provided for @bulkDefectDescriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe common symptoms, power failure, batch damage, network outage...'**
+  String get bulkDefectDescriptionHint;
+
+  /// No description provided for @btnSelectUnitsFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Units Above to Report Defect'**
+  String get btnSelectUnitsFirst;
+
+  /// No description provided for @btnRaiseBulkDefect.
+  ///
+  /// In en, this message translates to:
+  /// **'Raise Defect Ticket on {count} Unit(s)'**
+  String btnRaiseBulkDefect(int count);
+
+  /// No description provided for @submittingBulkDefect.
+  ///
+  /// In en, this message translates to:
+  /// **'Raising Defects...'**
+  String get submittingBulkDefect;
+
+  /// No description provided for @errSelectAtLeastOneUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select at least 1 equipment unit'**
+  String get errSelectAtLeastOneUnit;
+
+  /// No description provided for @errMaxUnitsLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum limit of 50 units reached for a single bulk ticket'**
+  String get errMaxUnitsLimit;
+
+  /// No description provided for @errRetiredUnitSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot raise defects on retired equipment'**
+  String get errRetiredUnitSelected;
+
+  /// No description provided for @errSelectCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a defect category'**
+  String get errSelectCategory;
+
+  /// No description provided for @errProvideDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Please provide a clear description of the defect'**
+  String get errProvideDescription;
+
+  /// No description provided for @bulkDefectSuccessMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} bulk defect tickets raised successfully'**
+  String bulkDefectSuccessMsg(int count);
+
+  /// No description provided for @errFailedToRaiseBulk.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to raise bulk issues'**
+  String get errFailedToRaiseBulk;
+
+  /// No description provided for @errFailedToLoadCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load defect categories'**
+  String get errFailedToLoadCategories;
+
+  /// No description provided for @viewGrouped.
+  ///
+  /// In en, this message translates to:
+  /// **'Grouped'**
+  String get viewGrouped;
+
+  /// No description provided for @viewFlat.
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get viewFlat;
+
+  /// No description provided for @unitsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Units'**
+  String unitsCount(int count);
+
+  /// No description provided for @singleUnitCount.
+  ///
+  /// In en, this message translates to:
+  /// **'1 Unit'**
+  String get singleUnitCount;
+
+  /// No description provided for @selectAllInGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Group'**
+  String get selectAllInGroup;
+
+  /// No description provided for @deselectGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Deselect'**
+  String get deselectGroup;
+
+  /// No description provided for @groupSelectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{selected}/{total} selected'**
+  String groupSelectedCount(int selected, int total);
+
+  /// No description provided for @filterByHardwareType.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by Type'**
+  String get filterByHardwareType;
+
+  /// No description provided for @allTypes.
+  ///
+  /// In en, this message translates to:
+  /// **'All Types'**
+  String get allTypes;
+
+  /// No description provided for @collapseAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse All'**
+  String get collapseAll;
+
+  /// No description provided for @expandAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand All'**
+  String get expandAll;
+
+  /// No description provided for @allHardware.
+  ///
+  /// In en, this message translates to:
+  /// **'All Hardware'**
+  String get allHardware;
+
+  /// No description provided for @categoriesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Categories'**
+  String categoriesCount(int count);
+
+  /// No description provided for @singleCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'1 Category'**
+  String get singleCategory;
+
+  /// No description provided for @unitsAffectedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Units Affected'**
+  String unitsAffectedBadge(int count);
+
+  /// No description provided for @quantityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity'**
+  String get quantityLabel;
+
+  /// No description provided for @applyToSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply to Selected'**
+  String get applyToSelected;
+
+  /// No description provided for @actionMarkResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark Resolved'**
+  String get actionMarkResolved;
+
+  /// No description provided for @actionStartWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Work'**
+  String get actionStartWork;
+
+  /// No description provided for @actionHold.
+  ///
+  /// In en, this message translates to:
+  /// **'Place on Hold'**
+  String get actionHold;
+
+  /// No description provided for @selectMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get selectMode;
+
+  /// No description provided for @doneSelecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get doneSelecting;
+
+  /// No description provided for @btnBulkResolve.
+  ///
+  /// In en, this message translates to:
+  /// **'Bulk Resolve'**
+  String get btnBulkResolve;
+
+  /// No description provided for @bulkResolveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bulk Resolve Issues'**
+  String get bulkResolveTitle;
+
+  /// No description provided for @bulkResolveSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch update status for multiple tickets (1–50)'**
+  String get bulkResolveSubtitle;
+
+  /// No description provided for @selectTickets.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Tickets ({count}/50)'**
+  String selectTickets(int count);
+
+  /// No description provided for @searchTicketsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search ticket by ID, device, category or zone...'**
+  String get searchTicketsHint;
+
+  /// No description provided for @resolutionNotesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Technician Resolution / Work Notes'**
+  String get resolutionNotesLabel;
+
+  /// No description provided for @resolutionNotesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Explain steps taken, repairs made, or reason for status update...'**
+  String get resolutionNotesHint;
+
+  /// No description provided for @btnApplyStatusToTickets.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply {status} to {count} Ticket(s)'**
+  String btnApplyStatusToTickets(String status, int count);
+
+  /// No description provided for @bulkStatusSuccessMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} tickets updated to {status}'**
+  String bulkStatusSuccessMsg(int count, String status);
+
+  /// No description provided for @errSelectAtLeastOneTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select at least 1 ticket'**
+  String get errSelectAtLeastOneTicket;
+
+  /// No description provided for @errMaxTicketsLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum limit of 50 tickets can be updated at once'**
+  String get errMaxTicketsLimit;
+
+  /// No description provided for @presetPowerRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Main power supply restored'**
+  String get presetPowerRestored;
+
+  /// No description provided for @presetBatchRepaired.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch repair completed and verified'**
+  String get presetBatchRepaired;
+
+  /// No description provided for @presetFirmwareUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Firmware updated & rebooted'**
+  String get presetFirmwareUpdated;
+
+  /// No description provided for @presetCablesTested.
+  ///
+  /// In en, this message translates to:
+  /// **'Cables re-seated & connectivity verified'**
+  String get presetCablesTested;
 }
 
 class _AppLocalizationsDelegate

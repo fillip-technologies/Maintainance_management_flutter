@@ -31,13 +31,26 @@ class DashboardSummaryModel {
     final total = (json['totalDevices'] ?? json['total_devices'] as num?)?.toInt() ?? 0;
     final missing = (json['devicesMissingTodayLog'] ?? json['devices_missing_today_log'] ?? json['today_logs_pending'] as num?)?.toInt() ?? 0;
     final completed = (json['todayLogsCompleted'] ?? json['today_logs_completed'] as num?)?.toInt() ?? (total > missing ? total - missing : 0);
+    final faulty = (json['faultyDevices'] ?? json['faulty_devices'] as num?)?.toInt() ?? 0;
+    final underMaint = (json['underMaintenance'] ??
+            json['under_maintenance'] ??
+            json['underMaintenanceDevices'] ??
+            json['under_maintenance_devices'] as num?)
+        ?.toInt() ??
+        0;
+    final prov = (json['provisionedDevices'] ?? json['provisioned_devices'] as num?)?.toInt() ?? 0;
+
+    final rawActive = (json['activeDevices'] ?? json['active_devices'] as num?)?.toInt();
+    // When the backend does not explicitly return activeDevices, derive it from
+    // non-retired total minus any faulty, under-maintenance, and provisioned devices.
+    final calculatedActive = rawActive ?? (total - faulty - underMaint - prov).clamp(0, total);
 
     return DashboardSummaryModel(
       totalDevices: total,
-      activeDevices: (json['activeDevices'] ?? json['active_devices'] as num?)?.toInt() ?? 0,
-      underMaintenanceDevices: (json['underMaintenanceDevices'] ?? json['under_maintenance_devices'] as num?)?.toInt() ?? 0,
-      faultyDevices: (json['faultyDevices'] ?? json['faulty_devices'] as num?)?.toInt() ?? 0,
-      provisionedDevices: (json['provisionedDevices'] ?? json['provisioned_devices'] as num?)?.toInt() ?? 0,
+      activeDevices: calculatedActive,
+      underMaintenanceDevices: underMaint,
+      faultyDevices: faulty,
+      provisionedDevices: prov,
       openIssues: (json['openIssues'] ?? json['open_issues'] as num?)?.toInt() ?? 0,
       inProgressIssues: (json['inProgressIssues'] ?? json['in_progress_issues'] as num?)?.toInt() ?? 0,
       resolvedIssues: (json['resolvedIssues'] ?? json['resolved_issues'] as num?)?.toInt() ?? 0,
@@ -45,6 +58,36 @@ class DashboardSummaryModel {
       devicesMissingTodayLog: missing,
       todayLogsCompleted: completed,
       todayLogsPending: missing,
+    );
+  }
+
+  DashboardSummaryModel copyWith({
+    int? totalDevices,
+    int? activeDevices,
+    int? underMaintenanceDevices,
+    int? faultyDevices,
+    int? provisionedDevices,
+    int? openIssues,
+    int? inProgressIssues,
+    int? resolvedIssues,
+    int? criticalIssues,
+    int? devicesMissingTodayLog,
+    int? todayLogsCompleted,
+    int? todayLogsPending,
+  }) {
+    return DashboardSummaryModel(
+      totalDevices: totalDevices ?? this.totalDevices,
+      activeDevices: activeDevices ?? this.activeDevices,
+      underMaintenanceDevices: underMaintenanceDevices ?? this.underMaintenanceDevices,
+      faultyDevices: faultyDevices ?? this.faultyDevices,
+      provisionedDevices: provisionedDevices ?? this.provisionedDevices,
+      openIssues: openIssues ?? this.openIssues,
+      inProgressIssues: inProgressIssues ?? this.inProgressIssues,
+      resolvedIssues: resolvedIssues ?? this.resolvedIssues,
+      criticalIssues: criticalIssues ?? this.criticalIssues,
+      devicesMissingTodayLog: devicesMissingTodayLog ?? this.devicesMissingTodayLog,
+      todayLogsCompleted: todayLogsCompleted ?? this.todayLogsCompleted,
+      todayLogsPending: todayLogsPending ?? this.todayLogsPending,
     );
   }
 

@@ -1,3 +1,4 @@
+export 'models/device_group_model.dart';
 export 'models/device_model.dart';
 export 'models/hardware_type_model.dart';
 export 'models/zone_model.dart';

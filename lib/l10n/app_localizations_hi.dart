@@ -500,4 +500,216 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get searchSparesHint => 'नाम या कोड से स्पेयर खोजें...';
+
+  @override
+  String get btnBulkDefect => 'थोक समस्या';
+
+  @override
+  String get raiseBulkDefectTitle => 'थोक उपकरण समस्या रिपोर्ट करें';
+
+  @override
+  String get raiseBulkDefectSubtitle =>
+      'एकाधिक उपकरणों पर समान समस्या दर्ज करें (1–50)';
+
+  @override
+  String selectEquipmentUnits(int count) {
+    return 'उपकरण चुनें ($count/50)';
+  }
+
+  @override
+  String get selectAll => 'सभी चुनें';
+
+  @override
+  String get clearSelection => 'हटाएं';
+
+  @override
+  String get searchUnitsHint => 'नाम, सीरियल नंबर या प्रकार से खोजें...';
+
+  @override
+  String get noMatchingUnits => 'कोई मेल खाने वाला उपकरण नहीं मिला';
+
+  @override
+  String get loadingCategories => 'दोष श्रेणियां लोड हो रही हैं...';
+
+  @override
+  String get noCategoriesFound =>
+      'कोई दोष श्रेणी नहीं मिली। कृपया व्यवस्थापक से संपर्क करें।';
+
+  @override
+  String get selectCategoryHint => 'दोष की श्रेणी चुनें';
+
+  @override
+  String get bulkDefectDescriptionLabel => 'दोष का विवरण एवं सामान्य लक्षण';
+
+  @override
+  String get bulkDefectDescriptionHint =>
+      'सामान्य लक्षण, बिजली विफलता, बैच क्षति या नेटवर्क खराबी का विवरण दें...';
+
+  @override
+  String get btnSelectUnitsFirst => 'समस्या दर्ज करने हेतु ऊपर उपकरण चुनें';
+
+  @override
+  String btnRaiseBulkDefect(int count) {
+    return '$count उपकरणों के लिए समस्या टिकट दर्ज करें';
+  }
+
+  @override
+  String get submittingBulkDefect => 'समस्याएं दर्ज हो रही हैं...';
+
+  @override
+  String get errSelectAtLeastOneUnit => 'कृपया कम से कम 1 उपकरण चुनें';
+
+  @override
+  String get errMaxUnitsLimit => 'एक साथ अधिकतम 50 उपकरण चुने जा सकते हैं';
+
+  @override
+  String get errRetiredUnitSelected =>
+      'सेवामुक्त उपकरणों पर समस्या दर्ज नहीं की जा सकती';
+
+  @override
+  String get errSelectCategory => 'कृपया दोष श्रेणी चुनें';
+
+  @override
+  String get errProvideDescription => 'कृपया दोष का स्पष्ट विवरण दर्ज करें';
+
+  @override
+  String bulkDefectSuccessMsg(int count) {
+    return '$count थोक समस्या टिकट सफलतापूर्वक दर्ज किए गए';
+  }
+
+  @override
+  String get errFailedToRaiseBulk => 'थोक समस्या टिकट दर्ज करने में विफल';
+
+  @override
+  String get errFailedToLoadCategories => 'दोष श्रेणियां लोड करने में विफल';
+
+  @override
+  String get viewGrouped => 'समूहबद्ध';
+
+  @override
+  String get viewFlat => 'सूची';
+
+  @override
+  String unitsCount(int count) {
+    return '$count उपकरण';
+  }
+
+  @override
+  String get singleUnitCount => '1 उपकरण';
+
+  @override
+  String get selectAllInGroup => 'समूह चुनें';
+
+  @override
+  String get deselectGroup => 'हटाएं';
+
+  @override
+  String groupSelectedCount(int selected, int total) {
+    return '$selected/$total चयनित';
+  }
+
+  @override
+  String get filterByHardwareType => 'प्रकार अनुसार फ़िल्टर';
+
+  @override
+  String get allTypes => 'सभी प्रकार';
+
+  @override
+  String get collapseAll => 'सभी समेटें';
+
+  @override
+  String get expandAll => 'सभी खोलें';
+
+  @override
+  String get allHardware => 'सभी हार्डवेयर';
+
+  @override
+  String categoriesCount(int count) {
+    return '$count श्रेणियां';
+  }
+
+  @override
+  String get singleCategory => '1 श्रेणी';
+
+  @override
+  String unitsAffectedBadge(int count) {
+    return '$count उपकरण प्रभावित';
+  }
+
+  @override
+  String get quantityLabel => 'मात्रा';
+
+  @override
+  String get applyToSelected => 'चयनित पर लागू करें';
+
+  @override
+  String get actionMarkResolved => 'समाधान करें';
+
+  @override
+  String get actionStartWork => 'कार्य शुरू करें';
+
+  @override
+  String get actionHold => 'होल्ड पर रखें';
+
+  @override
+  String get selectMode => 'चुनें';
+
+  @override
+  String get doneSelecting => 'पूर्ण';
+
+  @override
+  String get btnBulkResolve => 'थोक समाधान';
+
+  @override
+  String get bulkResolveTitle => 'थोक समस्याएं हल करें';
+
+  @override
+  String get bulkResolveSubtitle =>
+      'एक साथ कई टिकटों की स्थिति अपडेट करें (1–50)';
+
+  @override
+  String selectTickets(int count) {
+    return 'टिकट चुनें ($count/50)';
+  }
+
+  @override
+  String get searchTicketsHint =>
+      'टिकट आईडी, उपकरण, श्रेणी या ज़ोन से खोजें...';
+
+  @override
+  String get resolutionNotesLabel => 'तकनीशियन कार्य विवरण / नोट्स';
+
+  @override
+  String get resolutionNotesHint =>
+      'किए गए कार्य, मरम्मत या स्थिति परिवर्तन का कारण बताएं...';
+
+  @override
+  String btnApplyStatusToTickets(String status, int count) {
+    return '$count टिकटों पर $status लागू करें';
+  }
+
+  @override
+  String bulkStatusSuccessMsg(int count, String status) {
+    return '$count टिकट $status में सफलतापूर्वक अपडेट किए गए';
+  }
+
+  @override
+  String get errSelectAtLeastOneTicket => 'कृपया कम से कम 1 टिकट चुनें';
+
+  @override
+  String get errMaxTicketsLimit =>
+      'एक साथ अधिकतम 50 टिकट ही अपडेट किए जा सकते हैं';
+
+  @override
+  String get presetPowerRestored => 'मुख्य बिजली आपूर्ति बहाल की गई';
+
+  @override
+  String get presetBatchRepaired => 'बैच मरम्मत पूरी हुई और जांच की गई';
+
+  @override
+  String get presetFirmwareUpdated => 'फ़र्मवेयर अपडेट और रीबूट किया गया';
+
+  @override
+  String get presetCablesTested =>
+      'केबल दोबारा जोड़े गए और कनेक्टिविटी जांची गई';
 }

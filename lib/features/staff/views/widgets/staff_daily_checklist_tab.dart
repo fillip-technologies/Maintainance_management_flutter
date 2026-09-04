@@ -86,7 +86,7 @@ class StaffDailyChecklistTab extends StatelessWidget {
             onRefresh: onRefresh,
             child: ListView.builder(
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 84),
               itemCount: (isLoading || hasError || displayedDevices.isEmpty) ? 1 : displayedDevices.length,
               itemBuilder: (context, index) {
                 if (isLoading) {

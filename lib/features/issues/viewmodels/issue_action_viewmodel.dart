@@ -68,6 +68,78 @@ class IssueActionController extends Notifier<IssueActionState> {
     }
   }
 
+  /// Creates multiple maintenance tickets in bulk and refreshes relevant providers.
+  Future<List<IssueModel>?> createBulkIssues({
+    required List<String> deviceIds,
+    required String categoryId,
+    required IssuePriority priority,
+    required String description,
+  }) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    try {
+      final repo = ref.read(issueRepositoryProvider);
+      final newIssues = await repo.createBulkIssues(
+        deviceIds: deviceIds,
+        categoryId: categoryId,
+        priority: priority,
+        description: description,
+      );
+
+      // Invalidate issue queues so UI reflects the new defects immediately
+      ref.invalidate(staffIssuesProvider);
+      ref.invalidate(technicianIssuesProvider);
+
+      state = state.copyWith(
+        isLoading: false,
+        lastUpdatedIssue: newIssues.isNotEmpty ? newIssues.first : null,
+      );
+      return newIssues;
+    } catch (e, st) {
+      AppLogger.e('❌ [IssueActionController] Failed to create bulk issues: $e', e, st);
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: e.toString().replaceAll('Exception:', '').trim(),
+      );
+      return null;
+    }
+  }
+
+  /// Transitions status for multiple issues simultaneously and refreshes relevant providers.
+  Future<({List<IssueModel> updated, List<Map<String, dynamic>> errors})?> bulkUpdateStatus({
+    required List<String> issueIds,
+    required IssueStatus status,
+    String? notes,
+  }) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    try {
+      final repo = ref.read(issueRepositoryProvider);
+      final result = await repo.bulkUpdateStatus(
+        issueIds: issueIds,
+        status: status,
+        notes: notes,
+      );
+
+      // Invalidate relevant providers to update all views
+      ref.invalidate(staffIssuesProvider);
+      ref.invalidate(technicianIssuesProvider);
+      ref.invalidate(staffDevicesProvider);
+      ref.invalidate(staffDashboardSummaryProvider);
+
+      state = state.copyWith(
+        isLoading: false,
+        lastUpdatedIssue: result.updated.isNotEmpty ? result.updated.first : null,
+      );
+      return result;
+    } catch (e, st) {
+      AppLogger.e('❌ [IssueActionController] Failed to bulk update status: $e', e, st);
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: e.toString().replaceAll('Exception:', '').trim(),
+      );
+      return null;
+    }
+  }
+
   /// Transitions issue status (e.g., open -> in_progress -> on_hold -> resolved -> closed).
   Future<IssueModel?> updateStatus({
     required String issueId,

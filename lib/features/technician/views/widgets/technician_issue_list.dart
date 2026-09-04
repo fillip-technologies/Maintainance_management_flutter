@@ -13,6 +13,10 @@ class TechnicianIssueList extends StatelessWidget {
   final void Function(IssueModel issue) onOpenDetail;
   final void Function(IssueModel issue, [IssueStatus? targetStatus]) onOpenUpdateStatus;
 
+  final bool isSelectionMode;
+  final Set<String> selectedIssueIds;
+  final ValueChanged<String>? onToggleSelect;
+
   const TechnicianIssueList({
     super.key,
     required this.issues,
@@ -22,6 +26,9 @@ class TechnicianIssueList extends StatelessWidget {
     required this.onRefresh,
     required this.onOpenDetail,
     required this.onOpenUpdateStatus,
+    this.isSelectionMode = false,
+    this.selectedIssueIds = const {},
+    this.onToggleSelect,
   });
 
   @override
@@ -71,7 +78,10 @@ class TechnicianIssueList extends StatelessWidget {
           return TechnicianIssueCard(
             key: ValueKey(issue.id),
             issue: issue,
-            onTap: () => onOpenDetail(issue),
+            isSelectable: isSelectionMode,
+            isSelected: selectedIssueIds.contains(issue.id),
+            onSelect: (_) => onToggleSelect?.call(issue.id),
+            onTap: isSelectionMode ? () => onToggleSelect?.call(issue.id) : () => onOpenDetail(issue),
             onOpenTimeline: () => onOpenDetail(issue),
             onUpdateStatus: (newStatus) => onOpenUpdateStatus(issue, newStatus),
           );

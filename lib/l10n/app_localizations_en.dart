@@ -501,4 +501,219 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get searchSparesHint => 'Search spare by name or code...';
+
+  @override
+  String get btnBulkDefect => 'Bulk Defect';
+
+  @override
+  String get raiseBulkDefectTitle => 'Raise Bulk Defect';
+
+  @override
+  String get raiseBulkDefectSubtitle =>
+      'Report identical issue on multiple units (1–50)';
+
+  @override
+  String selectEquipmentUnits(int count) {
+    return 'Select Equipment ($count/50)';
+  }
+
+  @override
+  String get selectAll => 'Select All';
+
+  @override
+  String get clearSelection => 'Clear';
+
+  @override
+  String get searchUnitsHint => 'Search unit by name, serial number or type...';
+
+  @override
+  String get noMatchingUnits => 'No matching equipment units found';
+
+  @override
+  String get loadingCategories => 'Loading defect categories...';
+
+  @override
+  String get noCategoriesFound =>
+      'No defect categories found. Please contact an administrator.';
+
+  @override
+  String get selectCategoryHint => 'Select Defect Category';
+
+  @override
+  String get bulkDefectDescriptionLabel =>
+      'Defect Description & Shared Symptoms';
+
+  @override
+  String get bulkDefectDescriptionHint =>
+      'Describe common symptoms, power failure, batch damage, network outage...';
+
+  @override
+  String get btnSelectUnitsFirst => 'Select Units Above to Report Defect';
+
+  @override
+  String btnRaiseBulkDefect(int count) {
+    return 'Raise Defect Ticket on $count Unit(s)';
+  }
+
+  @override
+  String get submittingBulkDefect => 'Raising Defects...';
+
+  @override
+  String get errSelectAtLeastOneUnit =>
+      'Please select at least 1 equipment unit';
+
+  @override
+  String get errMaxUnitsLimit =>
+      'Maximum limit of 50 units reached for a single bulk ticket';
+
+  @override
+  String get errRetiredUnitSelected =>
+      'Cannot raise defects on retired equipment';
+
+  @override
+  String get errSelectCategory => 'Please select a defect category';
+
+  @override
+  String get errProvideDescription =>
+      'Please provide a clear description of the defect';
+
+  @override
+  String bulkDefectSuccessMsg(int count) {
+    return '$count bulk defect tickets raised successfully';
+  }
+
+  @override
+  String get errFailedToRaiseBulk => 'Failed to raise bulk issues';
+
+  @override
+  String get errFailedToLoadCategories => 'Failed to load defect categories';
+
+  @override
+  String get viewGrouped => 'Grouped';
+
+  @override
+  String get viewFlat => 'List';
+
+  @override
+  String unitsCount(int count) {
+    return '$count Units';
+  }
+
+  @override
+  String get singleUnitCount => '1 Unit';
+
+  @override
+  String get selectAllInGroup => 'Select Group';
+
+  @override
+  String get deselectGroup => 'Deselect';
+
+  @override
+  String groupSelectedCount(int selected, int total) {
+    return '$selected/$total selected';
+  }
+
+  @override
+  String get filterByHardwareType => 'Filter by Type';
+
+  @override
+  String get allTypes => 'All Types';
+
+  @override
+  String get collapseAll => 'Collapse All';
+
+  @override
+  String get expandAll => 'Expand All';
+
+  @override
+  String get allHardware => 'All Hardware';
+
+  @override
+  String categoriesCount(int count) {
+    return '$count Categories';
+  }
+
+  @override
+  String get singleCategory => '1 Category';
+
+  @override
+  String unitsAffectedBadge(int count) {
+    return '$count Units Affected';
+  }
+
+  @override
+  String get quantityLabel => 'Quantity';
+
+  @override
+  String get applyToSelected => 'Apply to Selected';
+
+  @override
+  String get actionMarkResolved => 'Mark Resolved';
+
+  @override
+  String get actionStartWork => 'Start Work';
+
+  @override
+  String get actionHold => 'Place on Hold';
+
+  @override
+  String get selectMode => 'Select';
+
+  @override
+  String get doneSelecting => 'Done';
+
+  @override
+  String get btnBulkResolve => 'Bulk Resolve';
+
+  @override
+  String get bulkResolveTitle => 'Bulk Resolve Issues';
+
+  @override
+  String get bulkResolveSubtitle =>
+      'Batch update status for multiple tickets (1–50)';
+
+  @override
+  String selectTickets(int count) {
+    return 'Select Tickets ($count/50)';
+  }
+
+  @override
+  String get searchTicketsHint =>
+      'Search ticket by ID, device, category or zone...';
+
+  @override
+  String get resolutionNotesLabel => 'Technician Resolution / Work Notes';
+
+  @override
+  String get resolutionNotesHint =>
+      'Explain steps taken, repairs made, or reason for status update...';
+
+  @override
+  String btnApplyStatusToTickets(String status, int count) {
+    return 'Apply $status to $count Ticket(s)';
+  }
+
+  @override
+  String bulkStatusSuccessMsg(int count, String status) {
+    return '$count tickets updated to $status';
+  }
+
+  @override
+  String get errSelectAtLeastOneTicket => 'Please select at least 1 ticket';
+
+  @override
+  String get errMaxTicketsLimit =>
+      'Maximum limit of 50 tickets can be updated at once';
+
+  @override
+  String get presetPowerRestored => 'Main power supply restored';
+
+  @override
+  String get presetBatchRepaired => 'Batch repair completed and verified';
+
+  @override
+  String get presetFirmwareUpdated => 'Firmware updated & rebooted';
+
+  @override
+  String get presetCablesTested => 'Cables re-seated & connectivity verified';
 }
