@@ -152,6 +152,25 @@ class AuthRepository {
     AppLogger.i('🧹 [AuthRepository] Session cleared from local storage');
   }
 
+  Future<void> registerDeviceToken({
+    required String token,
+    String platform = 'android',
+  }) async {
+    try {
+      AppLogger.i('📲 [AuthRepository] Registering device token with backend: ${token.length > 12 ? token.substring(0, 12) : token}...');
+      await apiClient.dio.post(
+        '/auth/device-token',
+        data: {
+          'token': token,
+          'platform': platform,
+        },
+      );
+      AppLogger.i('✅ [AuthRepository] Device token registered successfully with backend');
+    } catch (e) {
+      AppLogger.w('⚠️ [AuthRepository] Failed to register device token: $e');
+    }
+  }
+
   UserModel? getCurrentUser() => storage.getUser();
 
   bool get isAuthenticated => storage.hasSession;

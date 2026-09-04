@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user_model.dart';
 import '../repositories/auth_repository.dart';
 import '../../../core/network/api_client.dart';
+import '../../../core/notifications/push_notification_service.dart';
 import '../../../core/storage/storage_service.dart';
 
 // 1. Storage Provider (Overridden in main.dart after SharedPreferences.getInstance())
@@ -27,11 +28,31 @@ class AuthNotifier extends AsyncNotifier<UserModel?> {
   @override
   Future<UserModel?> build() async {
     final authRepo = ref.watch(authRepositoryProvider);
-    return authRepo.getCurrentUser();
+    final user = authRepo.getCurrentUser();
+    if (user != null) {
+      _registerPushToken(authRepo);
+    }
+    return user;
+  }
+
+  Future<void> _registerPushToken(AuthRepository authRepo) async {
+    try {
+      await PushNotificationService.init(
+        onTokenRefresh: (token) async {
+          await authRepo.registerDeviceToken(token: token);
+        },
+      );
+    } catch (e) {
+      // Gracefully degrades if offline or in test environment
+    }
   }
 
   void setUser(UserModel? user) {
     state = AsyncValue.data(user);
+    if (user != null) {
+      final authRepo = ref.read(authRepositoryProvider);
+      _registerPushToken(authRepo);
+    }
   }
 
   Future<UserModel> login({
@@ -43,6 +64,7 @@ class AuthNotifier extends AsyncNotifier<UserModel?> {
       final authRepo = ref.read(authRepositoryProvider);
       final user = await authRepo.login(email: email, password: password);
       state = AsyncValue.data(user);
+      _registerPushToken(authRepo);
       return user;
     } catch (e, st) {
       state = AsyncValue.error(e, st);

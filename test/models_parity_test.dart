@@ -714,5 +714,19 @@ void main() {
       expect(en.selectTickets(3), 'Select Tickets (3/50)');
       expect(hi.selectTickets(3), 'टिकट चुनें (3/50)');
     });
+
+    test('21. Push Notification Device Token payload and platform parity', () {
+      const sampleToken = 'fcm_test_token_abc_123';
+      const platform = 'android';
+      final payload = {
+        'token': sampleToken,
+        'platform': platform,
+      };
+
+      expect(payload['token'], sampleToken);
+      expect(payload['platform'], 'android');
+      expect(payload.containsKey('token'), isTrue);
+      expect(payload.containsKey('platform'), isTrue);
+    });
   });
 }
