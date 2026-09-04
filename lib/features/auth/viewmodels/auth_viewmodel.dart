@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user_model.dart';
 import '../repositories/auth_repository.dart';
 import '../../../core/network/api_client.dart';
+import '../../../core/services/push_service.dart';
 import '../../../core/storage/storage_service.dart';
 
 // 1. Storage Provider (Overridden in main.dart after SharedPreferences.getInstance())
@@ -80,6 +82,11 @@ class LoginController extends AsyncNotifier<void> {
       final authRepo = ref.read(authRepositoryProvider);
       final user = await authRepo.login(email: email, password: password);
       ref.read(authStateProvider.notifier).setUser(user);
+
+      // Register FCM token with backend — non-blocking, failure is tolerated.
+      final push = ref.read(pushServiceProvider);
+      push.listenForeground();
+      unawaited(push.registerToken());
     });
 
     return !state.hasError;
