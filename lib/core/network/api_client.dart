@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:dio/dio.dart';
 import '../config/app_config.dart';
 import '../storage/storage_service.dart';
@@ -7,6 +8,9 @@ class ApiClient {
   final StorageService storage;
   late final Dio dio;
   late final Dio _tokenDio; // Dedicated client for refresh requests without interceptor loops
+
+  final _tokenRefreshedController = StreamController<String>.broadcast();
+  Stream<String> get onTokenRefreshed => _tokenRefreshedController.stream;
 
   static String get defaultBaseUrl => AppConfig.defaultBaseUrl;
 
@@ -82,6 +86,41 @@ class ApiClient {
     }
   }
 
+  /// Explicitly refreshes the JWT access token using the stored refresh token.
+  /// Emits the new access token on [onTokenRefreshed] when successful.
+  Future<String?> refreshToken() async {
+    final refreshToken = storage.getRefreshToken();
+    if (refreshToken == null || refreshToken.isEmpty) {
+      AppLogger.w('⚠️ [ApiClient] No refresh token found.');
+      return null;
+    }
+
+    try {
+      final response = await _tokenDio.post(
+        '/auth/refresh',
+        data: {'refreshToken': refreshToken},
+      );
+
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        final data = response.data['data'] as Map<String, dynamic>;
+        final newAccessToken = data['accessToken'] as String;
+        final newRefreshToken = data['refreshToken'] as String;
+
+        await storage.saveTokens(
+          accessToken: newAccessToken,
+          refreshToken: newRefreshToken,
+        );
+
+        AppLogger.i('🔄 [ApiClient] Token refreshed successfully.');
+        _tokenRefreshedController.add(newAccessToken);
+        return newAccessToken;
+      }
+    } catch (refreshErr) {
+      AppLogger.e('🚫 [ApiClient] Refresh request failed.', refreshErr);
+    }
+    return null;
+  }
+
   void _setupInterceptors() {
     // 1. Logger Interceptor
     dio.interceptors.add(
@@ -127,53 +166,28 @@ class ApiClient {
               !error.requestOptions.path.contains('/auth/login') &&
               !error.requestOptions.path.contains('/auth/refresh')) {
             AppLogger.w('⚠️ Received 401 Unauthorized. Attempting token refresh...');
-            final refreshToken = storage.getRefreshToken();
+            final newAccessToken = await refreshToken();
 
-            if (refreshToken != null && refreshToken.isNotEmpty) {
-              try {
-                // Attempt to rotate refresh token
-                final response = await _tokenDio.post(
-                  '/auth/refresh',
-                  data: {'refreshToken': refreshToken},
-                );
+            if (newAccessToken != null && newAccessToken.isNotEmpty) {
+              AppLogger.i('🔄 Token refreshed. Retrying failed request...');
+              final retryOptions = error.requestOptions;
+              retryOptions.headers['Authorization'] = 'Bearer $newAccessToken';
 
-                if (response.statusCode == 200 && response.data['success'] == true) {
-                  final data = response.data['data'] as Map<String, dynamic>;
-                  final newAccessToken = data['accessToken'] as String;
-                  final newRefreshToken = data['refreshToken'] as String;
+              final clonedRequest = await dio.request(
+                retryOptions.path,
+                options: Options(
+                  method: retryOptions.method,
+                  headers: retryOptions.headers,
+                  responseType: retryOptions.responseType,
+                  contentType: retryOptions.contentType,
+                ),
+                data: retryOptions.data,
+                queryParameters: retryOptions.queryParameters,
+              );
 
-                  AppLogger.i('🔄 Token refreshed successfully. Retrying failed request...');
-
-                  // Save new tokens
-                  await storage.saveTokens(
-                    accessToken: newAccessToken,
-                    refreshToken: newRefreshToken,
-                  );
-
-                  // Update header and retry original request
-                  final retryOptions = error.requestOptions;
-                  retryOptions.headers['Authorization'] = 'Bearer $newAccessToken';
-
-                  final clonedRequest = await dio.request(
-                    retryOptions.path,
-                    options: Options(
-                      method: retryOptions.method,
-                      headers: retryOptions.headers,
-                      responseType: retryOptions.responseType,
-                      contentType: retryOptions.contentType,
-                    ),
-                    data: retryOptions.data,
-                    queryParameters: retryOptions.queryParameters,
-                  );
-
-                  return handler.resolve(clonedRequest);
-                }
-              } catch (refreshErr) {
-                AppLogger.e('🚫 Refresh failed. Clearing user session.', refreshErr);
-                await storage.clearSession();
-              }
+              return handler.resolve(clonedRequest);
             } else {
-              AppLogger.w('⚠️ No refresh token found. Clearing user session.');
+              AppLogger.w('⚠️ Token refresh failed. Clearing session.');
               await storage.clearSession();
             }
           }

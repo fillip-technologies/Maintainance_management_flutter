@@ -913,6 +913,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Available Spares in Stock'**
   String get deploySpareTitle;
+
+  /// No description provided for @realtimeLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Live'**
+  String get realtimeLive;
+
+  /// No description provided for @realtimeConnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting...'**
+  String get realtimeConnecting;
+
+  /// No description provided for @realtimeOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get realtimeOffline;
+
+  /// No description provided for @newIssueAlertTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New Defect Reported'**
+  String get newIssueAlertTitle;
+
+  /// No description provided for @issueStartedAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'Technician started work on equipment'**
+  String get issueStartedAlert;
+
+  /// No description provided for @issueResolvedAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'Issue marked resolved by technician'**
+  String get issueResolvedAlert;
+
+  /// No description provided for @deviceCheckedLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit verified by colleague'**
+  String get deviceCheckedLive;
+
+  /// No description provided for @viewTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'View Ticket'**
+  String get viewTicket;
 }
 
 class _AppLocalizationsDelegate

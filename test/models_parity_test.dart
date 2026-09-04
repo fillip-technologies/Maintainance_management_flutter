@@ -1,11 +1,15 @@
+import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:equipment_management_system/data/models/user_model.dart';
 import 'package:equipment_management_system/data/models/zone_model.dart';
 import 'package:equipment_management_system/data/models/device_model.dart';
 import 'package:equipment_management_system/data/models/issue_model.dart';
 import 'package:equipment_management_system/data/models/hardware_type_model.dart';
+import 'package:equipment_management_system/core/config/app_config.dart';
 import 'package:equipment_management_system/data/models/daily_log_model.dart';
 import 'package:equipment_management_system/data/models/dashboard_summary_model.dart';
+import 'package:equipment_management_system/data/models/socket_event_model.dart';
+import 'package:equipment_management_system/core/utils/jwt_helper.dart';
 
 void main() {
   group('Backend ⟷ Frontend Model Parity Tests', () {
@@ -309,6 +313,66 @@ void main() {
       expect(issue.deviceCode, 'CAM-000123');
       expect(issue.deviceStatus, DeviceStatus.underMaintenance);
       expect(issue.priority, IssuePriority.critical);
+    });
+
+    test('11. AppConfig.getSocketUrl extracts WebSocket origin server URL correctly', () {
+      expect(AppConfig.getSocketUrl('http://localhost:3000/api/v1'), 'http://localhost:3000');
+      expect(AppConfig.getSocketUrl('https://api.myapp.com/api/v1/'), 'https://api.myapp.com');
+      expect(AppConfig.getSocketUrl('http://192.168.1.100:3000/api/v1'), 'http://192.168.1.100:3000');
+    });
+
+    test('12. SocketEventModel parses socket domain payloads correctly', () {
+      final backendIssuePayload = {
+        'id': 'iss-live-01',
+        'title': 'Power failure',
+        'description': 'UPS battery dead',
+        'device': {
+          'id': 'dev-ups-01',
+          'name': 'Main UPS',
+          'code': 'UPS-000001',
+          'status': 'under_maintenance',
+        },
+        'category': {'id': 'cat-pwr', 'name': 'Electrical'},
+        'priority': 'high',
+        'status': 'open',
+        'createdAt': '2026-09-03T18:00:00.000Z',
+      };
+
+      final issueEvent = SocketIssueEvent.fromJson('issue:created', backendIssuePayload);
+      expect(issueEvent.eventType, 'issue:created');
+      expect(issueEvent.issue.id, 'iss-live-01');
+      expect(issueEvent.issue.deviceName, 'Main UPS');
+
+      final backendLogPayload = {
+        'id': 'log-live-01',
+        'deviceId': 'dev-ups-01',
+        'status': 'working',
+        'logDate': '2026-09-03',
+        'notes': 'All green indicators',
+        'zoneId': 'zone-north',
+      };
+
+      final logEvent = SocketLogEvent.fromJson(backendLogPayload);
+      expect(logEvent.log.id, 'log-live-01');
+      expect(logEvent.log.status, DailyLogStatus.working);
+      expect(logEvent.zoneId, 'zone-north');
+    });
+
+    test('13. JwtHelper detects token expiration and decodes payload correctly', () {
+      // Future expiry token:
+      final futureExpirySeconds = (DateTime.now().millisecondsSinceEpoch ~/ 1000) + 3600;
+      final payloadFuture = base64Url.encode(utf8.encode('{"sub":"user-1","exp":$futureExpirySeconds}'));
+      final validToken = 'header.$payloadFuture.signature';
+      expect(JwtHelper.isExpired(validToken), false);
+
+      // Past expiry token:
+      final pastExpirySeconds = (DateTime.now().millisecondsSinceEpoch ~/ 1000) - 100;
+      final payloadPast = base64Url.encode(utf8.encode('{"sub":"user-1","exp":$pastExpirySeconds}'));
+      final expiredToken = 'header.$payloadPast.signature';
+      expect(JwtHelper.isExpired(expiredToken), true);
+
+      // Malformed token:
+      expect(JwtHelper.isExpired('invalid-token'), true);
     });
   });
 }

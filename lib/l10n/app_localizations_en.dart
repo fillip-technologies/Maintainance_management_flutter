@@ -423,4 +423,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deploySpareTitle => 'Available Spares in Stock';
+
+  @override
+  String get realtimeLive => 'Live';
+
+  @override
+  String get realtimeConnecting => 'Connecting...';
+
+  @override
+  String get realtimeOffline => 'Offline';
+
+  @override
+  String get newIssueAlertTitle => 'New Defect Reported';
+
+  @override
+  String get issueStartedAlert => 'Technician started work on equipment';
+
+  @override
+  String get issueResolvedAlert => 'Issue marked resolved by technician';
+
+  @override
+  String get deviceCheckedLive => 'Unit verified by colleague';
+
+  @override
+  String get viewTicket => 'View Ticket';
 }

@@ -148,5 +148,13 @@
   "hardwareStatus": "उपकरण स्थिति",
   "filterRetired": "हटाए गए",
   "hardwareCode": "उपकरण कोड",
-  "deploySpareTitle": "स्टॉक में उपलब्ध स्पेयर यूनिट"
+  "deploySpareTitle": "स्टॉक में उपलब्ध स्पेयर यूनिट",
+  "realtimeLive": "लाइव",
+  "realtimeConnecting": "कनेक्ट हो रहा है...",
+  "realtimeOffline": "ऑफ़लाइन",
+  "newIssueAlertTitle": "नया दोष दर्ज किया गया",
+  "issueStartedAlert": "तकनीशियन ने उपकरण पर कार्य शुरू किया",
+  "issueResolvedAlert": "तकनीशियन द्वारा समस्या हल की गई",
+  "deviceCheckedLive": "सहकर्मी द्वारा उपकरण जांचा गया",
+  "viewTicket": "टिकट देखें"
 }

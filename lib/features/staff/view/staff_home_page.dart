@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/providers/daily_log_provider.dart';
 import '../../../core/providers/device_provider.dart';
+import '../../../core/providers/socket_provider.dart';
 import '../../../core/theme/colors.dart';
 import '../../../core/utils/app_snackbar.dart';
+import '../../../core/utils/realtime_toast_helper.dart';
 import '../../../data/models/daily_log_model.dart';
 import '../../../data/models/device_model.dart';
 import '../../../data/models/issue_model.dart';
@@ -177,6 +179,59 @@ class _StaffHomePageState extends ConsumerState<StaffHomePage>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+
+    // Realtime: Sync daily logs submitted by any staff member in this zone
+    ref.listen<AsyncValue<DailyStatusLogModel>>(
+      socketLogSubmittedStreamProvider,
+      (previous, next) {
+        final log = next.value;
+        if (log != null) {
+          ref.invalidate(todayLogsProvider);
+          ref.invalidate(staffDashboardSummaryProvider);
+          ref.invalidate(staffDevicesProvider);
+        }
+      },
+    );
+
+    // Realtime: Sync issue defect creation
+    ref.listen<AsyncValue<IssueModel>>(
+      socketIssueCreatedStreamProvider,
+      (previous, next) {
+        final issue = next.value;
+        if (issue != null) {
+          ref.invalidate(staffIssuesProvider);
+          ref.invalidate(staffDevicesProvider);
+          ref.invalidate(staffDashboardSummaryProvider);
+        }
+      },
+    );
+
+    // Realtime: Sync issue updates (technician started work, resolved, or closed)
+    ref.listen<AsyncValue<IssueModel>>(
+      socketIssueUpdatedStreamProvider,
+      (previous, next) {
+        final issue = next.value;
+        if (issue != null) {
+          ref.invalidate(staffIssuesProvider);
+          ref.invalidate(staffDevicesProvider);
+          ref.invalidate(staffDashboardSummaryProvider);
+          ref.invalidate(issueDetailProvider(issue.id));
+
+          // If issue was marked resolved by tech, notify staff to verify
+          if (issue.status == IssueStatus.resolved) {
+            RealtimeToastHelper.showSimpleToast(
+              context,
+              title: l10n?.issueResolvedAlert ?? 'Defect Resolved',
+              message: '${issue.deviceName} has been resolved by technician. Tap to verify & close.',
+              icon: Icons.check_circle_outline,
+              iconColor: AppColors.success,
+              onTap: () => IssueDetailSheet.show(context, issue),
+            );
+          }
+        }
+      },
+    );
+
     final staffDevicesAsync = ref.watch(staffDevicesProvider);
     final staffSummaryAsync = ref.watch(staffDashboardSummaryProvider);
     final staffIssuesAsync = ref.watch(staffIssuesProvider);

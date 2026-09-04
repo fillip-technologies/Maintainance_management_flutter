@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../../../core/theme/colors.dart';
+import '../../../core/widgets/connection_status_pill.dart';
 import '../../../core/widgets/language_switcher_button.dart';
 import '../../../data/models/user_model.dart';
 import '../../profile/profile.dart';
@@ -115,6 +116,8 @@ class GlobalHomePage extends ConsumerWidget {
           ),
         ),
         actions: const [
+          Center(child: ConnectionStatusPill()),
+          SizedBox(width: 8),
           Center(child: LanguageSwitcherButton(isCompact: true)),
           SizedBox(width: 14),
         ],

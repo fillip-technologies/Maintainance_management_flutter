@@ -42,4 +42,20 @@ class AppConfig {
 
     return url;
   }
+
+  /// Extracts the origin server URL for Socket.IO by stripping `/api/v1`.
+  /// e.g. `http://localhost:3000/api/v1` -> `http://localhost:3000`
+  static String getSocketUrl(String apiBaseUrl) {
+    var url = apiBaseUrl.trim();
+    while (url.endsWith('/')) {
+      url = url.substring(0, url.length - 1);
+    }
+    if (url.endsWith('/api/v1')) {
+      url = url.substring(0, url.length - '/api/v1'.length);
+    }
+    while (url.endsWith('/')) {
+      url = url.substring(0, url.length - 1);
+    }
+    return url;
+  }
 }

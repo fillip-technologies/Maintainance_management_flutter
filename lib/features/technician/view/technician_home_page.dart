@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/providers/socket_provider.dart';
 import '../../../core/theme/colors.dart';
 import '../../../core/utils/app_snackbar.dart';
+import '../../../core/utils/realtime_toast_helper.dart';
 import '../../../data/models/issue_model.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../issues/issues.dart';
@@ -71,6 +73,35 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage>
 
   @override
   Widget build(BuildContext context) {
+    // Realtime: Listen for incoming new tickets and show toast + refresh
+    ref.listen<AsyncValue<IssueModel>>(
+      socketIssueCreatedStreamProvider,
+      (previous, next) {
+        final issue = next.value;
+        if (issue != null) {
+          ref.invalidate(technicianIssuesProvider);
+          RealtimeToastHelper.showNewIssueToast(
+            context,
+            issue: issue,
+            onTap: () => IssueDetailSheet.show(context, issue),
+          );
+        }
+      },
+    );
+
+    // Realtime: Listen for ticket status updates (e.g. claimed or resolved)
+    ref.listen<AsyncValue<IssueModel>>(
+      socketIssueUpdatedStreamProvider,
+      (previous, next) {
+        final issue = next.value;
+        if (issue != null) {
+          ref.invalidate(technicianIssuesProvider);
+          ref.invalidate(issueDetailProvider(issue.id));
+          ref.invalidate(issueHistoryProvider(issue.id));
+        }
+      },
+    );
+
     final l10n = AppLocalizations.of(context)!;
     final issuesAsync = ref.watch(technicianIssuesProvider);
     final issues = issuesAsync.value ?? [];

@@ -422,4 +422,28 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get deploySpareTitle => 'स्टॉक में उपलब्ध स्पेयर यूनिट';
+
+  @override
+  String get realtimeLive => 'लाइव';
+
+  @override
+  String get realtimeConnecting => 'कनेक्ट हो रहा है...';
+
+  @override
+  String get realtimeOffline => 'ऑफ़लाइन';
+
+  @override
+  String get newIssueAlertTitle => 'नया दोष दर्ज किया गया';
+
+  @override
+  String get issueStartedAlert => 'तकनीशियन ने उपकरण पर कार्य शुरू किया';
+
+  @override
+  String get issueResolvedAlert => 'तकनीशियन द्वारा समस्या हल की गई';
+
+  @override
+  String get deviceCheckedLive => 'सहकर्मी द्वारा उपकरण जांचा गया';
+
+  @override
+  String get viewTicket => 'टिकट देखें';
 }
