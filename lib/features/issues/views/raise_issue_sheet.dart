@@ -68,9 +68,7 @@ class _RaiseIssueSheetState extends ConsumerState<RaiseIssueSheet> {
   void initState() {
     super.initState();
     _selectedDevice = widget.initialDevice;
-    if (_selectedDevice != null) {
-      _loadCategoriesForDevice(_selectedDevice!);
-    }
+    _loadCategoriesForDevice(_selectedDevice);
   }
 
   @override
@@ -79,7 +77,7 @@ class _RaiseIssueSheetState extends ConsumerState<RaiseIssueSheet> {
     super.dispose();
   }
 
-  Future<void> _loadCategoriesForDevice(DeviceModel device) async {
+  Future<void> _loadCategoriesForDevice(DeviceModel? device) async {
     setState(() {
       _isLoadingCategories = true;
       _categories = [];
@@ -88,7 +86,10 @@ class _RaiseIssueSheetState extends ConsumerState<RaiseIssueSheet> {
 
     try {
       final issueRepo = ref.read(issueRepositoryProvider);
-      final categories = await issueRepo.getCategoriesForHardwareType(device.hardwareTypeId);
+      final categories = await issueRepo.getCategoriesForHardwareType(
+        device?.hardwareTypeId,
+        deviceId: device?.id,
+      );
       if (mounted) {
         setState(() {
           _categories = categories;

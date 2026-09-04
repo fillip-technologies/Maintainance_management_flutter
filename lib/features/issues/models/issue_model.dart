@@ -54,7 +54,10 @@ class IssueCategoryModel {
     return IssueCategoryModel(
       id: (json['id'] as String?) ?? '',
       name: (json['name'] as String?) ?? 'General Issue',
-      hardwareTypeId: (json['hardwareTypeId'] ?? json['hardware_type_id']) as String?,
+      hardwareTypeId: (json['hardwareTypeId'] ??
+              json['hardware_type_id'] ??
+              json['categoryId'] ??
+              json['category_id']) as String?,
     );
   }
 

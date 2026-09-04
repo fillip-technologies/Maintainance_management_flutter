@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/utils/app_logger.dart';
-import '../../devices/models/hardware_type_model.dart';
 import '../models/issue_model.dart';
 
 class IssueRepository {
@@ -165,31 +164,36 @@ class IssueRepository {
     }
   }
 
-  /// Fetches issue categories for a given hardware type.
-  Future<List<IssueCategoryModel>> getCategoriesForHardwareType(String? hardwareTypeId) async {
+  /// Fetches issue categories from the backend `/issue-categories` endpoint.
+  /// If a [deviceId] is provided, returns global defect categories plus any categories
+  /// specific to that device's product category.
+  Future<List<IssueCategoryModel>> getCategoriesForHardwareType(
+    String? hardwareTypeId, {
+    String? deviceId,
+  }) async {
     try {
-      if (hardwareTypeId == null || hardwareTypeId.isEmpty) {
-        // Fetch all hardware types and collect categories
-        final response = await apiClient.dio.get('/hardware-types');
-        if (response.statusCode == 200 && response.data['success'] == true) {
-          final data = response.data['data'] as Map<String, dynamic>;
-          final items = (data['items'] as List<dynamic>?) ?? [];
-          final allCats = <IssueCategoryModel>[];
-          for (final h in items) {
-            final hw = HardwareTypeModel.fromJson(h as Map<String, dynamic>);
-            allCats.addAll(hw.issueCategories);
-          }
-          return allCats;
-        }
-        return [];
+      final queryParams = <String, dynamic>{};
+      if (deviceId != null && deviceId.isNotEmpty) {
+        queryParams['deviceId'] = deviceId;
       }
 
-      final response = await apiClient.dio.get('/hardware-types/$hardwareTypeId');
+      final response = await apiClient.dio.get(
+        '/issue-categories',
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      );
 
       if (response.statusCode == 200 && response.data['success'] == true) {
-        final data = response.data['data'] as Map<String, dynamic>;
-        final hw = HardwareTypeModel.fromJson(data);
-        return hw.issueCategories;
+        final data = response.data['data'];
+        List<dynamic> items = [];
+        if (data is Map<String, dynamic> && data['items'] is List) {
+          items = data['items'] as List<dynamic>;
+        } else if (data is List) {
+          items = data;
+        }
+
+        return items
+            .map((item) => IssueCategoryModel.fromJson(item as Map<String, dynamic>))
+            .toList();
       }
       return [];
     } on DioException catch (e) {
@@ -199,6 +203,11 @@ class IssueRepository {
       AppLogger.w('⚠️ [IssueRepository] Error parsing categories: $e');
       return [];
     }
+  }
+
+  /// Explicit helper to fetch defect categories for a specific device.
+  Future<List<IssueCategoryModel>> getCategoriesForDevice(String deviceId) async {
+    return getCategoriesForHardwareType(null, deviceId: deviceId);
   }
 
   /// Updates the status of an issue (e.g. assigned -> in_progress -> on_hold -> resolved -> closed).

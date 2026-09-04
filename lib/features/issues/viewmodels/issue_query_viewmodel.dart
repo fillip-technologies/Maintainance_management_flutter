@@ -48,3 +48,9 @@ final issueCategoriesProvider = FutureProvider.autoDispose.family<List<IssueCate
   final issueRepo = ref.watch(issueRepositoryProvider);
   return issueRepo.getCategoriesForHardwareType(hardwareTypeId);
 });
+
+/// 7. Issue Categories Scoped to Device Provider
+final issueCategoriesForDeviceProvider = FutureProvider.autoDispose.family<List<IssueCategoryModel>, String?>((ref, deviceId) async {
+  final issueRepo = ref.watch(issueRepositoryProvider);
+  return issueRepo.getCategoriesForHardwareType(null, deviceId: deviceId);
+});
