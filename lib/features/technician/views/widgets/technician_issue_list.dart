@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/colors.dart';
+import '../../../../core/widgets/empty_state_view.dart';
 import '../../../issues/issues.dart';
 import 'technician_issue_card.dart';
 
@@ -44,53 +45,24 @@ class TechnicianIssueList extends StatelessWidget {
 
           if (hasError) {
             return Padding(
-              padding: const EdgeInsets.only(top: 60),
-              child: Center(
-                child: Column(
-                  children: [
-                    const Icon(Icons.cloud_off_rounded, size: 48, color: AppColors.icon),
-                    const SizedBox(height: 12),
-                    const Text(
-                      'Failed to load technician queue',
-                      style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-                    ),
-                    const SizedBox(height: 12),
-                    ElevatedButton.icon(
-                      onPressed: onRefresh,
-                      icon: const Icon(Icons.refresh, size: 16),
-                      label: const Text('Retry'),
-                    ),
-                  ],
-                ),
+              padding: const EdgeInsets.only(top: 40),
+              child: ErrorStateView(
+                title: 'Failed to load technician queue',
+                subtitle: 'Please check your network and try again',
+                onRetry: onRefresh,
               ),
             );
           }
 
           if (issues.isEmpty) {
             return Padding(
-              padding: const EdgeInsets.only(top: 80),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.task_alt, size: 48, color: AppColors.iconLight),
-                    const SizedBox(height: 12),
-                    Text(
-                      emptyMessage,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textSecondary,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 6),
-                    const Text(
-                      'Pull down to refresh ticket feed',
-                      style: TextStyle(fontSize: 12, color: AppColors.textMuted),
-                    ),
-                  ],
-                ),
+              padding: const EdgeInsets.only(top: 40),
+              child: EmptyStateView(
+                icon: Icons.task_alt,
+                iconColor: AppColors.primary,
+                iconBackgroundColor: AppColors.primaryBg,
+                title: emptyMessage,
+                subtitle: 'Pull down to refresh ticket feed',
               ),
             );
           }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/colors.dart';
+import '../../../../core/widgets/app_filter_chip.dart';
+import '../../../../core/widgets/empty_state_view.dart';
 import '../../../daily_logs/daily_logs.dart';
 import '../../../devices/devices.dart';
 import '../../models/staff_checklist_state.dart';
@@ -53,21 +55,24 @@ class StaffDailyChecklistTab extends StatelessWidget {
           color: AppColors.surface,
           child: Row(
             children: [
-              _buildFilterChip(
+              AppFilterChip(
                 label: 'All (${allDevices.length})',
-                index: 0,
+                isSelected: checklistState.filterIndex == 0,
+                onTap: () => onFilterChanged(0),
               ),
               const SizedBox(width: 8),
-              _buildFilterChip(
+              AppFilterChip(
                 label: 'Pending ($pendingCount)',
-                index: 1,
+                isSelected: checklistState.filterIndex == 1,
                 badgeColor: pendingCount > 0 ? AppColors.warningText : null,
+                onTap: () => onFilterChanged(1),
               ),
               const SizedBox(width: 8),
-              _buildFilterChip(
+              AppFilterChip(
                 label: 'Done ($completedCount)',
-                index: 2,
+                isSelected: checklistState.filterIndex == 2,
                 badgeColor: completedCount > 0 ? AppColors.successText : null,
+                onTap: () => onFilterChanged(2),
               ),
             ],
           ),
@@ -95,59 +100,32 @@ class StaffDailyChecklistTab extends StatelessWidget {
 
                 if (hasError) {
                   return Padding(
-                    padding: const EdgeInsets.only(top: 60),
-                    child: Center(
-                      child: Column(
-                        children: [
-                          const Icon(Icons.cloud_off_rounded, size: 48, color: AppColors.icon),
-                          const SizedBox(height: 12),
-                          const Text(
-                            'Failed to load hardware checklist',
-                            style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-                          ),
-                          const SizedBox(height: 12),
-                          ElevatedButton.icon(
-                            onPressed: onRefresh,
-                            icon: const Icon(Icons.refresh, size: 16),
-                            label: const Text('Retry'),
-                          ),
-                        ],
-                      ),
+                    padding: const EdgeInsets.only(top: 40),
+                    child: ErrorStateView(
+                      title: 'Failed to load hardware checklist',
+                      subtitle: 'Please check your connection and tap to retry',
+                      onRetry: onRefresh,
                     ),
                   );
                 }
 
                 if (displayedDevices.isEmpty) {
                   return Padding(
-                    padding: const EdgeInsets.only(top: 80),
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            checklistState.filterIndex == 1 ? Icons.task_alt_rounded : Icons.devices_outlined,
-                            size: 48,
-                            color: checklistState.filterIndex == 1 ? AppColors.success : AppColors.iconLight,
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            checklistState.filterIndex == 1
-                                ? 'All checks complete for today! Great work.'
-                                : 'No devices found in this filter',
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textSecondary,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 6),
-                          const Text(
-                            'Pull down to refresh catalogue',
-                            style: TextStyle(fontSize: 12, color: AppColors.textMuted),
-                          ),
-                        ],
-                      ),
+                    padding: const EdgeInsets.only(top: 40),
+                    child: EmptyStateView(
+                      icon: checklistState.filterIndex == 1
+                          ? Icons.task_alt_rounded
+                          : Icons.devices_outlined,
+                      iconColor: checklistState.filterIndex == 1
+                          ? AppColors.successText
+                          : AppColors.icon,
+                      iconBackgroundColor: checklistState.filterIndex == 1
+                          ? AppColors.successLight
+                          : AppColors.cardAlt,
+                      title: checklistState.filterIndex == 1
+                          ? 'All checks complete for today! Great work.'
+                          : 'No hardware found in this filter',
+                      subtitle: 'Pull down to refresh the catalogue',
                     ),
                   );
                 }
@@ -175,38 +153,6 @@ class StaffDailyChecklistTab extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildFilterChip({
-    required String label,
-    required int index,
-    Color? badgeColor,
-  }) {
-    final isSelected = checklistState.filterIndex == index;
-    return InkWell(
-      onTap: () => onFilterChanged(index),
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : AppColors.background,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.border,
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-            color: isSelected
-                ? AppColors.textWhite
-                : (badgeColor ?? AppColors.textSecondary),
-          ),
-        ),
-      ),
     );
   }
 }

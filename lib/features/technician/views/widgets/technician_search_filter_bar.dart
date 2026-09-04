@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/colors.dart';
+import '../../../../core/widgets/app_filter_chip.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../issues/issues.dart';
 
-class TechnicianSearchFilterBar extends StatelessWidget {
+class TechnicianSearchFilterBar extends StatefulWidget {
   final String searchQuery;
   final IssuePriority? selectedPriority;
   final ValueChanged<String> onSearchChanged;
@@ -16,6 +17,33 @@ class TechnicianSearchFilterBar extends StatelessWidget {
     required this.onSearchChanged,
     required this.onPriorityChanged,
   });
+
+  @override
+  State<TechnicianSearchFilterBar> createState() => _TechnicianSearchFilterBarState();
+}
+
+class _TechnicianSearchFilterBarState extends State<TechnicianSearchFilterBar> {
+  late final TextEditingController _searchController;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController(text: widget.searchQuery);
+  }
+
+  @override
+  void didUpdateWidget(covariant TechnicianSearchFilterBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.searchQuery != widget.searchQuery && _searchController.text != widget.searchQuery) {
+      _searchController.text = widget.searchQuery;
+    }
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,10 +61,20 @@ class TechnicianSearchFilterBar extends StatelessWidget {
       child: Column(
         children: [
           TextField(
+            controller: _searchController,
             style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
             decoration: InputDecoration(
               hintText: searchHint,
               prefixIcon: const Icon(Icons.search, color: AppColors.icon),
+              suffixIcon: widget.searchQuery.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear, size: 18, color: AppColors.icon),
+                      onPressed: () {
+                        _searchController.clear();
+                        widget.onSearchChanged('');
+                      },
+                    )
+                  : null,
               contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               filled: true,
               fillColor: AppColors.background,
@@ -45,7 +83,7 @@ class TechnicianSearchFilterBar extends StatelessWidget {
                 borderSide: BorderSide.none,
               ),
             ),
-            onChanged: onSearchChanged,
+            onChanged: widget.onSearchChanged,
           ),
           const SizedBox(height: 8),
           SingleChildScrollView(
@@ -53,9 +91,13 @@ class TechnicianSearchFilterBar extends StatelessWidget {
             child: Row(
               children: [
                 _buildPriorityFilterChip(allLabel, null),
+                const SizedBox(width: 6),
                 _buildPriorityFilterChip(criticalLabel, IssuePriority.critical),
+                const SizedBox(width: 6),
                 _buildPriorityFilterChip(highLabel, IssuePriority.high),
+                const SizedBox(width: 6),
                 _buildPriorityFilterChip(mediumLabel, IssuePriority.medium),
+                const SizedBox(width: 6),
                 _buildPriorityFilterChip(lowLabel, IssuePriority.low),
               ],
             ),
@@ -66,32 +108,12 @@ class TechnicianSearchFilterBar extends StatelessWidget {
   }
 
   Widget _buildPriorityFilterChip(String label, IssuePriority? priority) {
-    final isSelected = selectedPriority == priority;
-    return Padding(
-      padding: const EdgeInsets.only(right: 6),
-      child: FilterChip(
-        label: Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            color: isSelected ? AppColors.textWhite : AppColors.textSecondary,
-          ),
-        ),
-        selected: isSelected,
-        onSelected: (_) => onPriorityChanged(priority),
-        backgroundColor: AppColors.background,
-        selectedColor: _getChipColor(priority),
-        checkmarkColor: AppColors.textWhite,
-        showCheckmark: false,
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: BorderSide(
-            color: isSelected ? Colors.transparent : AppColors.border,
-          ),
-        ),
-      ),
+    final isSelected = widget.selectedPriority == priority;
+    return AppFilterChip(
+      label: label,
+      isSelected: isSelected,
+      activeColor: _getChipColor(priority),
+      onTap: () => widget.onPriorityChanged(priority),
     );
   }
 

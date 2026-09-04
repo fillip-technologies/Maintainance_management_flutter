@@ -19,6 +19,7 @@ class IssueCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      key: ValueKey(issue.id),
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: AppColors.surface,
@@ -57,17 +58,35 @@ class IssueCard extends StatelessWidget {
               ),
               const SizedBox(height: 10),
 
+              // Title if available
+              if (issue.title.isNotEmpty) ...[
+                Text(
+                  issue.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 6),
+              ],
+
               // Device & Category Info
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(8),
+                    width: 36,
+                    height: 36,
                     decoration: BoxDecoration(
                       color: AppColors.primaryBg,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Icon(
-                      HardwareIconHelper.getIcon(issue.deviceName),
+                      HardwareIconHelper.getIcon(
+                        issue.categoryName.isNotEmpty ? issue.categoryName : issue.deviceName,
+                      ),
                       size: 20,
                       color: AppColors.primary,
                     ),
@@ -81,12 +100,12 @@ class IssueCard extends StatelessWidget {
                           issue.deviceName,
                           style: const TextStyle(
                             fontSize: 14,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,
                           ),
                         ),
                         Text(
-                          '${issue.zoneName} • ${issue.categoryName}',
+                          '${issue.zoneName}${issue.categoryName.isNotEmpty ? " • ${issue.categoryName}" : ""}',
                           style: const TextStyle(
                             fontSize: 12,
                             color: AppColors.textSecondary,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/colors.dart';
-import '../../../../core/widgets/status_badge.dart';
-import '../../../devices/devices.dart';
+import '../../../../core/widgets/app_filter_chip.dart';
+import '../../../../core/widgets/empty_state_view.dart';
 import '../../../issues/issues.dart';
 
 class StaffIssuesTrackerTab extends StatefulWidget {
@@ -49,21 +49,24 @@ class _StaffIssuesTrackerTabState extends State<StaffIssuesTrackerTab> {
           color: AppColors.surface,
           child: Row(
             children: [
-              _buildFilterChip(
+              AppFilterChip(
                 label: 'Open (${openIssues.length})',
-                index: 0,
+                isSelected: _filterIndex == 0,
                 badgeColor: openIssues.isNotEmpty ? AppColors.warningText : null,
+                onTap: () => setState(() => _filterIndex = 0),
               ),
               const SizedBox(width: 8),
-              _buildFilterChip(
+              AppFilterChip(
                 label: 'Closed (${closedIssues.length})',
-                index: 1,
+                isSelected: _filterIndex == 1,
                 badgeColor: closedIssues.isNotEmpty ? AppColors.successText : null,
+                onTap: () => setState(() => _filterIndex = 1),
               ),
               const SizedBox(width: 8),
-              _buildFilterChip(
+              AppFilterChip(
                 label: 'All (${allIssues.length})',
-                index: 2,
+                isSelected: _filterIndex == 2,
+                onTap: () => setState(() => _filterIndex = 2),
               ),
             ],
           ),
@@ -91,170 +94,47 @@ class _StaffIssuesTrackerTabState extends State<StaffIssuesTrackerTab> {
                 }
                 if (widget.hasError) {
                   return Padding(
-                    padding: const EdgeInsets.only(top: 60),
-                    child: Center(
-                      child: Column(
-                        children: [
-                          const Icon(Icons.cloud_off_rounded, size: 48, color: AppColors.icon),
-                          const SizedBox(height: 12),
-                          const Text(
-                            'Failed to load maintenance tickets',
-                            style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-                          ),
-                          const SizedBox(height: 12),
-                          ElevatedButton.icon(
-                            onPressed: widget.onRefresh,
-                            icon: const Icon(Icons.refresh, size: 16),
-                            label: const Text('Retry'),
-                          ),
-                        ],
-                      ),
+                    padding: const EdgeInsets.only(top: 40),
+                    child: ErrorStateView(
+                      title: 'Failed to load maintenance tickets',
+                      subtitle: 'Please check your connection and try again',
+                      onRetry: widget.onRefresh,
                     ),
                   );
                 }
                 if (displayedIssues.isEmpty) {
                   return Padding(
-                    padding: const EdgeInsets.only(top: 80),
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            _filterIndex == 0
-                                ? Icons.task_alt_rounded
-                                : (_filterIndex == 1
-                                    ? Icons.history_toggle_off_rounded
-                                    : Icons.confirmation_number_outlined),
-                            size: 48,
-                            color: AppColors.iconLight,
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            _filterIndex == 0
-                                ? 'No open maintenance tickets in your zone'
-                                : (_filterIndex == 1
-                                    ? 'No closed maintenance tickets yet'
-                                    : 'No maintenance issues recorded in your zone'),
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            _filterIndex == 0
-                                ? 'All reported equipment issues have been resolved'
-                                : 'Pull down to refresh tickets',
-                            style: const TextStyle(
-                              fontSize: 13,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
+                    padding: const EdgeInsets.only(top: 40),
+                    child: EmptyStateView(
+                      icon: _filterIndex == 0
+                          ? Icons.task_alt_rounded
+                          : (_filterIndex == 1
+                              ? Icons.history_toggle_off_rounded
+                              : Icons.confirmation_number_outlined),
+                      iconColor: _filterIndex == 0 ? AppColors.successText : AppColors.icon,
+                      iconBackgroundColor: _filterIndex == 0 ? AppColors.successLight : AppColors.cardAlt,
+                      title: _filterIndex == 0
+                          ? 'No open maintenance tickets in your zone'
+                          : (_filterIndex == 1
+                              ? 'No closed maintenance tickets yet'
+                              : 'No maintenance issues recorded in your zone'),
+                      subtitle: _filterIndex == 0
+                          ? 'All reported equipment issues have been resolved'
+                          : 'Pull down to refresh tickets',
                     ),
                   );
                 }
 
                 final issue = displayedIssues[index];
-                return Container(
-                  key: ValueKey(issue.id),
-                  margin: const EdgeInsets.only(bottom: 12),
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: issue.priority == IssuePriority.critical
-                          ? AppColors.error.withValues(alpha: 0.5)
-                          : AppColors.border,
-                    ),
-                  ),
-                  child: InkWell(
-                    onTap: () => widget.onOpenIssueDetail(issue),
-                    borderRadius: BorderRadius.circular(14),
-                    child: Padding(
-                      padding: const EdgeInsets.all(14),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                issue.id.length > 8 ? '#${issue.id.substring(0, 8)}' : issue.id,
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppColors.primary),
-                              ),
-                              const Spacer(),
-                              StatusBadge.priority(issue.priority),
-                              const SizedBox(width: 6),
-                              StatusBadge.issue(issue.status),
-                            ],
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            issue.title.isNotEmpty ? issue.title : (issue.description.isNotEmpty ? issue.description : 'Maintenance Issue'),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppColors.textPrimary),
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              Icon(
-                                HardwareIconHelper.getIcon(issue.categoryName),
-                                size: 13,
-                                color: AppColors.icon,
-                              ),
-                              const SizedBox(width: 4),
-                              Expanded(
-                                child: Text(
-                                  '${issue.deviceName} • ${issue.zoneName} ${issue.categoryName.isNotEmpty ? "• ${issue.categoryName}" : ""}',
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                return IssueCard(
+                  issue: issue,
+                  onTap: () => widget.onOpenIssueDetail(issue),
                 );
               },
             ),
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildFilterChip({
-    required String label,
-    required int index,
-    Color? badgeColor,
-  }) {
-    final isSelected = _filterIndex == index;
-    return InkWell(
-      onTap: () => setState(() => _filterIndex = index),
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : AppColors.cardAlt,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.border,
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            color: isSelected ? AppColors.textWhite : (badgeColor ?? AppColors.textSecondary),
-          ),
-        ),
-      ),
     );
   }
 }

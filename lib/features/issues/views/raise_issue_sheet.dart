@@ -32,10 +32,8 @@ class RaiseIssueSheet extends ConsumerStatefulWidget {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
+      enableDrag: true,
+      backgroundColor: Colors.transparent,
       builder: (_) => RaiseIssueSheet(
         devices: devices,
         initialDevice: initialDevice,
@@ -99,8 +97,10 @@ class _RaiseIssueSheetState extends ConsumerState<RaiseIssueSheet> {
           }
         });
       }
-    } catch (_) {
-      // Empty fallback
+    } catch (e) {
+      if (mounted) {
+        setState(() => _errorMessage = 'Failed to load defect categories');
+      }
     } finally {
       if (mounted) {
         setState(() => _isLoadingCategories = false);
@@ -109,34 +109,55 @@ class _RaiseIssueSheetState extends ConsumerState<RaiseIssueSheet> {
   }
 
   // =========================================================================
-  // CAMERA PROOF CAPTURE (COMMENTED OUT FOR NOW - WILL BE ENABLED IN FUTURE)
+  // CAMERA PROOF CAPTURE HELPERS (COMMENTED OUT FOR NOW)
   // =========================================================================
   // Future<void> _pickImage(ImageSource source) async {
-  //   Navigator.pop(context);
-  //   setState(() => _isPickingImage = true);
   //   try {
-  //     final XFile? pickedFile = await _picker.pickImage(
+  //     setState(() => _isPickingImage = true);
+  //     final picked = await _picker.pickImage(
   //       source: source,
-  //       maxWidth: 1800,
-  //       maxHeight: 1800,
-  //       imageQuality: 85,
+  //       imageQuality: 70,
+  //       maxWidth: 1024,
   //     );
-  //     if (pickedFile != null) {
-  //       setState(() {
-  //         _attachedImage = File(pickedFile.path);
-  //       });
+  //     if (picked != null) {
+  //       setState(() => _attachedImage = File(picked.path));
   //     }
   //   } catch (e) {
   //     AppSnackbar.error('Failed to capture photo: $e');
   //   } finally {
-  //     if (mounted) {
-  //       setState(() => _isPickingImage = false);
-  //     }
+  //     if (mounted) setState(() => _isPickingImage = false);
   //   }
   // }
   //
   // void _showImageSourceModal() {
-  //   ...
+  //   showModalBottomSheet(
+  //     context: context,
+  //     shape: const RoundedRectangleBorder(
+  //       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+  //     ),
+  //     builder: (ctx) => SafeArea(
+  //       child: Wrap(
+  //         children: [
+  //           ListTile(
+  //             leading: const Icon(Icons.camera_alt, color: AppColors.primary),
+  //             title: const Text('Take Defect Photo'),
+  //             onTap: () {
+  //               Navigator.pop(ctx);
+  //               _pickImage(ImageSource.camera);
+  //             },
+  //           ),
+  //           ListTile(
+  //             leading: const Icon(Icons.photo_library, color: AppColors.primary),
+  //             title: const Text('Choose from Gallery'),
+  //             onTap: () {
+  //               Navigator.pop(ctx);
+  //               _pickImage(ImageSource.gallery);
+  //             },
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
   // }
   // =========================================================================
 
@@ -192,303 +213,351 @@ class _RaiseIssueSheetState extends ConsumerState<RaiseIssueSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 20,
-        right: 20,
-        top: 20,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+    final maxHeight = MediaQuery.of(context).size.height * 0.90;
+
+    return Container(
+      constraints: BoxConstraints(maxHeight: maxHeight),
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Header
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Row(
-                  children: [
-                    Icon(Icons.report_problem_outlined, color: AppColors.error, size: 22),
-                    SizedBox(width: 8),
-                    Text(
-                      'Raise Equipment Defect',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                  ],
-                ),
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.close, color: AppColors.icon),
-                ),
-              ],
-            ),
-            const Divider(color: AppColors.divider),
-            const SizedBox(height: 12),
-
-            if (_errorMessage != null) ...[
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: AppColors.errorLight,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.error_outline, color: AppColors.errorText, size: 18),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        _errorMessage!,
-                        style: const TextStyle(fontSize: 13, color: AppColors.errorText),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-            ],
-
-            // 1. Device Selection Dropdown
-            const Text(
-              'Equipment Unit',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Top Drag Handle
+          const SizedBox(height: 12),
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
               decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.border),
-              ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<DeviceModel>(
-                  value: _selectedDevice,
-                  isExpanded: true,
-                  hint: const Text('Select Equipment Unit'),
-                  items: widget.devices.map((device) {
-                    return DropdownMenuItem<DeviceModel>(
-                      value: device,
-                      child: Text(
-                        '${device.name} (${device.location.isNotEmpty ? device.location : "No Location"})',
-                        style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (DeviceModel? newDevice) {
-                    if (newDevice != null) {
-                      setState(() {
-                        _selectedDevice = newDevice;
-                      });
-                      _loadCategoriesForDevice(newDevice);
-                    }
-                  },
-                ),
+                color: AppColors.border,
+                borderRadius: BorderRadius.circular(10),
               ),
             ),
-            const SizedBox(height: 14),
+          ),
+          const SizedBox(height: 6),
 
-            // 2. Defect Category Selection
-            const Text(
-              'Defect Category',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
+          Flexible(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 6,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
               ),
-            ),
-            const SizedBox(height: 6),
-            if (_isLoadingCategories)
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: const Row(
-                  children: [
-                    SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Header
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: AppColors.errorLight,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(Icons.report_problem_outlined, color: AppColors.errorText, size: 20),
+                          ),
+                          const SizedBox(width: 10),
+                          const Text(
+                            'Raise Equipment Defect',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.close, color: AppColors.icon),
+                      ),
+                    ],
+                  ),
+                  const Divider(color: AppColors.divider),
+                  const SizedBox(height: 12),
+
+                  if (_errorMessage != null) ...[
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppColors.errorLight,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.error_outline, color: AppColors.errorText, size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _errorMessage!,
+                              style: const TextStyle(fontSize: 13, color: AppColors.errorText),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    SizedBox(width: 10),
-                    Text(
-                      'Loading categories...',
-                      style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
-                    ),
+                    const SizedBox(height: 12),
                   ],
-                ),
-              )
-            else if (_categories.isEmpty && _selectedDevice != null)
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.warningLight,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Text(
-                  'No categories defined for this hardware. General failure will be reported.',
-                  style: TextStyle(fontSize: 12, color: AppColors.warningText),
-                ),
-              )
-            else
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<IssueCategoryModel>(
-                    value: _selectedCategory,
-                    isExpanded: true,
-                    hint: const Text('Select Defect Type'),
-                    items: _categories.map((cat) {
-                      return DropdownMenuItem<IssueCategoryModel>(
-                        value: cat,
-                        child: Text(
-                          cat.name,
-                          style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
+
+                  // 1. Device Selection Dropdown
+                  const Text(
+                    'Equipment Unit',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<DeviceModel>(
+                        value: _selectedDevice,
+                        isExpanded: true,
+                        hint: const Text('Select Unit to Report'),
+                        items: widget.devices.map((d) {
+                          return DropdownMenuItem<DeviceModel>(
+                            value: d,
+                            child: Row(
+                              children: [
+                                Icon(
+                                  HardwareIconHelper.getIcon(d.hardwareTypeName),
+                                  size: 16,
+                                  color: AppColors.icon,
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    '${d.name} (${d.zoneName})',
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (DeviceModel? newDevice) {
+                          if (newDevice != null) {
+                            setState(() {
+                              _selectedDevice = newDevice;
+                            });
+                            _loadCategoriesForDevice(newDevice);
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+
+                  // 2. Defect Category Selection
+                  const Text(
+                    'Defect Category',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  if (_isLoadingCategories)
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: const Row(
+                        children: [
+                          SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                          ),
+                          SizedBox(width: 10),
+                          Text(
+                            'Loading categories...',
+                            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                          ),
+                        ],
+                      ),
+                    )
+                  else if (_categories.isEmpty && _selectedDevice != null)
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.warningLight,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: const Text(
+                        'No categories defined for this hardware. General failure will be reported.',
+                        style: TextStyle(fontSize: 12, color: AppColors.warningText),
+                      ),
+                    )
+                  else
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<IssueCategoryModel>(
+                          value: _selectedCategory,
+                          isExpanded: true,
+                          hint: const Text('Select Defect Type'),
+                          items: _categories.map((cat) {
+                            return DropdownMenuItem<IssueCategoryModel>(
+                              value: cat,
+                              child: Text(
+                                cat.name,
+                                style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (IssueCategoryModel? newCat) {
+                            setState(() {
+                              _selectedCategory = newCat;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                  const SizedBox(height: 14),
+
+                  // 3. Priority Selector
+                  const Text(
+                    'Severity / Priority',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: IssuePriority.values.map((priority) {
+                      final isSelected = _selectedPriority == priority;
+                      final (bg, textCol) = switch (priority) {
+                        IssuePriority.critical => isSelected
+                            ? (AppColors.error, AppColors.textWhite)
+                            : (AppColors.errorLight, AppColors.errorText),
+                        IssuePriority.high => isSelected
+                            ? (AppColors.warning, AppColors.textWhite)
+                            : (AppColors.warningLight, AppColors.warningText),
+                        IssuePriority.medium => isSelected
+                            ? (AppColors.info, AppColors.textWhite)
+                            : (AppColors.infoLight, AppColors.infoText),
+                        IssuePriority.low => isSelected
+                            ? (AppColors.primary, AppColors.textWhite)
+                            : (AppColors.surface, AppColors.textSecondary),
+                      };
+
+                      return Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 3),
+                          child: InkWell(
+                            onTap: () => setState(() => _selectedPriority = priority),
+                            borderRadius: BorderRadius.circular(12),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              decoration: BoxDecoration(
+                                color: bg,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: isSelected ? AppColors.transparent : AppColors.border,
+                                ),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                priority.localized(context),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: textCol,
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                       );
                     }).toList(),
-                    onChanged: (IssueCategoryModel? newCat) {
-                      setState(() {
-                        _selectedCategory = newCat;
-                      });
-                    },
                   ),
-                ),
-              ),
-            const SizedBox(height: 14),
+                  const SizedBox(height: 14),
 
-            // 3. Priority Selector
-            const Text(
-              'Severity / Priority',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: IssuePriority.values.map((priority) {
-                final isSelected = _selectedPriority == priority;
-                final (bg, textCol) = switch (priority) {
-                  IssuePriority.critical => isSelected
-                      ? (AppColors.error, AppColors.textWhite)
-                      : (AppColors.errorLight, AppColors.errorText),
-                  IssuePriority.high => isSelected
-                      ? (AppColors.warning, AppColors.textWhite)
-                      : (AppColors.warningLight, AppColors.warningText),
-                  IssuePriority.medium => isSelected
-                      ? (AppColors.info, AppColors.textWhite)
-                      : (AppColors.infoLight, AppColors.infoText),
-                  IssuePriority.low => isSelected
-                      ? (AppColors.primary, AppColors.textWhite)
-                      : (AppColors.surface, AppColors.textSecondary),
-                };
-
-                return Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 3),
-                    child: InkWell(
-                      onTap: () => setState(() => _selectedPriority = priority),
-                      borderRadius: BorderRadius.circular(12),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        decoration: BoxDecoration(
-                          color: bg,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: isSelected ? AppColors.transparent : AppColors.border,
-                          ),
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          priority.localized(context),
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: textCol,
-                          ),
-                        ),
+                  // 4. Description Field
+                  const Text(
+                    'Defect Details & Symptoms',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  TextField(
+                    controller: _descriptionController,
+                    maxLines: 3,
+                    style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
+                    decoration: InputDecoration(
+                      hintText: 'Describe the symptoms, error codes, physical damage...',
+                      fillColor: AppColors.background,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide.none,
                       ),
                     ),
                   ),
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 14),
 
-            // 4. Description Field
-            const Text(
-              'Defect Details & Symptoms',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
+                  const SizedBox(height: 22),
+
+                  // Submit Button
+                  SizedBox(
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: _isSubmitting ? null : _handleSubmit,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.error,
+                        foregroundColor: AppColors.textWhite,
+                        elevation: 1,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      child: _isSubmitting
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.textWhite),
+                            )
+                          : const Text(
+                              'Submit & Raise Maintenance Ticket',
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                            ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 6),
-            TextField(
-              controller: _descriptionController,
-              maxLines: 3,
-              style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
-              decoration: const InputDecoration(
-                hintText: 'Describe the symptoms, error codes, physical damage...',
-              ),
-            ),
-            const SizedBox(height: 14),
-
-            // =========================================================================
-            // CAMERA PROOF CAPTURE (COMMENTED OUT FOR NOW - WILL BE ENABLED IN FUTURE)
-            // =========================================================================
-            // const Text(
-            //   'Proof Photo (Optional)',
-            //   style: TextStyle(
-            //     fontSize: 13,
-            //     fontWeight: FontWeight.w600,
-            //     color: AppColors.textSecondary,
-            //   ),
-            // ),
-            // const SizedBox(height: 8),
-            // ... (Camera / Gallery Picker)
-            // =========================================================================
-
-            const SizedBox(height: 22),
-
-            // Submit Button
-            ElevatedButton(
-              onPressed: _isSubmitting ? null : _handleSubmit,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.error,
-                foregroundColor: AppColors.textWhite,
-              ),
-              child: _isSubmitting
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.textWhite),
-                    )
-                  : const Text('Submit & Raise Maintenance Ticket'),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

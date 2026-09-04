@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/utils/app_snackbar.dart';
+import '../../../../core/widgets/app_filter_chip.dart';
+import '../../../../core/widgets/empty_state_view.dart';
 import '../../../../core/widgets/status_badge.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../devices/devices.dart';
@@ -26,8 +28,23 @@ class StaffDevicesDirectoryTab extends StatefulWidget {
 }
 
 class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
+  final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   DeviceStatus? _filterStatus;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _clearFilters() {
+    setState(() {
+      _searchController.clear();
+      _searchQuery = '';
+      _filterStatus = null;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +65,8 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
       }).toList();
     }
 
+    final hasActiveFilter = _searchQuery.isNotEmpty || _filterStatus != null;
+
     return Column(
       children: [
         // Search & Filter Box
@@ -57,10 +76,20 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
           child: Column(
             children: [
               TextField(
+                controller: _searchController,
                 style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
                 decoration: InputDecoration(
                   hintText: 'Search hardware by name, type, or zone...',
                   prefixIcon: const Icon(Icons.search, color: AppColors.icon),
+                  suffixIcon: _searchQuery.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear, size: 18, color: AppColors.icon),
+                          onPressed: () {
+                            _searchController.clear();
+                            setState(() => _searchQuery = '');
+                          },
+                        )
+                      : null,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   filled: true,
                   fillColor: AppColors.background,
@@ -76,12 +105,46 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    _buildFilterChip('All Hardware', null),
-                    _buildFilterChip(l10n?.deviceStatusActive ?? 'Active', DeviceStatus.active),
-                    _buildFilterChip(l10n?.deviceStatusMaintenance ?? 'Maintenance', DeviceStatus.underMaintenance),
-                    _buildFilterChip(l10n?.deviceStatusFaulty ?? 'Faulty', DeviceStatus.faulty),
-                    _buildFilterChip(l10n?.deviceStatusProvisioned ?? 'In Stock', DeviceStatus.provisioned),
-                    _buildFilterChip(l10n?.deviceStatusRetired ?? 'Removed', DeviceStatus.retired),
+                    AppFilterChip(
+                      label: 'All Hardware',
+                      isSelected: _filterStatus == null,
+                      onTap: () => setState(() => _filterStatus = null),
+                    ),
+                    const SizedBox(width: 6),
+                    AppFilterChip(
+                      label: l10n?.deviceStatusActive ?? 'Active',
+                      isSelected: _filterStatus == DeviceStatus.active,
+                      activeColor: AppColors.success,
+                      onTap: () => setState(() => _filterStatus = DeviceStatus.active),
+                    ),
+                    const SizedBox(width: 6),
+                    AppFilterChip(
+                      label: l10n?.deviceStatusMaintenance ?? 'Maintenance',
+                      isSelected: _filterStatus == DeviceStatus.underMaintenance,
+                      activeColor: AppColors.warning,
+                      onTap: () => setState(() => _filterStatus = DeviceStatus.underMaintenance),
+                    ),
+                    const SizedBox(width: 6),
+                    AppFilterChip(
+                      label: l10n?.deviceStatusFaulty ?? 'Faulty',
+                      isSelected: _filterStatus == DeviceStatus.faulty,
+                      activeColor: AppColors.error,
+                      onTap: () => setState(() => _filterStatus = DeviceStatus.faulty),
+                    ),
+                    const SizedBox(width: 6),
+                    AppFilterChip(
+                      label: l10n?.deviceStatusProvisioned ?? 'In Stock',
+                      isSelected: _filterStatus == DeviceStatus.provisioned,
+                      activeColor: AppColors.info,
+                      onTap: () => setState(() => _filterStatus = DeviceStatus.provisioned),
+                    ),
+                    const SizedBox(width: 6),
+                    AppFilterChip(
+                      label: l10n?.deviceStatusRetired ?? 'Removed',
+                      isSelected: _filterStatus == DeviceStatus.retired,
+                      activeColor: AppColors.neutral,
+                      onTap: () => setState(() => _filterStatus = DeviceStatus.retired),
+                    ),
                   ],
                 ),
               ),
@@ -108,35 +171,26 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
                 }
                 if (widget.hasError) {
                   return Padding(
-                    padding: const EdgeInsets.only(top: 60),
-                    child: Center(
-                      child: Column(
-                        children: [
-                          const Icon(Icons.cloud_off_rounded, size: 48, color: AppColors.icon),
-                          const SizedBox(height: 12),
-                          const Text(
-                            'Failed to load hardware directory',
-                            style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-                          ),
-                          const SizedBox(height: 12),
-                          ElevatedButton.icon(
-                            onPressed: widget.onRefresh,
-                            icon: const Icon(Icons.refresh, size: 16),
-                            label: const Text('Retry'),
-                          ),
-                        ],
-                      ),
+                    padding: const EdgeInsets.only(top: 40),
+                    child: ErrorStateView(
+                      title: 'Failed to load hardware directory',
+                      subtitle: 'Please check your connection and try again',
+                      onRetry: widget.onRefresh,
                     ),
                   );
                 }
                 if (list.isEmpty) {
-                  return const Padding(
-                    padding: EdgeInsets.only(top: 80),
-                    child: Center(
-                      child: Text(
-                        'No matching hardware found',
-                        style: TextStyle(color: AppColors.textSecondary),
-                      ),
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 40),
+                    child: EmptyStateView(
+                      icon: hasActiveFilter ? Icons.search_off_rounded : Icons.devices_other_rounded,
+                      title: 'No matching hardware found',
+                      subtitle: hasActiveFilter
+                          ? 'Try adjusting your search keywords or status filter'
+                          : 'No equipment units have been registered in this zone yet',
+                      actionLabel: hasActiveFilter ? 'Clear Filters' : null,
+                      actionIcon: Icons.filter_alt_off_rounded,
+                      onAction: hasActiveFilter ? _clearFilters : null,
                     ),
                   );
                 }
@@ -146,13 +200,15 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
                   margin: const EdgeInsets.only(bottom: 12),
                   decoration: BoxDecoration(
                     color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: AppColors.border),
                   ),
                   child: ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     leading: Container(
-                      padding: const EdgeInsets.all(8),
+                      width: 36,
+                      height: 36,
                       decoration: BoxDecoration(
                         color: AppColors.primaryBg,
                         borderRadius: BorderRadius.circular(10),
@@ -186,28 +242,6 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildFilterChip(String label, DeviceStatus? status) {
-    final isSelected = _filterStatus == status;
-    return Padding(
-      padding: const EdgeInsets.only(right: 6),
-      child: ChoiceChip(
-        label: Text(label),
-        selected: isSelected,
-        selectedColor: AppColors.primaryBg,
-        backgroundColor: AppColors.surface,
-        labelStyle: TextStyle(
-          fontSize: 12,
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          color: isSelected ? AppColors.primary : AppColors.textSecondary,
-        ),
-        side: BorderSide(
-          color: isSelected ? AppColors.primary : AppColors.border,
-        ),
-        onSelected: (_) => setState(() => _filterStatus = status),
-      ),
     );
   }
 }
