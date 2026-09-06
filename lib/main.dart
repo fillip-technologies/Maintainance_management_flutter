@@ -1,16 +1,21 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/config/app_config.dart';
+import 'core/services/push_service.dart';
 import 'core/storage/storage_service.dart';
 import 'core/theme/colors.dart';
 import 'core/utils/app_snackbar.dart';
 import 'features/auth/auth.dart';
 import 'features/home/home.dart';
 import 'features/profile/profile.dart';
+import 'firebase_options.dart';
 import 'l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await initPushBackground();
   final storageService = await StorageService.init();
 
   runApp(
