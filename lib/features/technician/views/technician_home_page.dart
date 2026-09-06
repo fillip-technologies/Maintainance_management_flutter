@@ -28,7 +28,9 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage>
     _tabController.addListener(() {
       if (_tabController.indexIsChanging) return;
       if (!mounted) return;
-      ref.read(technicianQueueFilterProvider.notifier).setTabIndex(_tabController.index);
+      ref
+          .read(technicianQueueFilterProvider.notifier)
+          .setTabIndex(_tabController.index);
     });
   }
 
@@ -45,13 +47,17 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage>
       initialTargetStatus: targetStatus,
       onStatusUpdated: (newStatus, comment, resolutionPhoto) async {
         try {
-          await ref.read(technicianActionViewModelProvider).updateStatus(
-            issueId: issue.id,
-            toStatus: newStatus,
-            notes: comment,
-          );
+          await ref
+              .read(technicianActionViewModelProvider)
+              .updateStatus(
+                issueId: issue.id,
+                toStatus: newStatus,
+                notes: comment,
+              );
 
-          final ticketIdStr = issue.id.length > 8 ? '#${issue.id.substring(0, 8)}' : issue.id;
+          final ticketIdStr = issue.id.length > 8
+              ? '#${issue.id.substring(0, 8)}'
+              : issue.id;
           final msg = 'Ticket $ticketIdStr moved to ${newStatus.label}';
           if (newStatus == IssueStatus.resolved) {
             AppSnackbar.success(msg);
@@ -70,33 +76,33 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage>
   @override
   Widget build(BuildContext context) {
     // Realtime: Listen for incoming new tickets and show toast + refresh
-    ref.listen<AsyncValue<IssueModel>>(
-      socketIssueCreatedStreamProvider,
-      (previous, next) {
-        final issue = next.value;
-        if (issue == null) return;
+    ref.listen<AsyncValue<IssueModel>>(socketIssueCreatedStreamProvider, (
+      previous,
+      next,
+    ) {
+      final issue = next.value;
+      if (issue == null) return;
 
-        ref.read(technicianActionViewModelProvider).refreshQueue();
-        RealtimeToastHelper.showNewIssueToast(
-          context,
-          issue: issue,
-          onTap: () => IssueDetailSheet.show(context, issue),
-        );
-      },
-    );
+      ref.read(technicianActionViewModelProvider).refreshQueue();
+      RealtimeToastHelper.showNewIssueToast(
+        context,
+        issue: issue,
+        onTap: () => IssueDetailSheet.show(context, issue),
+      );
+    });
 
     // Realtime: Listen for ticket status updates (e.g. claimed or resolved)
-    ref.listen<AsyncValue<IssueModel>>(
-      socketIssueUpdatedStreamProvider,
-      (previous, next) {
-        final issue = next.value;
-        if (issue == null) return;
+    ref.listen<AsyncValue<IssueModel>>(socketIssueUpdatedStreamProvider, (
+      previous,
+      next,
+    ) {
+      final issue = next.value;
+      if (issue == null) return;
 
-        ref.read(technicianActionViewModelProvider).refreshQueue();
-        ref.invalidate(issueDetailProvider(issue.id));
-        ref.invalidate(issueHistoryProvider(issue.id));
-      },
-    );
+      ref.read(technicianActionViewModelProvider).refreshQueue();
+      ref.invalidate(issueDetailProvider(issue.id));
+      ref.invalidate(issueHistoryProvider(issue.id));
+    });
 
     final l10n = AppLocalizations.of(context)!;
     final queueState = ref.watch(technicianQueueStateProvider);
@@ -121,15 +127,15 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage>
             tabs: [
               Tab(
                 icon: const Icon(Icons.assignment_outlined, size: 18),
-                text: '${l10n.tabActiveQueue} (${queueState.activeIssues.length})',
+                text: l10n.tabActiveQueue,
               ),
               Tab(
                 icon: const Icon(Icons.pause_circle_outline, size: 18),
-                text: '${l10n.tabOnHold} (${queueState.onHoldIssues.length})',
+                text: l10n.tabOnHold,
               ),
               Tab(
                 icon: const Icon(Icons.task_alt, size: 18),
-                text: '${l10n.tabResolvedHistory} (${queueState.resolvedIssues.length})',
+                text: l10n.tabResolvedHistory,
               ),
             ],
           ),

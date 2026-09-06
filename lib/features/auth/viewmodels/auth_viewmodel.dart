@@ -29,11 +29,26 @@ class AuthNotifier extends AsyncNotifier<UserModel?> {
   @override
   Future<UserModel?> build() async {
     final authRepo = ref.watch(authRepositoryProvider);
-    return authRepo.getCurrentUser();
+    final user = authRepo.getCurrentUser();
+    if (user != null) {
+      _initPush();
+    }
+    return user;
+  }
+
+  void _initPush() {
+    try {
+      final push = ref.read(pushServiceProvider);
+      push.listenForeground();
+      unawaited(push.registerToken());
+    } catch (_) {}
   }
 
   void setUser(UserModel? user) {
     state = AsyncValue.data(user);
+    if (user != null) {
+      _initPush();
+    }
   }
 
   Future<UserModel> login({
