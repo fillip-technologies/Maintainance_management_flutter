@@ -236,5 +236,105 @@
   "presetPowerRestored": "मुख्य बिजली आपूर्ति बहाल की गई",
   "presetBatchRepaired": "बैच मरम्मत पूरी हुई और जांच की गई",
   "presetFirmwareUpdated": "फ़र्मवेयर अपडेट और रीबूट किया गया",
-  "presetCablesTested": "केबल दोबारा जोड़े गए और कनेक्टिविटी जांची गई"
+  "presetCablesTested": "केबल दोबारा जोड़े गए और कनेक्टिविटी जांची गई",
+
+  "techViewSpatial": "ज़ोन नक्शा",
+  "techViewQueue": "मेरे टिकट",
+  "techBadgeOk": "ठीक",
+  "techBadgeResolved": "हल हुआ",
+  "techBadgeAllOk": "सब ठीक",
+  "techCouldntLoadRetry": "लोड नहीं हुआ • दोबारा कोशिश करें",
+  "techZoneHealthLoadFailed": "इस ज़ोन की स्थिति लोड नहीं हुई — दोबारा कोशिश के लिए नीचे खींचें",
+  "techCoverageOverview": "कवरेज सारांश",
+  "techZonesDevicesSummary": "{zones} सौंपे गए ज़ोन • {devices} कुल उपकरण",
+  "@techZonesDevicesSummary": {
+    "placeholders": {
+      "zones": { "type": "int" },
+      "devices": { "type": "int" }
+    }
+  },
+  "techPercentOnline": "{percent}% ऑनलाइन",
+  "@techPercentOnline": {
+    "placeholders": { "percent": { "type": "int" } }
+  },
+  "techPercentHealth": "{percent}% स्वस्थ",
+  "@techPercentHealth": {
+    "placeholders": { "percent": { "type": "int" } }
+  },
+  "techStatTotal": "कुल",
+  "techStatOnline": "चालू",
+  "techStatFaulty": "खराब",
+  "techStatDefects": "खराबी",
+  "techZoneClientDepth": "{client} • स्तर {depth}",
+  "@techZoneClientDepth": {
+    "placeholders": {
+      "client": { "type": "String" },
+      "depth": { "type": "int" }
+    }
+  },
+  "techZoneDepthStatus": "स्तर {depth} • स्थिति: {status}",
+  "@techZoneDepthStatus": {
+    "placeholders": {
+      "depth": { "type": "int" },
+      "status": { "type": "String" }
+    }
+  },
+  "techFailedToLoadZones": "ज़ोन लोड नहीं हुए: {error}",
+  "@techFailedToLoadZones": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "techAssignedZonesCount": "सौंपे गए ज़ोन ({count})",
+  "@techAssignedZonesCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "techSubZonesCount": "उप-ज़ोन ({count})",
+  "@techSubZonesCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "techUnresolvedHardwareCount": "बिना ठीक हुए उपकरण ({count})",
+  "@techUnresolvedHardwareCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "techFacilityIncidentsCount": "क्षेत्र की समस्याएँ ({count})",
+  "@techFacilityIncidentsCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "techNoAssignedZones": "कोई ज़ोन नहीं सौंपा गया",
+  "techNoAssignedZonesSub": "अभी आपको कोई ज़ोन नहीं सौंपा गया है",
+  "techAllUnitsOperational": "सभी उपकरण चालू",
+  "techAllUnitsOperationalSub": "{zone} में सभी {count} उपकरण चालू हैं, कोई बाकी समस्या नहीं",
+  "@techAllUnitsOperationalSub": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "zone": { "type": "String" }
+    }
+  },
+  "techNoUnresolvedInZone": "{zone} में कोई बाकी समस्या या खराबी नहीं",
+  "@techNoUnresolvedInZone": {
+    "placeholders": { "zone": { "type": "String" } }
+  },
+  "techAllZones": "सभी ज़ोन",
+  "techFailedToLoadQueue": "आपकी काम सूची लोड नहीं हुई",
+  "techCheckNetworkRetry": "कृपया अपना नेटवर्क जांचें और दोबारा कोशिश करें",
+  "techPullToRefreshFeed": "नया देखने के लिए नीचे खींचें",
+  "techNoActiveTickets": "कोई सक्रिय टिकट नहीं",
+  "techNoOnHoldTickets": "कोई टिकट रुका हुआ नहीं",
+  "techNoResolvedTickets": "अभी कोई टिकट हल नहीं हुआ",
+  "bulkAlreadyInStatus": "{count} पहले से {status}",
+  "@bulkAlreadyInStatus": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "status": { "type": "String" }
+    }
+  },
+  "bulkCouldNotUpdate": "{count} अपनी मौजूदा स्थिति से नहीं बदले जा सके",
+  "@bulkCouldNotUpdate": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "bulkFailedToUpdate": "टिकट अपडेट नहीं हुए: {error}",
+  "@bulkFailedToUpdate": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "bulkNoPendingIssues": "हल करने के लिए कोई टिकट नहीं",
+  "bulkNoMatchingTickets": "कोई मिलता-जुलता टिकट नहीं मिला"
 }

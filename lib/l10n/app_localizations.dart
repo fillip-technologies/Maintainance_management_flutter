@@ -1429,6 +1429,240 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cables re-seated & connectivity verified'**
   String get presetCablesTested;
+
+  /// No description provided for @techViewSpatial.
+  ///
+  /// In en, this message translates to:
+  /// **'Zone Map'**
+  String get techViewSpatial;
+
+  /// No description provided for @techViewQueue.
+  ///
+  /// In en, this message translates to:
+  /// **'My Tickets'**
+  String get techViewQueue;
+
+  /// No description provided for @techBadgeOk.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get techBadgeOk;
+
+  /// No description provided for @techBadgeResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'RESOLVED'**
+  String get techBadgeResolved;
+
+  /// No description provided for @techBadgeAllOk.
+  ///
+  /// In en, this message translates to:
+  /// **'ALL OK'**
+  String get techBadgeAllOk;
+
+  /// No description provided for @techCouldntLoadRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load • tap to retry'**
+  String get techCouldntLoadRetry;
+
+  /// No description provided for @techZoneHealthLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load this zone\'s health — pull down to retry'**
+  String get techZoneHealthLoadFailed;
+
+  /// No description provided for @techCoverageOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Coverage Overview'**
+  String get techCoverageOverview;
+
+  /// No description provided for @techZonesDevicesSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{zones} Assigned Zones • {devices} Total Devices'**
+  String techZonesDevicesSummary(int zones, int devices);
+
+  /// No description provided for @techPercentOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% Online'**
+  String techPercentOnline(int percent);
+
+  /// No description provided for @techPercentHealth.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% Health'**
+  String techPercentHealth(int percent);
+
+  /// No description provided for @techStatTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'TOTAL'**
+  String get techStatTotal;
+
+  /// No description provided for @techStatOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'ONLINE'**
+  String get techStatOnline;
+
+  /// No description provided for @techStatFaulty.
+  ///
+  /// In en, this message translates to:
+  /// **'FAULTY'**
+  String get techStatFaulty;
+
+  /// No description provided for @techStatDefects.
+  ///
+  /// In en, this message translates to:
+  /// **'DEFECTS'**
+  String get techStatDefects;
+
+  /// No description provided for @techZoneClientDepth.
+  ///
+  /// In en, this message translates to:
+  /// **'{client} • Depth Level {depth}'**
+  String techZoneClientDepth(String client, int depth);
+
+  /// No description provided for @techZoneDepthStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Depth Level {depth} • Status: {status}'**
+  String techZoneDepthStatus(int depth, String status);
+
+  /// No description provided for @techFailedToLoadZones.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load zones: {error}'**
+  String techFailedToLoadZones(String error);
+
+  /// No description provided for @techAssignedZonesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'ASSIGNED ZONES ({count})'**
+  String techAssignedZonesCount(int count);
+
+  /// No description provided for @techSubZonesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'SUB-ZONES ({count})'**
+  String techSubZonesCount(int count);
+
+  /// No description provided for @techUnresolvedHardwareCount.
+  ///
+  /// In en, this message translates to:
+  /// **'UNRESOLVED HARDWARE UNITS ({count})'**
+  String techUnresolvedHardwareCount(int count);
+
+  /// No description provided for @techFacilityIncidentsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'FACILITY INCIDENTS ({count})'**
+  String techFacilityIncidentsCount(int count);
+
+  /// No description provided for @techNoAssignedZones.
+  ///
+  /// In en, this message translates to:
+  /// **'No Assigned Zones'**
+  String get techNoAssignedZones;
+
+  /// No description provided for @techNoAssignedZonesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'You are currently not assigned to any facility zones'**
+  String get techNoAssignedZonesSub;
+
+  /// No description provided for @techAllUnitsOperational.
+  ///
+  /// In en, this message translates to:
+  /// **'All Units Operational'**
+  String get techAllUnitsOperational;
+
+  /// No description provided for @techAllUnitsOperationalSub.
+  ///
+  /// In en, this message translates to:
+  /// **'All {count} units in {zone} are operational with no unresolved issues'**
+  String techAllUnitsOperationalSub(int count, String zone);
+
+  /// No description provided for @techNoUnresolvedInZone.
+  ///
+  /// In en, this message translates to:
+  /// **'No unresolved issues or defects in {zone}'**
+  String techNoUnresolvedInZone(String zone);
+
+  /// No description provided for @techAllZones.
+  ///
+  /// In en, this message translates to:
+  /// **'All Zones'**
+  String get techAllZones;
+
+  /// No description provided for @techFailedToLoadQueue.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load your job list'**
+  String get techFailedToLoadQueue;
+
+  /// No description provided for @techCheckNetworkRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Please check your network and try again'**
+  String get techCheckNetworkRetry;
+
+  /// No description provided for @techPullToRefreshFeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull down to refresh'**
+  String get techPullToRefreshFeed;
+
+  /// No description provided for @techNoActiveTickets.
+  ///
+  /// In en, this message translates to:
+  /// **'No active tickets in queue'**
+  String get techNoActiveTickets;
+
+  /// No description provided for @techNoOnHoldTickets.
+  ///
+  /// In en, this message translates to:
+  /// **'No tickets currently on hold'**
+  String get techNoOnHoldTickets;
+
+  /// No description provided for @techNoResolvedTickets.
+  ///
+  /// In en, this message translates to:
+  /// **'No resolved tickets yet'**
+  String get techNoResolvedTickets;
+
+  /// No description provided for @bulkAlreadyInStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} already {status}'**
+  String bulkAlreadyInStatus(int count, String status);
+
+  /// No description provided for @bulkCouldNotUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} couldn\'t change from their current state'**
+  String bulkCouldNotUpdate(int count);
+
+  /// No description provided for @bulkFailedToUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t update tickets: {error}'**
+  String bulkFailedToUpdate(String error);
+
+  /// No description provided for @bulkNoPendingIssues.
+  ///
+  /// In en, this message translates to:
+  /// **'No pending issues to resolve'**
+  String get bulkNoPendingIssues;
+
+  /// No description provided for @bulkNoMatchingTickets.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching tickets found'**
+  String get bulkNoMatchingTickets;
 }
 
 class _AppLocalizationsDelegate

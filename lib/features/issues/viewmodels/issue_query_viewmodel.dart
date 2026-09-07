@@ -22,12 +22,17 @@ final staffIssuesProvider = FutureProvider.autoDispose<List<IssueModel>>((ref) a
 });
 
 /// 3. Technician Issues Provider (all organization issues / technician scope)
+///
+/// Search and priority filters are applied client-side over this list, so we
+/// pull the largest page the backend allows (100). Sites with more than 100
+/// live tickets will need server-side search / pagination wired in here.
 final technicianIssuesProvider = FutureProvider.autoDispose<List<IssueModel>>((ref) async {
   final issueRepo = ref.watch(issueRepositoryProvider);
 
   return issueRepo.getIssues(
     scope: 'technician',
     includeSubzones: true,
+    limit: 100,
   );
 });
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/widgets/empty_state_view.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../issues/issues.dart';
 import 'technician_issue_card.dart';
 
@@ -33,6 +34,7 @@ class TechnicianIssueList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return RefreshIndicator(
       color: AppColors.primary,
       onRefresh: onRefresh,
@@ -54,8 +56,8 @@ class TechnicianIssueList extends StatelessWidget {
             return Padding(
               padding: const EdgeInsets.only(top: 40),
               child: ErrorStateView(
-                title: 'Failed to load technician queue',
-                subtitle: 'Please check your network and try again',
+                title: l10n.techFailedToLoadQueue,
+                subtitle: l10n.techCheckNetworkRetry,
                 onRetry: onRefresh,
               ),
             );
@@ -69,7 +71,7 @@ class TechnicianIssueList extends StatelessWidget {
                 iconColor: AppColors.primary,
                 iconBackgroundColor: AppColors.primaryBg,
                 title: emptyMessage,
-                subtitle: 'Pull down to refresh ticket feed',
+                subtitle: l10n.techPullToRefreshFeed,
               ),
             );
           }

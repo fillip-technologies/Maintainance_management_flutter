@@ -46,6 +46,11 @@ class TechnicianZoneNode {
   final List<DeviceModel> devices;
   final List<IssueModel> openIssues;
 
+  /// True when the health/inventory enrichment calls for this node failed.
+  /// The card must then show a neutral "couldn't load" state rather than a
+  /// misleading all-clear green.
+  final bool dataLoadFailed;
+
   const TechnicianZoneNode({
     required this.id,
     required this.name,
@@ -65,6 +70,7 @@ class TechnicianZoneNode {
     this.subzones = const [],
     this.devices = const [],
     this.openIssues = const [],
+    this.dataLoadFailed = false,
   });
 
   /// Computed visual health status based on defect severity and device faultiness.
@@ -111,6 +117,7 @@ class TechnicianZoneNode {
     List<TechnicianZoneNode>? subzones,
     List<DeviceModel>? devices,
     List<IssueModel>? openIssues,
+    bool? dataLoadFailed,
   }) {
     return TechnicianZoneNode(
       id: id ?? this.id,
@@ -131,6 +138,7 @@ class TechnicianZoneNode {
       subzones: subzones ?? this.subzones,
       devices: devices ?? this.devices,
       openIssues: openIssues ?? this.openIssues,
+      dataLoadFailed: dataLoadFailed ?? this.dataLoadFailed,
     );
   }
 

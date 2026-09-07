@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../devices/models/technician_zone_node.dart';
 
 /// Top hero card visualizing overall operational health and prominent problem alerts.
@@ -22,21 +23,26 @@ class ZoneHealthHeroCard extends StatelessWidget {
   }
 
   Widget _buildRootHero(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     var totalDevices = 0;
     var totalWorking = 0;
-    var totalNotWorking = 0;
+    var totalFaulty = 0;
     var totalCritical = 0;
     var totalHigh = 0;
     var totalOpen = 0;
 
-    for (final z in rootZones) {
+    // Zones whose enrichment failed contribute no reliable counts — leaving
+    // them in would drag the health % down with phantom zeroes.
+    final countedZones = rootZones.where((z) => !z.dataLoadFailed);
+    for (final z in countedZones) {
       totalDevices += z.deviceCount;
       totalWorking += z.workingCount;
-      totalNotWorking += z.unresolvedUnitsCount > 0 ? z.unresolvedUnitsCount : z.notWorkingCount;
+      totalFaulty += z.notWorkingCount;
       totalCritical += z.criticalIssuesCount;
       totalHigh += z.highIssuesCount;
       totalOpen += z.openIssuesCount;
     }
+    final totalNotWorking = totalFaulty;
 
     final operationalRate = totalDevices > 0
         ? ((totalWorking / totalDevices) * 100).round().clamp(0, 100)
@@ -90,16 +96,16 @@ class ZoneHealthHeroCard extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Coverage Overview',
-                        style: TextStyle(
+                      Text(
+                        l10n.techCoverageOverview,
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textPrimary,
                         ),
                       ),
                       Text(
-                        '${rootZones.length} Assigned Zones • $totalDevices Total Devices',
+                        l10n.techZonesDevicesSummary(rootZones.length, totalDevices),
                         style: const TextStyle(
                           fontSize: 11,
                           color: AppColors.textSecondary,
@@ -129,7 +135,7 @@ class ZoneHealthHeroCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 5),
                     Text(
-                      '$operationalRate% Online',
+                      l10n.techPercentOnline(operationalRate),
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
@@ -159,7 +165,7 @@ class ZoneHealthHeroCard extends StatelessWidget {
           Row(
             children: [
               _StatTile(
-                label: 'TOTAL',
+                label: l10n.techStatTotal,
                 value: '$totalDevices',
                 color: AppColors.textPrimary,
                 bg: AppColors.cardAlt,
@@ -167,7 +173,7 @@ class ZoneHealthHeroCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               _StatTile(
-                label: 'ONLINE',
+                label: l10n.techStatOnline,
                 value: '$totalWorking',
                 color: AppColors.success,
                 bg: AppColors.success.withValues(alpha: 0.08),
@@ -175,7 +181,7 @@ class ZoneHealthHeroCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               _StatTile(
-                label: 'FAULTY',
+                label: l10n.techStatFaulty,
                 value: '$totalNotWorking',
                 color: totalNotWorking > 0 ? AppColors.error : AppColors.textSecondary,
                 bg: totalNotWorking > 0
@@ -185,7 +191,7 @@ class ZoneHealthHeroCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               _StatTile(
-                label: 'DEFECTS',
+                label: l10n.techStatDefects,
                 value: '$totalOpen',
                 color: totalOpen > 0 ? AppColors.warning : AppColors.textSecondary,
                 bg: totalOpen > 0
@@ -201,6 +207,11 @@ class ZoneHealthHeroCard extends StatelessWidget {
   }
 
   Widget _buildZoneHero(BuildContext context, TechnicianZoneNode zone) {
+    final l10n = AppLocalizations.of(context)!;
+    if (zone.dataLoadFailed) {
+      return _buildUnknownHero(l10n, zone);
+    }
+
     final healthStatus = zone.healthStatus;
     final statusColor = healthStatus == ZoneHealthStatus.critical
         ? AppColors.error
@@ -261,8 +272,8 @@ class ZoneHealthHeroCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       zone.clientName != null
-                          ? '${zone.clientName} • Depth Level ${zone.depth}'
-                          : 'Depth Level ${zone.depth} • Status: ${zone.status.toUpperCase()}',
+                          ? l10n.techZoneClientDepth(zone.clientName!, zone.depth)
+                          : l10n.techZoneDepthStatus(zone.depth, zone.status.toUpperCase()),
                       style: const TextStyle(
                         fontSize: 11,
                         color: AppColors.textSecondary,
@@ -279,7 +290,7 @@ class ZoneHealthHeroCard extends StatelessWidget {
                   border: Border.all(color: statusColor.withValues(alpha: 0.3)),
                 ),
                 child: Text(
-                  '$operationalRate% Health',
+                  l10n.techPercentHealth(operationalRate),
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
@@ -307,7 +318,7 @@ class ZoneHealthHeroCard extends StatelessWidget {
           Row(
             children: [
               _StatTile(
-                label: 'TOTAL',
+                label: l10n.techStatTotal,
                 value: '${zone.deviceCount}',
                 color: AppColors.textPrimary,
                 bg: AppColors.cardAlt,
@@ -315,7 +326,7 @@ class ZoneHealthHeroCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               _StatTile(
-                label: 'ONLINE',
+                label: l10n.techStatOnline,
                 value: '${zone.workingCount}',
                 color: AppColors.success,
                 bg: AppColors.success.withValues(alpha: 0.08),
@@ -323,7 +334,7 @@ class ZoneHealthHeroCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               _StatTile(
-                label: 'FAULTY',
+                label: l10n.techStatFaulty,
                 value: '$faultyCount',
                 color: faultyCount > 0 ? AppColors.error : AppColors.textSecondary,
                 bg: faultyCount > 0
@@ -333,7 +344,7 @@ class ZoneHealthHeroCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               _StatTile(
-                label: 'DEFECTS',
+                label: l10n.techStatDefects,
                 value: '${zone.openIssuesCount}',
                 color: zone.openIssuesCount > 0 ? AppColors.warning : AppColors.textSecondary,
                 bg: zone.openIssuesCount > 0
@@ -342,6 +353,52 @@ class ZoneHealthHeroCard extends StatelessWidget {
                 icon: Icons.build_circle_outlined,
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUnknownHero(AppLocalizations l10n, TechnicianZoneNode zone) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.border, width: 1.5),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.border.withValues(alpha: 0.4),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: const Icon(Icons.cloud_off_rounded, size: 22, color: AppColors.textSecondary),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  zone.name,
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textPrimary,
+                    letterSpacing: -0.2,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  l10n.techZoneHealthLoadFailed,
+                  style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                ),
+              ],
+            ),
           ),
         ],
       ),

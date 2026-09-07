@@ -9,7 +9,7 @@ import '../models/technician_queue_state.dart';
 import '../models/technician_zone_tree_state.dart';
 import '../viewmodels/technician_action_viewmodel.dart';
 import '../viewmodels/technician_queue_viewmodel.dart';
-import '../viewmodels/technician_zone_tree_viewmodel.dart';
+import '../viewmodels/technician_view_mode_provider.dart';
 import 'widgets/widgets.dart';
 
 class TechnicianHomePage extends ConsumerStatefulWidget {
@@ -153,13 +153,40 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage> {
       ref.invalidate(issueHistoryProvider(issue.id));
     });
 
+    // Switching tabs abandons any in-progress selection so the bulk bar can
+    // never act on tickets that are no longer visible.
+    ref.listen(technicianQueueFilterProvider.select((f) => f.tabIndex), (_, _) {
+      if (_selectedIssueIds.isEmpty) return;
+      setState(() {
+        _selectedIssueIds.clear();
+        _isSelectionMode = false;
+      });
+    });
+
+    // Drop selected ids whose tickets disappeared (e.g. resolved via realtime).
+    ref.listen(technicianQueueStateProvider, (_, next) {
+      if (_selectedIssueIds.isEmpty) return;
+      final liveIds = {
+        for (final i in [
+          ...next.activeIssues,
+          ...next.onHoldIssues,
+          ...next.resolvedIssues,
+        ])
+          i.id,
+      };
+      if (_selectedIssueIds.every(liveIds.contains)) return;
+      setState(() {
+        _selectedIssueIds.retainWhere(liveIds.contains);
+        if (_selectedIssueIds.isEmpty) _isSelectionMode = false;
+      });
+    });
+
     final l10n = AppLocalizations.of(context)!;
     final queueState = ref.watch(technicianQueueStateProvider);
     final filterNotifier = ref.read(technicianQueueFilterProvider.notifier);
-    final treeAsync = ref.watch(technicianZoneTreeViewModelProvider);
-    final treeNotifier = ref.read(technicianZoneTreeViewModelProvider.notifier);
-    final isSpatialMode = (treeAsync.value?.viewMode ?? TechnicianViewMode.spatialExplorer) ==
-        TechnicianViewMode.spatialExplorer;
+    final isSpatialMode =
+        ref.watch(technicianViewModeProvider) == TechnicianViewMode.spatialExplorer;
+    final viewModeNotifier = ref.read(technicianViewModeProvider.notifier);
 
     final currentList = switch (queueState.filter.tabIndex) {
       0 => queueState.activeIssues,
@@ -184,17 +211,17 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage> {
               Expanded(
                 child: _ModeSwitchButton(
                   icon: Icons.account_tree_rounded,
-                  label: 'Spatial Explorer',
+                  label: l10n.techViewSpatial,
                   isActive: isSpatialMode,
-                  onTap: () => treeNotifier.setViewMode(TechnicianViewMode.spatialExplorer),
+                  onTap: () => viewModeNotifier.setMode(TechnicianViewMode.spatialExplorer),
                 ),
               ),
               Expanded(
                 child: _ModeSwitchButton(
                   icon: Icons.list_alt_rounded,
-                  label: 'My Queue (${queueState.kpiStats.open})',
+                  label: '${l10n.techViewQueue} (${queueState.kpiStats.open})',
                   isActive: !isSpatialMode,
-                  onTap: () => treeNotifier.setViewMode(TechnicianViewMode.workQueue),
+                  onTap: () => viewModeNotifier.setMode(TechnicianViewMode.workQueue),
                 ),
               ),
             ],
@@ -407,11 +434,12 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage> {
     required TechnicianQueueState queueState,
     required int tabIndex,
   }) {
+    final l10n = AppLocalizations.of(context)!;
     final (list, emptyMessage) = switch (tabIndex) {
-      0 => (queueState.activeIssues, 'No active tickets in queue'),
-      1 => (queueState.onHoldIssues, 'No tickets currently on hold'),
-      2 => (queueState.resolvedIssues, 'No resolved tickets yet'),
-      _ => (queueState.activeIssues, 'No active tickets in queue'),
+      0 => (queueState.activeIssues, l10n.techNoActiveTickets),
+      1 => (queueState.onHoldIssues, l10n.techNoOnHoldTickets),
+      2 => (queueState.resolvedIssues, l10n.techNoResolvedTickets),
+      _ => (queueState.activeIssues, l10n.techNoActiveTickets),
     };
 
     return TechnicianIssueList(

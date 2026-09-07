@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../devices/models/technician_zone_node.dart';
 
 const _gradients = [
@@ -27,6 +28,14 @@ class SubzoneGridCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    // Health enrichment failed for this zone: show a neutral "unknown" card,
+    // never a misleading all-clear green.
+    if (zone.dataLoadFailed) {
+      return _buildUnknownCard(l10n);
+    }
+
     final gradientColors = _gradients[index % _gradients.length];
     final unresolvedUnits = zone.unresolvedUnitsCount > 0
         ? zone.unresolvedUnitsCount
@@ -110,7 +119,7 @@ class SubzoneGridCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        hasIssues ? '$unresolvedUnits' : 'OK',
+                        hasIssues ? '$unresolvedUnits' : l10n.techBadgeOk,
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w900,
@@ -135,31 +144,17 @@ class SubzoneGridCard extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
 
-            // Not Resolved Units Counter & Nested Sub-zones Indicator
+            // The red number / green OK badge above already carries the health
+            // signal — here we only hint how many sub-areas are nested inside.
             Row(
               children: [
-                Icon(
-                  hasIssues ? Icons.warning_amber_rounded : Icons.check_circle_rounded,
-                  size: 13,
-                  color: hasIssues ? AppColors.error : AppColors.success,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  hasIssues ? '$unresolvedUnits not resolved' : 'All resolved',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: hasIssues ? AppColors.error : AppColors.success,
-                  ),
-                ),
                 if (zone.subzoneCount > 0) ...[
-                  const SizedBox(width: 8),
                   const Icon(Icons.account_tree_outlined, size: 13, color: AppColors.textSecondary),
                   const SizedBox(width: 4),
                   Text(
-                    '${zone.subzoneCount} ${zone.subzoneCount == 1 ? 'zone' : 'zones'}',
+                    '${zone.subzoneCount}',
                     style: const TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
@@ -172,6 +167,70 @@ class SubzoneGridCard extends StatelessWidget {
                   Icons.arrow_forward_ios_rounded,
                   size: 13,
                   color: AppColors.textSecondary,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUnknownCard(AppLocalizations l10n) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: AppColors.cardAlt,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: AppColors.border, width: 1.5),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: AppColors.border.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.cloud_off_rounded,
+                color: AppColors.textSecondary,
+                size: 22,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              zone.name,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+                color: AppColors.textPrimary,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                const Icon(Icons.refresh_rounded, size: 13, color: AppColors.textSecondary),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    l10n.techCouldntLoadRetry,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
                 ),
               ],
             ),

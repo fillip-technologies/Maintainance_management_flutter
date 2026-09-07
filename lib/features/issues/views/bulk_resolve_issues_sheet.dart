@@ -113,21 +113,38 @@ class _BulkResolveIssuesSheetState extends ConsumerState<BulkResolveIssuesSheet>
       final updatedCount = result.updated.length;
       final errorCount = result.errors.length;
 
+      final statusLabel = _targetStatus.label;
+
       if (updatedCount > 0) {
-        final statusLabel = _targetStatus.label;
         final msg = l10n?.bulkStatusSuccessMsg(updatedCount, statusLabel) ??
             '$updatedCount tickets updated to $statusLabel';
         AppSnackbar.success(msg);
       }
 
       if (errorCount > 0) {
-        AppSnackbar.warning('$errorCount ticket(s) could not be updated (invalid transition)');
+        // Distinguish the benign "already in that state" case from a real block.
+        final alreadyCount = result.errors
+            .where((e) => (e['message'] as String? ?? '').contains('already'))
+            .length;
+        if (alreadyCount == errorCount) {
+          AppSnackbar.info(
+            l10n?.bulkAlreadyInStatus(errorCount, statusLabel) ??
+                '$errorCount already $statusLabel',
+          );
+        } else {
+          AppSnackbar.warning(
+            l10n?.bulkCouldNotUpdate(errorCount) ??
+                "$errorCount couldn't change from their current state",
+          );
+        }
       }
 
       Navigator.of(context).pop();
     } catch (e) {
       if (!mounted) return;
-      AppSnackbar.error('Failed to update tickets: $e');
+      AppSnackbar.error(
+        l10n?.bulkFailedToUpdate('$e') ?? 'Failed to update tickets: $e',
+      );
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }
@@ -535,8 +552,8 @@ class _BulkResolveIssuesSheetState extends ConsumerState<BulkResolveIssuesSheet>
                           const SizedBox(height: 8),
                           Text(
                             candidateIssues.isEmpty
-                                ? 'No pending issues to resolve'
-                                : 'No matching tickets found',
+                                ? (l10n?.bulkNoPendingIssues ?? 'No pending issues to resolve')
+                                : (l10n?.bulkNoMatchingTickets ?? 'No matching tickets found'),
                             style: const TextStyle(
                               fontSize: 14,
                               color: AppColors.textSecondary,

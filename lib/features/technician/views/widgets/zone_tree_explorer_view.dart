@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/widgets/empty_state_view.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../issues/issues.dart';
 import '../../viewmodels/technician_action_viewmodel.dart';
 import '../../viewmodels/technician_zone_tree_viewmodel.dart';
@@ -25,6 +26,7 @@ class ZoneTreeExplorerView extends ConsumerStatefulWidget {
 class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final treeAsync = ref.watch(technicianZoneTreeViewModelProvider);
     final viewModel = ref.read(technicianZoneTreeViewModelProvider.notifier);
     final actionNotifier = ref.read(technicianActionViewModelProvider);
@@ -42,7 +44,7 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
               const Icon(Icons.error_outline_rounded, size: 48, color: AppColors.error),
               const SizedBox(height: 12),
               Text(
-                'Failed to load zones: $err',
+                l10n.techFailedToLoadZones('$err'),
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
               ),
@@ -50,7 +52,7 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
               ElevatedButton.icon(
                 onPressed: () => viewModel.refresh(),
                 icon: const Icon(Icons.refresh_rounded, size: 16),
-                label: const Text('Retry'),
+                label: Text(l10n.retry),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
@@ -73,15 +75,20 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
             .toList();
 
         // Spatial Explorer: ONLY show devices that have UNRESOLVED issues!
-        final displayedDevices = devices.where((d) {
-          return issues.any((iss) => iss.deviceId == d.id);
-        }).toList();
+        final deviceIdsInZone = {for (final d in devices) d.id};
+        final displayedDevices = devices
+            .where((d) => issues.any((iss) => iss.deviceId == d.id))
+            .toList();
 
-        // Direct facility incidents (issues directly in this zone without a device)
-        final unassignedIssues = issues
+        // Facility incidents: every active issue in this subtree that isn't
+        // pinned to one of the devices shown above — device-less area incidents
+        // AND issues on devices that live in a deeper sub-zone. Previously these
+        // were filtered to `iss.zoneId == currentZone.id` and silently vanished
+        // at every level when they belonged to a nested zone. The card still
+        // shows each issue's own zone name so the technician sees where it is.
+        final facilityIncidents = issues
             .where((iss) =>
-                iss.zoneId == currentZone?.id &&
-                (iss.deviceId.isEmpty || !devices.any((d) => d.id == iss.deviceId)))
+                iss.deviceId.isEmpty || !deviceIdsInZone.contains(iss.deviceId))
             .toList();
 
         return Column(
@@ -157,8 +164,8 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                             const SizedBox(width: 6),
                             Text(
                               isAtRoot
-                                  ? 'ASSIGNED ZONES (${displayedSubzones.length})'
-                                  : 'SUB-ZONES (${displayedSubzones.length})',
+                                  ? l10n.techAssignedZonesCount(displayedSubzones.length)
+                                  : l10n.techSubZonesCount(displayedSubzones.length),
                               style: const TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
@@ -194,12 +201,12 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
 
                     // Empty state if root with 0 assigned zones
                     if (isAtRoot && displayedSubzones.isEmpty) ...[
-                      const Padding(
-                        padding: EdgeInsets.only(top: 40),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 40),
                         child: EmptyStateView(
                           icon: Icons.map_outlined,
-                          title: 'No Assigned Zones',
-                          subtitle: 'You are currently not assigned to any facility zones',
+                          title: l10n.techNoAssignedZones,
+                          subtitle: l10n.techNoAssignedZonesSub,
                         ),
                       ),
                     ],
@@ -218,7 +225,7 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              'UNRESOLVED HARDWARE UNITS (${displayedDevices.length})',
+                              l10n.techUnresolvedHardwareCount(displayedDevices.length),
                               style: const TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
@@ -275,7 +282,7 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                     ],
 
                     // 4. Area-Level Incidents (Only shown if defects exist that are NOT tied to any known device above)
-                    if (!isAtRoot && unassignedIssues.isNotEmpty) ...[
+                    if (!isAtRoot && facilityIncidents.isNotEmpty) ...[
                       Padding(
                         padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                         child: Row(
@@ -290,7 +297,7 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              'FACILITY INCIDENTS (${unassignedIssues.length})',
+                              l10n.techFacilityIncidentsCount(facilityIncidents.length),
                               style: const TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
@@ -305,7 +312,7 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Column(
                           children: [
-                            for (final issue in unassignedIssues)
+                            for (final issue in facilityIncidents)
                               TechnicianIssueCard(
                                 issue: issue,
                                 onTap: () => IssueDetailSheet.show(context, issue),
@@ -338,15 +345,20 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                     ],
 
                     // 5. Empty state if leaf zone with 0 subzones and 0 unresolved items
-                    if (!isAtRoot && displayedSubzones.isEmpty && displayedDevices.isEmpty && unassignedIssues.isEmpty) ...[
+                    if (!isAtRoot && displayedSubzones.isEmpty && displayedDevices.isEmpty && facilityIncidents.isEmpty) ...[
                       Padding(
                         padding: const EdgeInsets.only(top: 40),
                         child: EmptyStateView(
                           icon: Icons.check_circle_outline_rounded,
-                          title: 'All Units Operational',
+                          title: l10n.techAllUnitsOperational,
                           subtitle: devices.isNotEmpty
-                              ? 'All ${devices.length} units in ${currentZone?.name ?? 'this zone'} are operational with 0 unresolved issues'
-                              : 'No unresolved issues or defects in ${currentZone?.name ?? 'this zone'}',
+                              ? l10n.techAllUnitsOperationalSub(
+                                  devices.length,
+                                  currentZone?.name ?? l10n.techAllZones,
+                                )
+                              : l10n.techNoUnresolvedInZone(
+                                  currentZone?.name ?? l10n.techAllZones,
+                                ),
                         ),
                       ),
                     ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/widgets/status_badge.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../devices/models/device_model.dart';
 import '../../../devices/views/helpers/hardware_icon_helper.dart';
 import '../../../issues/models/issue_model.dart';
@@ -58,6 +59,7 @@ class ZoneDeviceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final topIssue = _highestPriorityIssue;
     final isDefective = hasActiveIssues;
 
@@ -258,11 +260,12 @@ class ZoneDeviceCard extends StatelessWidget {
                       InkWell(
                         onTap: () => onUpdateIssueStatus?.call(
                           topIssue,
-                          topIssue.status == IssueStatus.open ||
-                                  topIssue.status == IssueStatus.assigned ||
-                                  topIssue.status == IssueStatus.reopened
-                              ? IssueStatus.inProgress
-                              : IssueStatus.resolved,
+                          // in_progress is the only issue that can go straight
+                          // to resolved; everything else must be picked up
+                          // (-> in_progress) first.
+                          topIssue.status == IssueStatus.inProgress
+                              ? IssueStatus.resolved
+                              : IssueStatus.inProgress,
                         ),
                         child: Container(
                           width: 26,
@@ -320,12 +323,12 @@ class ZoneDeviceCard extends StatelessWidget {
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Icon(Icons.check_circle_rounded, size: 15, color: AppColors.successText),
-                      SizedBox(width: 6),
+                    children: [
+                      const Icon(Icons.check_circle_rounded, size: 15, color: AppColors.successText),
+                      const SizedBox(width: 6),
                       Text(
-                        'RESOLVED',
-                        style: TextStyle(
+                        l10n.techBadgeResolved,
+                        style: const TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w900,
                           color: AppColors.successText,
@@ -347,12 +350,12 @@ class ZoneDeviceCard extends StatelessWidget {
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Icon(Icons.check_circle_rounded, size: 15, color: AppColors.successText),
-                    SizedBox(width: 6),
+                  children: [
+                    const Icon(Icons.check_circle_rounded, size: 15, color: AppColors.successText),
+                    const SizedBox(width: 6),
                     Text(
-                      'ALL OK',
-                      style: TextStyle(
+                      l10n.techBadgeAllOk,
+                      style: const TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w900,
                         color: AppColors.successText,

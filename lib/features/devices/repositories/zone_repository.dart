@@ -119,9 +119,13 @@ class ZoneRepository {
         }
       }
       return result;
-    } catch (e) {
-      AppLogger.w('⚠️ [ZoneRepository] Failed to fetch breakdown (falling back): $e');
-      return const {};
+    } on DioException catch (e) {
+      final msg = e.response?.data?['message'] as String? ?? e.message ?? 'Failed to load zone breakdown';
+      AppLogger.e('❌ [ZoneRepository] DioException in getZoneBreakdown: $msg', e);
+      throw Exception(msg);
+    } catch (e, st) {
+      AppLogger.e('💥 [ZoneRepository] Unexpected error in getZoneBreakdown: $e', e, st);
+      throw Exception('Failed to load zone breakdown: $e');
     }
   }
 

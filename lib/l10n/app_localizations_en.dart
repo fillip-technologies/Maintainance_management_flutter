@@ -716,4 +716,153 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get presetCablesTested => 'Cables re-seated & connectivity verified';
+
+  @override
+  String get techViewSpatial => 'Zone Map';
+
+  @override
+  String get techViewQueue => 'My Tickets';
+
+  @override
+  String get techBadgeOk => 'OK';
+
+  @override
+  String get techBadgeResolved => 'RESOLVED';
+
+  @override
+  String get techBadgeAllOk => 'ALL OK';
+
+  @override
+  String get techCouldntLoadRetry => 'Couldn\'t load • tap to retry';
+
+  @override
+  String get techZoneHealthLoadFailed =>
+      'Couldn\'t load this zone\'s health — pull down to retry';
+
+  @override
+  String get techCoverageOverview => 'Coverage Overview';
+
+  @override
+  String techZonesDevicesSummary(int zones, int devices) {
+    return '$zones Assigned Zones • $devices Total Devices';
+  }
+
+  @override
+  String techPercentOnline(int percent) {
+    return '$percent% Online';
+  }
+
+  @override
+  String techPercentHealth(int percent) {
+    return '$percent% Health';
+  }
+
+  @override
+  String get techStatTotal => 'TOTAL';
+
+  @override
+  String get techStatOnline => 'ONLINE';
+
+  @override
+  String get techStatFaulty => 'FAULTY';
+
+  @override
+  String get techStatDefects => 'DEFECTS';
+
+  @override
+  String techZoneClientDepth(String client, int depth) {
+    return '$client • Depth Level $depth';
+  }
+
+  @override
+  String techZoneDepthStatus(int depth, String status) {
+    return 'Depth Level $depth • Status: $status';
+  }
+
+  @override
+  String techFailedToLoadZones(String error) {
+    return 'Failed to load zones: $error';
+  }
+
+  @override
+  String techAssignedZonesCount(int count) {
+    return 'ASSIGNED ZONES ($count)';
+  }
+
+  @override
+  String techSubZonesCount(int count) {
+    return 'SUB-ZONES ($count)';
+  }
+
+  @override
+  String techUnresolvedHardwareCount(int count) {
+    return 'UNRESOLVED HARDWARE UNITS ($count)';
+  }
+
+  @override
+  String techFacilityIncidentsCount(int count) {
+    return 'FACILITY INCIDENTS ($count)';
+  }
+
+  @override
+  String get techNoAssignedZones => 'No Assigned Zones';
+
+  @override
+  String get techNoAssignedZonesSub =>
+      'You are currently not assigned to any facility zones';
+
+  @override
+  String get techAllUnitsOperational => 'All Units Operational';
+
+  @override
+  String techAllUnitsOperationalSub(int count, String zone) {
+    return 'All $count units in $zone are operational with no unresolved issues';
+  }
+
+  @override
+  String techNoUnresolvedInZone(String zone) {
+    return 'No unresolved issues or defects in $zone';
+  }
+
+  @override
+  String get techAllZones => 'All Zones';
+
+  @override
+  String get techFailedToLoadQueue => 'Failed to load your job list';
+
+  @override
+  String get techCheckNetworkRetry => 'Please check your network and try again';
+
+  @override
+  String get techPullToRefreshFeed => 'Pull down to refresh';
+
+  @override
+  String get techNoActiveTickets => 'No active tickets in queue';
+
+  @override
+  String get techNoOnHoldTickets => 'No tickets currently on hold';
+
+  @override
+  String get techNoResolvedTickets => 'No resolved tickets yet';
+
+  @override
+  String bulkAlreadyInStatus(int count, String status) {
+    return '$count already $status';
+  }
+
+  @override
+  String bulkCouldNotUpdate(int count) {
+    return '$count couldn\'t change from their current state';
+  }
+
+  @override
+  String bulkFailedToUpdate(String error) {
+    return 'Couldn\'t update tickets: $error';
+  }
+
+  @override
+  String get bulkNoPendingIssues => 'No pending issues to resolve';
+
+  @override
+  String get bulkNoMatchingTickets => 'No matching tickets found';
 }

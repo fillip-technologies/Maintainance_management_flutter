@@ -6,18 +6,38 @@ import '../../devices/repositories/zone_repository.dart';
 import '../../issues/issues.dart';
 import '../../realtime/realtime.dart';
 import '../models/technician_zone_tree_state.dart';
+import 'technician_view_mode_provider.dart';
+
+/// Collapse a burst of realtime events into a single reload.
+const _realtimeRefreshDebounce = Duration(milliseconds: 900);
 
 class TechnicianZoneTreeViewModel extends AsyncNotifier<TechnicianZoneTreeState> {
   StreamSubscription? _issueCreatedSub;
   StreamSubscription? _issueUpdatedSub;
+  Timer? _debounceTimer;
+
+  /// Set when a realtime event arrives while the technician is in Work Queue
+  /// mode. The (expensive) tree reload is deferred until they switch back to
+  /// the Spatial Explorer so we never reload a view nobody is looking at.
+  bool _pendingRealtimeRefresh = false;
 
   @override
   Future<TechnicianZoneTreeState> build() async {
     _listenToRealtimeEvents();
 
+    // When the technician returns to the Spatial Explorer, apply any reload
+    // that was deferred while they were in the Work Queue.
+    ref.listen<TechnicianViewMode>(technicianViewModeProvider, (_, next) {
+      if (next == TechnicianViewMode.spatialExplorer && _pendingRealtimeRefresh) {
+        _pendingRealtimeRefresh = false;
+        refresh();
+      }
+    });
+
     ref.onDispose(() {
       _issueCreatedSub?.cancel();
       _issueUpdatedSub?.cancel();
+      _debounceTimer?.cancel();
     });
 
     return _loadRootZones();
@@ -26,105 +46,126 @@ class TechnicianZoneTreeViewModel extends AsyncNotifier<TechnicianZoneTreeState>
   void _listenToRealtimeEvents() {
     try {
       final socketService = ref.read(socketServiceProvider);
-      _issueCreatedSub = socketService.onIssueCreated.listen((_) {
-        AppLogger.i('⚡ [TechnicianZoneTreeViewModel] Issue created event received -> refreshing tree');
-        refresh();
-      });
-      _issueUpdatedSub = socketService.onIssueUpdated.listen((_) {
-        AppLogger.i('⚡ [TechnicianZoneTreeViewModel] Issue updated event received -> refreshing tree');
-        refresh();
-      });
+      _issueCreatedSub =
+          socketService.onIssueCreated.listen((_) => _onRealtimeEvent());
+      _issueUpdatedSub =
+          socketService.onIssueUpdated.listen((_) => _onRealtimeEvent());
     } catch (e) {
       AppLogger.w('⚠️ [TechnicianZoneTreeViewModel] Could not subscribe to real-time events: $e');
     }
   }
 
-  /// Initial load: fetches assigned zones, subzone counts, breakdown, and defect severities.
-  Future<TechnicianZoneTreeState> _loadRootZones() async {
+  /// Debounced, mode-aware reaction to `issue:created` / `issue:updated`.
+  void _onRealtimeEvent() {
+    if (ref.read(technicianViewModeProvider) != TechnicianViewMode.spatialExplorer) {
+      _pendingRealtimeRefresh = true;
+      return;
+    }
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(_realtimeRefreshDebounce, () {
+      AppLogger.i('⚡ [TechnicianZoneTreeViewModel] Realtime event -> refreshing tree');
+      refresh();
+    });
+  }
+
+  /// Enriches a bare zone node with authoritative device counts (from the
+  /// dashboard breakdown endpoint) and issue metrics (from the issues
+  /// endpoint).
+  ///
+  /// The two data sources are kept strictly separate: device counts come only
+  /// from the breakdown, issue metrics only from the issues list. Blending them
+  /// (working from one source, "not working" from the other) produced totals
+  /// that didn't add up and a health % that disagreed with the faulty tile.
+  ///
+  /// May throw — the caller marks the node `dataLoadFailed` so its card shows a
+  /// neutral "unknown" state instead of a misleading all-clear green.
+  Future<TechnicianZoneNode> _enrichZone(
+    TechnicianZoneNode node, {
+    int? subzoneCount,
+  }) async {
     final zoneRepo = ref.read(zoneRepositoryProvider);
     final issueRepo = ref.read(issueRepositoryProvider);
 
-    try {
-      final rawRoots = await zoneRepo.getMyZones();
-      final enhancedRoots = <TechnicianZoneNode>[];
-
-      for (final root in rawRoots) {
-        try {
-          // Fetch subzones count
-          final subzones = await zoneRepo.getSubzones(root.id);
-
-          // Fetch device status breakdown
-          final breakdownMap = await zoneRepo.getZoneBreakdown(root.id);
-          int subtreeTotal = 0;
-          int subtreeWorking = 0;
-          int subtreeFaulty = 0;
-          int subtreeMaintenance = 0;
-
-          for (final entry in breakdownMap.values) {
-            subtreeTotal += entry['total'] ?? 0;
-            subtreeWorking += entry['working'] ?? 0;
-            subtreeFaulty += entry['faulty'] ?? 0;
-            subtreeMaintenance += entry['underMaintenance'] ?? 0;
-          }
-
-          // Fetch issues across this zone's entire subtree
-          final subtreeIssues = await issueRepo.getIssues(
-            zoneId: root.id,
-            includeSubzones: true,
-            scope: 'technician',
-          );
-
-          final activeIssues = subtreeIssues.where((i) =>
-              i.status != IssueStatus.resolved &&
-              i.status != IssueStatus.closed).toList();
-
-          final unresolvedDeviceIds = activeIssues
-              .map((i) => i.deviceId)
-              .where((id) => id.isNotEmpty)
-              .toSet();
-          final areaIncidents = activeIssues.where((i) => i.deviceId.isEmpty).length;
-          final notResolvedUnits = unresolvedDeviceIds.length + areaIncidents;
-
-          final criticalCount = activeIssues.where((i) => i.priority == IssuePriority.critical).length;
-          final highCount = activeIssues.where((i) => i.priority == IssuePriority.high).length;
-
-          final totalDevices = subtreeTotal > 0 ? subtreeTotal : root.deviceCount;
-          final notWorking = notResolvedUnits > 0 ? notResolvedUnits : subtreeFaulty;
-          final maintenance = subtreeMaintenance;
-          final working = subtreeWorking > 0
-              ? subtreeWorking
-              : (totalDevices - notWorking - maintenance > 0 ? totalDevices - notWorking - maintenance : 0);
-
-          enhancedRoots.add(root.copyWith(
-            deviceCount: totalDevices,
-            subzoneCount: subzones.length,
-            workingCount: working,
-            notWorkingCount: notWorking,
-            maintenanceCount: maintenance,
-            openIssuesCount: activeIssues.length,
-            unresolvedUnitsCount: notResolvedUnits,
-            criticalIssuesCount: criticalCount,
-            highIssuesCount: highCount,
-          ));
-        } catch (zoneErr) {
-          AppLogger.w('⚠️ [TechnicianZoneTreeViewModel] Partial error enhancing zone ${root.name}: $zoneErr');
-          enhancedRoots.add(root);
-        }
-      }
-
-      return TechnicianZoneTreeState(
-        rootZones: enhancedRoots,
-        currentPath: const [],
-        currentSubzones: const [],
-        currentDevices: const [],
-        currentIssues: const [],
-        viewMode: TechnicianViewMode.spatialExplorer,
-        isLoading: false,
-      );
-    } catch (e, st) {
-      AppLogger.e('❌ [TechnicianZoneTreeViewModel] Failed to load root zones: $e', e, st);
-      rethrow;
+    final breakdownMap = await zoneRepo.getZoneBreakdown(node.id);
+    var total = 0, working = 0, faulty = 0, maintenance = 0;
+    for (final entry in breakdownMap.values) {
+      total += entry['total'] ?? 0;
+      working += entry['working'] ?? 0;
+      faulty += entry['faulty'] ?? 0;
+      maintenance += entry['underMaintenance'] ?? 0;
     }
+
+    final subtreeIssues = await issueRepo.getIssues(
+      zoneId: node.id,
+      includeSubzones: true,
+      scope: 'technician',
+    );
+    final active = subtreeIssues
+        .where((i) =>
+            i.status != IssueStatus.resolved && i.status != IssueStatus.closed)
+        .toList();
+
+    final affectedDeviceIds =
+        active.map((i) => i.deviceId).where((id) => id.isNotEmpty).toSet();
+    final areaIncidents = active.where((i) => i.deviceId.isEmpty).length;
+
+    return node.copyWith(
+      deviceCount: total,
+      subzoneCount: subzoneCount ?? node.subzoneCount,
+      workingCount: working,
+      notWorkingCount: faulty,
+      maintenanceCount: maintenance,
+      openIssuesCount: active.length,
+      unresolvedUnitsCount: affectedDeviceIds.length + areaIncidents,
+      criticalIssuesCount:
+          active.where((i) => i.priority == IssuePriority.critical).length,
+      highIssuesCount:
+          active.where((i) => i.priority == IssuePriority.high).length,
+      dataLoadFailed: false,
+    );
+  }
+
+  /// Enriches a list of sibling sub-zones, isolating per-zone failures.
+  Future<List<TechnicianZoneNode>> _enrichSubzones(
+    List<TechnicianZoneNode> rawSubzones,
+  ) async {
+    final result = <TechnicianZoneNode>[];
+    for (final sz in rawSubzones) {
+      try {
+        result.add(await _enrichZone(sz));
+      } catch (err) {
+        AppLogger.w('⚠️ [TechnicianZoneTreeViewModel] Sub-zone enrich failed for ${sz.name}: $err');
+        result.add(sz.copyWith(dataLoadFailed: true));
+      }
+    }
+    return result;
+  }
+
+  /// Initial load: fetches assigned zones and enriches each with counts.
+  Future<TechnicianZoneTreeState> _loadRootZones() async {
+    final zoneRepo = ref.read(zoneRepositoryProvider);
+
+    final rawRoots = await zoneRepo.getMyZones();
+    final enhancedRoots = <TechnicianZoneNode>[];
+
+    for (final root in rawRoots) {
+      try {
+        final subzones = await zoneRepo.getSubzones(root.id);
+        enhancedRoots.add(await _enrichZone(root, subzoneCount: subzones.length));
+      } catch (zoneErr) {
+        AppLogger.w('⚠️ [TechnicianZoneTreeViewModel] Root zone enrich failed for ${root.name}: $zoneErr');
+        enhancedRoots.add(root.copyWith(dataLoadFailed: true));
+      }
+    }
+
+    return TechnicianZoneTreeState(
+      rootZones: enhancedRoots,
+      currentPath: const [],
+      currentSubzones: const [],
+      currentDevices: const [],
+      currentIssues: const [],
+      isLoading: false,
+    );
   }
 
   /// Drills down into a specific zone node: updates breadcrumb path and fetches its
@@ -139,71 +180,10 @@ class TechnicianZoneTreeViewModel extends AsyncNotifier<TechnicianZoneTreeState>
     final issueRepo = ref.read(issueRepositoryProvider);
 
     try {
-      // 1. Fetch child sub-zones
       final rawSubzones = await zoneRepo.getSubzones(node.id);
-      final enhancedSubzones = <TechnicianZoneNode>[];
+      final enhancedSubzones = await _enrichSubzones(rawSubzones);
 
-      for (final sz in rawSubzones) {
-        try {
-          final breakdownMap = await zoneRepo.getZoneBreakdown(sz.id);
-          int szTotal = 0;
-          int szWorking = 0;
-          int szFaulty = 0;
-          int szMaintenance = 0;
-
-          for (final entry in breakdownMap.values) {
-            szTotal += entry['total'] ?? 0;
-            szWorking += entry['working'] ?? 0;
-            szFaulty += entry['faulty'] ?? 0;
-            szMaintenance += entry['underMaintenance'] ?? 0;
-          }
-
-          final issues = await issueRepo.getIssues(
-            zoneId: sz.id,
-            includeSubzones: true,
-            scope: 'technician',
-          );
-
-          final activeIssues = issues.where((i) =>
-              i.status != IssueStatus.resolved &&
-              i.status != IssueStatus.closed).toList();
-
-          final szUnresolvedDeviceIds = activeIssues
-              .map((i) => i.deviceId)
-              .where((id) => id.isNotEmpty)
-              .toSet();
-          final szAreaIncidents = activeIssues.where((i) => i.deviceId.isEmpty).length;
-          final szNotResolvedUnits = szUnresolvedDeviceIds.length + szAreaIncidents;
-
-          final criticalCount = activeIssues.where((i) => i.priority == IssuePriority.critical).length;
-          final highCount = activeIssues.where((i) => i.priority == IssuePriority.high).length;
-
-          final total = szTotal > 0 ? szTotal : sz.deviceCount;
-          final notWorking = szNotResolvedUnits > 0 ? szNotResolvedUnits : szFaulty;
-          final working = szWorking > 0
-              ? szWorking
-              : (total - notWorking - szMaintenance > 0 ? total - notWorking - szMaintenance : 0);
-
-          enhancedSubzones.add(sz.copyWith(
-            deviceCount: total,
-            workingCount: working,
-            notWorkingCount: notWorking,
-            maintenanceCount: szMaintenance,
-            openIssuesCount: activeIssues.length,
-            unresolvedUnitsCount: szNotResolvedUnits,
-            criticalIssuesCount: criticalCount,
-            highIssuesCount: highCount,
-          ));
-        } catch (szErr) {
-          AppLogger.w('⚠️ [TechnicianZoneTreeViewModel] Subzone enhance failed: $szErr');
-          enhancedSubzones.add(sz);
-        }
-      }
-
-      // 2. Fetch direct devices situated in this zone
       final devices = await zoneRepo.getZoneDevices(node.id);
-
-      // 3. Fetch active issues situated in this zone (subtree) - exclude resolved
       final rawIssues = await issueRepo.getIssues(
         zoneId: node.id,
         includeSubzones: true,
@@ -288,64 +268,7 @@ class TechnicianZoneTreeViewModel extends AsyncNotifier<TechnicianZoneTreeState>
 
     try {
       final rawSubzones = await zoneRepo.getSubzones(node.id);
-      final enhancedSubzones = <TechnicianZoneNode>[];
-
-      for (final sz in rawSubzones) {
-        try {
-          final breakdownMap = await zoneRepo.getZoneBreakdown(sz.id);
-          int szTotal = 0;
-          int szWorking = 0;
-          int szFaulty = 0;
-          int szMaintenance = 0;
-
-          for (final entry in breakdownMap.values) {
-            szTotal += entry['total'] ?? 0;
-            szWorking += entry['working'] ?? 0;
-            szFaulty += entry['faulty'] ?? 0;
-            szMaintenance += entry['underMaintenance'] ?? 0;
-          }
-
-          final issues = await issueRepo.getIssues(
-            zoneId: sz.id,
-            includeSubzones: true,
-            scope: 'technician',
-          );
-
-          final activeIssues = issues.where((i) =>
-              i.status != IssueStatus.resolved &&
-              i.status != IssueStatus.closed).toList();
-
-          final szUnresolvedDeviceIds = activeIssues
-              .map((i) => i.deviceId)
-              .where((id) => id.isNotEmpty)
-              .toSet();
-          final szAreaIncidents = activeIssues.where((i) => i.deviceId.isEmpty).length;
-          final szNotResolvedUnits = szUnresolvedDeviceIds.length + szAreaIncidents;
-
-          final criticalCount = activeIssues.where((i) => i.priority == IssuePriority.critical).length;
-          final highCount = activeIssues.where((i) => i.priority == IssuePriority.high).length;
-
-          final total = szTotal > 0 ? szTotal : sz.deviceCount;
-          final notWorking = szNotResolvedUnits > 0 ? szNotResolvedUnits : szFaulty;
-          final working = szWorking > 0
-              ? szWorking
-              : (total - notWorking - szMaintenance > 0 ? total - notWorking - szMaintenance : 0);
-
-          enhancedSubzones.add(sz.copyWith(
-            deviceCount: total,
-            workingCount: working,
-            notWorkingCount: notWorking,
-            maintenanceCount: szMaintenance,
-            openIssuesCount: activeIssues.length,
-            unresolvedUnitsCount: szNotResolvedUnits,
-            criticalIssuesCount: criticalCount,
-            highIssuesCount: highCount,
-          ));
-        } catch (szErr) {
-          AppLogger.w('⚠️ [TechnicianZoneTreeViewModel] Subzone enhance failed in reload: $szErr');
-          enhancedSubzones.add(sz);
-        }
-      }
+      final enhancedSubzones = await _enrichSubzones(rawSubzones);
 
       final devices = await zoneRepo.getZoneDevices(node.id);
       final rawIssues = await issueRepo.getIssues(
@@ -370,13 +293,6 @@ class TechnicianZoneTreeViewModel extends AsyncNotifier<TechnicianZoneTreeState>
         errorMessage: 'Failed to load: $e',
       ));
     }
-  }
-
-  /// Toggles between Spatial Explorer and Work Queue modes.
-  void setViewMode(TechnicianViewMode mode) {
-    final current = state.value;
-    if (current == null) return;
-    state = AsyncValue.data(current.copyWith(viewMode: mode));
   }
 
   /// Sets the filter search query.

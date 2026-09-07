@@ -712,4 +712,153 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get presetCablesTested =>
       'केबल दोबारा जोड़े गए और कनेक्टिविटी जांची गई';
+
+  @override
+  String get techViewSpatial => 'ज़ोन नक्शा';
+
+  @override
+  String get techViewQueue => 'मेरे टिकट';
+
+  @override
+  String get techBadgeOk => 'ठीक';
+
+  @override
+  String get techBadgeResolved => 'हल हुआ';
+
+  @override
+  String get techBadgeAllOk => 'सब ठीक';
+
+  @override
+  String get techCouldntLoadRetry => 'लोड नहीं हुआ • दोबारा कोशिश करें';
+
+  @override
+  String get techZoneHealthLoadFailed =>
+      'इस ज़ोन की स्थिति लोड नहीं हुई — दोबारा कोशिश के लिए नीचे खींचें';
+
+  @override
+  String get techCoverageOverview => 'कवरेज सारांश';
+
+  @override
+  String techZonesDevicesSummary(int zones, int devices) {
+    return '$zones सौंपे गए ज़ोन • $devices कुल उपकरण';
+  }
+
+  @override
+  String techPercentOnline(int percent) {
+    return '$percent% ऑनलाइन';
+  }
+
+  @override
+  String techPercentHealth(int percent) {
+    return '$percent% स्वस्थ';
+  }
+
+  @override
+  String get techStatTotal => 'कुल';
+
+  @override
+  String get techStatOnline => 'चालू';
+
+  @override
+  String get techStatFaulty => 'खराब';
+
+  @override
+  String get techStatDefects => 'खराबी';
+
+  @override
+  String techZoneClientDepth(String client, int depth) {
+    return '$client • स्तर $depth';
+  }
+
+  @override
+  String techZoneDepthStatus(int depth, String status) {
+    return 'स्तर $depth • स्थिति: $status';
+  }
+
+  @override
+  String techFailedToLoadZones(String error) {
+    return 'ज़ोन लोड नहीं हुए: $error';
+  }
+
+  @override
+  String techAssignedZonesCount(int count) {
+    return 'सौंपे गए ज़ोन ($count)';
+  }
+
+  @override
+  String techSubZonesCount(int count) {
+    return 'उप-ज़ोन ($count)';
+  }
+
+  @override
+  String techUnresolvedHardwareCount(int count) {
+    return 'बिना ठीक हुए उपकरण ($count)';
+  }
+
+  @override
+  String techFacilityIncidentsCount(int count) {
+    return 'क्षेत्र की समस्याएँ ($count)';
+  }
+
+  @override
+  String get techNoAssignedZones => 'कोई ज़ोन नहीं सौंपा गया';
+
+  @override
+  String get techNoAssignedZonesSub => 'अभी आपको कोई ज़ोन नहीं सौंपा गया है';
+
+  @override
+  String get techAllUnitsOperational => 'सभी उपकरण चालू';
+
+  @override
+  String techAllUnitsOperationalSub(int count, String zone) {
+    return '$zone में सभी $count उपकरण चालू हैं, कोई बाकी समस्या नहीं';
+  }
+
+  @override
+  String techNoUnresolvedInZone(String zone) {
+    return '$zone में कोई बाकी समस्या या खराबी नहीं';
+  }
+
+  @override
+  String get techAllZones => 'सभी ज़ोन';
+
+  @override
+  String get techFailedToLoadQueue => 'आपकी काम सूची लोड नहीं हुई';
+
+  @override
+  String get techCheckNetworkRetry =>
+      'कृपया अपना नेटवर्क जांचें और दोबारा कोशिश करें';
+
+  @override
+  String get techPullToRefreshFeed => 'नया देखने के लिए नीचे खींचें';
+
+  @override
+  String get techNoActiveTickets => 'कोई सक्रिय टिकट नहीं';
+
+  @override
+  String get techNoOnHoldTickets => 'कोई टिकट रुका हुआ नहीं';
+
+  @override
+  String get techNoResolvedTickets => 'अभी कोई टिकट हल नहीं हुआ';
+
+  @override
+  String bulkAlreadyInStatus(int count, String status) {
+    return '$count पहले से $status';
+  }
+
+  @override
+  String bulkCouldNotUpdate(int count) {
+    return '$count अपनी मौजूदा स्थिति से नहीं बदले जा सके';
+  }
+
+  @override
+  String bulkFailedToUpdate(String error) {
+    return 'टिकट अपडेट नहीं हुए: $error';
+  }
+
+  @override
+  String get bulkNoPendingIssues => 'हल करने के लिए कोई टिकट नहीं';
+
+  @override
+  String get bulkNoMatchingTickets => 'कोई मिलता-जुलता टिकट नहीं मिला';
 }

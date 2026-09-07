@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../devices/models/technician_zone_node.dart';
 
 /// Horizontal scrolling breadcrumb navigation bar with quick jump-to-level support.
@@ -19,6 +20,7 @@ class TechnicianBreadcrumbBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isAtRoot = currentPath.isEmpty;
 
     return Container(
@@ -61,7 +63,7 @@ class TechnicianBreadcrumbBar extends StatelessWidget {
                   // Root Chip
                   _BreadcrumbChip(
                     icon: Icons.home_rounded,
-                    label: 'All Zones',
+                    label: l10n.techAllZones,
                     isActive: isAtRoot,
                     onTap: onJumpToRoot,
                   ),

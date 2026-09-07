@@ -306,28 +306,45 @@ class IssueModel {
 
   String get raisedByName => createdByUserName;
 
-  /// Extracts the number of units affected if recorded in the description header
-  /// (e.g. from bulk defect reporting: `Product: Camera · Units affected: 3`).
+  /// Bulk-defect tickets are created with a machine-written metadata header of
+  /// one or two contiguous leading lines, e.g.:
+  ///
+  ///   Product: Camera · Units affected: 3
+  ///   Defect type: No power
+  ///   (the raiser's actual note)
+  ///
+  /// Only that *leading* block is treated as metadata. A user note that happens
+  /// to contain the word "Product:" further down is left untouched.
+  static final _headerLine = RegExp(
+    r'^\s*(Product:|Defect type:).*$|^\s*.*Units affected:\s*\d+.*$',
+    caseSensitive: false,
+  );
+
+  List<String> get _descriptionLines => description.split('\n');
+
+  int get _headerLineCount {
+    var count = 0;
+    for (final line in _descriptionLines) {
+      if (!_headerLine.hasMatch(line)) break;
+      count++;
+    }
+    return count;
+  }
+
+  /// Number of units affected, read from the leading metadata header only.
   int? get unitsAffected {
-    final match = RegExp(r'Units affected:\s*(\d+)').firstMatch(description);
-    if (match != null) {
-      return int.tryParse(match.group(1)!);
+    for (final line in _descriptionLines.take(_headerLineCount)) {
+      final match = RegExp(r'Units affected:\s*(\d+)', caseSensitive: false)
+          .firstMatch(line);
+      if (match != null) return int.tryParse(match.group(1)!);
     }
     return null;
   }
 
-  /// Returns user comments with automated metadata headers
-  /// (`Product: ... · Units affected: ...`) stripped out, leaving only
-  /// the technician/staff actual notes.
+  /// The raiser's actual note, with the leading metadata header removed.
   String get displayDescription {
     if (description.isEmpty) return '';
-    final lines = description.split('\n');
-    final userLines = lines.where((l) {
-      final trimmed = l.trim();
-      return !trimmed.startsWith('Product:') &&
-          !trimmed.contains('Units affected:') &&
-          !trimmed.startsWith('Defect type:');
-    }).join('\n').trim();
-    return userLines.isNotEmpty ? userLines : description;
+    final body = _descriptionLines.skip(_headerLineCount).join('\n').trim();
+    return body.isNotEmpty ? body : description;
   }
 }

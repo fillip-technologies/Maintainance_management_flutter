@@ -1,12 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:equipment_management_system/features/devices/devices.dart';
 import 'package:equipment_management_system/features/issues/issues.dart';
 import 'package:equipment_management_system/features/technician/models/technician_queue_state.dart';
 import 'package:equipment_management_system/features/technician/models/technician_zone_tree_state.dart';
+import 'package:equipment_management_system/features/technician/viewmodels/technician_view_mode_provider.dart';
 import 'package:equipment_management_system/features/technician/views/widgets/subzone_grid_card.dart';
 import 'package:equipment_management_system/features/technician/views/widgets/technician_search_filter_bar.dart';
 import 'package:equipment_management_system/features/technician/views/widgets/zone_device_card.dart';
+import 'package:equipment_management_system/l10n/app_localizations.dart';
+
+/// Wraps a technician widget with the localization delegates it now needs.
+Widget _localized(Widget child) => MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: Scaffold(body: child),
+    );
 
 void main() {
   group('TechnicianZoneNode Unit Tests', () {
@@ -169,7 +179,6 @@ void main() {
       expect(rootState.isAtRoot, isTrue);
       expect(rootState.currentZone, isNull);
       expect(rootState.currentDepth, 0);
-      expect(rootState.viewMode, TechnicianViewMode.spatialExplorer);
     });
 
     test('manages drill-down path and ancestor hierarchy correctly', () {
@@ -191,11 +200,21 @@ void main() {
     });
 
     test('view mode toggles between spatial explorer and work queue', () {
-      const state = TechnicianZoneTreeState();
-      expect(state.viewMode, TechnicianViewMode.spatialExplorer);
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
 
-      final queueModeState = state.copyWith(viewMode: TechnicianViewMode.workQueue);
-      expect(queueModeState.viewMode, TechnicianViewMode.workQueue);
+      expect(
+        container.read(technicianViewModeProvider),
+        TechnicianViewMode.spatialExplorer,
+      );
+
+      container
+          .read(technicianViewModeProvider.notifier)
+          .setMode(TechnicianViewMode.workQueue);
+      expect(
+        container.read(technicianViewModeProvider),
+        TechnicianViewMode.workQueue,
+      );
     });
   });
 
@@ -233,13 +252,11 @@ void main() {
       bool inspected = false;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ZoneDeviceCard(
-              device: device,
-              activeIssues: [issue],
-              onInspectIssue: (iss) => inspected = true,
-            ),
+        _localized(
+          ZoneDeviceCard(
+            device: device,
+            activeIssues: [issue],
+            onInspectIssue: (iss) => inspected = true,
           ),
         ),
       );
@@ -271,12 +288,10 @@ void main() {
       );
 
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: ZoneDeviceCard(
-              device: device,
-              activeIssues: [],
-            ),
+        _localized(
+          const ZoneDeviceCard(
+            device: device,
+            activeIssues: [],
           ),
         ),
       );
@@ -318,12 +333,10 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ZoneDeviceCard(
-              device: device,
-              activeIssues: [resolvedIssue],
-            ),
+        _localized(
+          ZoneDeviceCard(
+            device: device,
+            activeIssues: [resolvedIssue],
           ),
         ),
       );
@@ -422,20 +435,14 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SubzoneGridCard(
-              zone: zone,
-              onTap: () {},
-            ),
-          ),
-        ),
+        _localized(SubzoneGridCard(zone: zone, onTap: () {})),
       );
 
       expect(find.text('Surgical Wing'), findsOneWidget);
-      expect(find.text('2 not resolved'), findsOneWidget);
-      expect(find.text('3 zones'), findsOneWidget);
+      // Health signal is the red count badge; nested sub-zone count is icon + number.
+      expect(find.text('3'), findsOneWidget);
       expect(find.text('2'), findsOneWidget);
+      expect(find.text('2 not resolved'), findsNothing);
       expect(find.text('10 units'), findsNothing);
     });
 
@@ -450,20 +457,13 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SubzoneGridCard(
-              zone: zone,
-              onTap: () {},
-            ),
-          ),
-        ),
+        _localized(SubzoneGridCard(zone: zone, onTap: () {})),
       );
 
       expect(find.text('Radiology Area'), findsOneWidget);
-      expect(find.text('All resolved'), findsOneWidget);
-      expect(find.text('1 zone'), findsOneWidget);
       expect(find.text('OK'), findsOneWidget);
+      expect(find.text('1'), findsOneWidget);
+      expect(find.text('All resolved'), findsNothing);
       expect(find.text('8 units'), findsNothing);
     });
 

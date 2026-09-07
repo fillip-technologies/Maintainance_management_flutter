@@ -146,8 +146,13 @@ class TechnicianIssueCard extends StatelessWidget {
                     ),
                   ],
                   const Spacer(),
-                  StatusBadge.priority(issue.priority),
-                  const SizedBox(width: 6),
+                  // Only surface priority when it actually demands attention —
+                  // low/medium priority badges are noise on a small card.
+                  if (issue.priority == IssuePriority.critical ||
+                      issue.priority == IssuePriority.high) ...[
+                    StatusBadge.priority(issue.priority),
+                    const SizedBox(width: 6),
+                  ],
                   StatusBadge.issue(issue.status),
                 ],
               ),
@@ -236,96 +241,110 @@ class TechnicianIssueCard extends StatelessWidget {
                 ),
               ],
 
-              const SizedBox(height: 12),
-              const Divider(color: AppColors.divider, height: 1),
-              const SizedBox(height: 10),
-
-              // Technician Workflow Quick Actions
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    '${issue.history.length} timeline events',
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: AppColors.textMuted,
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      if (issue.status == IssueStatus.open ||
-                          issue.status == IssueStatus.assigned ||
-                          issue.status == IssueStatus.reopened) ...[
-                        ElevatedButton.icon(
-                          onPressed: () => onUpdateStatus(IssueStatus.inProgress),
-                          icon: const Icon(Icons.play_arrow_rounded, size: 15),
-                          label: Text(startWorkLabel, style: const TextStyle(fontSize: 12)),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.warning,
-                            foregroundColor: AppColors.textWhite,
-                            visualDensity: VisualDensity.compact,
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          ),
-                        ),
-                      ] else if (issue.status == IssueStatus.inProgress) ...[
-                        OutlinedButton(
-                          onPressed: () => onUpdateStatus(IssueStatus.onHold),
-                          style: OutlinedButton.styleFrom(
-                            visualDensity: VisualDensity.compact,
-                            foregroundColor: AppColors.purpleText,
-                            side: const BorderSide(color: AppColors.border),
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          ),
-                          child: Text(holdLabel, style: const TextStyle(fontSize: 12)),
-                        ),
-                        const SizedBox(width: 8),
-                        ElevatedButton.icon(
-                          onPressed: () => onUpdateStatus(IssueStatus.resolved),
-                          icon: const Icon(Icons.check, size: 15),
-                          label: Text(resolveLabel, style: const TextStyle(fontSize: 12)),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.success,
-                            foregroundColor: AppColors.textWhite,
-                            visualDensity: VisualDensity.compact,
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          ),
-                        ),
-                      ] else if (issue.status == IssueStatus.onHold) ...[
-                        ElevatedButton.icon(
-                          onPressed: () => onUpdateStatus(IssueStatus.inProgress),
-                          icon: const Icon(Icons.play_arrow_rounded, size: 15),
-                          label: Text(startWorkLabel, style: const TextStyle(fontSize: 12)),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: AppColors.textWhite,
-                            visualDensity: VisualDensity.compact,
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          ),
-                        ),
-                      ] else ...[
-                        OutlinedButton.icon(
-                          onPressed: onOpenTimeline,
-                          icon: const Icon(Icons.history, size: 14),
-                          label: Text(timelineLabel, style: const TextStyle(fontSize: 12)),
-                          style: OutlinedButton.styleFrom(
-                            visualDensity: VisualDensity.compact,
-                            foregroundColor: AppColors.textSecondary,
-                            side: const BorderSide(color: AppColors.border),
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ],
-              ),
+              // In bulk-selection mode the whole card is a checkbox target, so
+              // per-card action buttons would just get in the way.
+              if (!isSelectable) ...[
+                const SizedBox(height: 14),
+                _buildActionArea(
+                  startWorkLabel: startWorkLabel,
+                  holdLabel: holdLabel,
+                  resolveLabel: resolveLabel,
+                  timelineLabel: timelineLabel,
+                ),
+              ],
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  /// One prominent primary action per state, big enough to tap without reading.
+  Widget _buildActionArea({
+    required String startWorkLabel,
+    required String holdLabel,
+    required String resolveLabel,
+    required String timelineLabel,
+  }) {
+    switch (issue.status) {
+      case IssueStatus.open:
+      case IssueStatus.assigned:
+      case IssueStatus.reopened:
+        return _primaryButton(
+          label: startWorkLabel,
+          icon: Icons.play_arrow_rounded,
+          color: AppColors.warning,
+          onPressed: () => onUpdateStatus(IssueStatus.inProgress),
+        );
+      case IssueStatus.inProgress:
+        return Row(
+          children: [
+            Expanded(
+              child: _primaryButton(
+                label: resolveLabel,
+                icon: Icons.check_rounded,
+                color: AppColors.success,
+                onPressed: () => onUpdateStatus(IssueStatus.resolved),
+              ),
+            ),
+            const SizedBox(width: 10),
+            OutlinedButton(
+              onPressed: () => onUpdateStatus(IssueStatus.onHold),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.textSecondary,
+                side: const BorderSide(color: AppColors.border),
+                minimumSize: const Size(0, 46),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: Text(holdLabel, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        );
+      case IssueStatus.onHold:
+        return _primaryButton(
+          label: startWorkLabel,
+          icon: Icons.play_arrow_rounded,
+          color: AppColors.warning,
+          onPressed: () => onUpdateStatus(IssueStatus.inProgress),
+        );
+      case IssueStatus.resolved:
+      case IssueStatus.closed:
+        return SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: onOpenTimeline,
+            icon: const Icon(Icons.history_rounded, size: 18),
+            label: Text(timelineLabel, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.textSecondary,
+              side: const BorderSide(color: AppColors.border),
+              minimumSize: const Size(0, 46),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          ),
+        );
+    }
+  }
+
+  Widget _primaryButton({
+    required String label,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onPressed,
+  }) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: onPressed,
+        icon: Icon(icon, size: 20),
+        label: Text(label, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          foregroundColor: AppColors.textWhite,
+          elevation: 0,
+          minimumSize: const Size(0, 46),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
       ),
     );

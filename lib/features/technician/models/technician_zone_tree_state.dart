@@ -3,18 +3,12 @@ import '../../devices/models/technician_zone_node.dart';
 import '../../issues/models/issue_model.dart';
 
 /// Active viewing mode for the technician home interface.
+///
+/// The selected mode lives in `technicianViewModeProvider`, not in
+/// [TechnicianZoneTreeState], so it survives the tree's async reloads.
 enum TechnicianViewMode {
   spatialExplorer, // 🗺️ Zone-tree and spatial drill-down view
   workQueue;       // 📋 Flat ticket list (Active, On-Hold, Resolved)
-
-  String get label {
-    switch (this) {
-      case TechnicianViewMode.spatialExplorer:
-        return 'Spatial Explorer';
-      case TechnicianViewMode.workQueue:
-        return 'My Queue';
-    }
-  }
 }
 
 /// Complete state for the technician zone hierarchy explorer.
@@ -34,9 +28,6 @@ class TechnicianZoneTreeState {
   /// Active defects at the current zone level or its children.
   final List<IssueModel> currentIssues;
 
-  /// The active view mode: spatial explorer or work queue.
-  final TechnicianViewMode viewMode;
-
   /// Loading flags.
   final bool isLoading;
   final bool isDrillingDown;
@@ -53,7 +44,6 @@ class TechnicianZoneTreeState {
     this.currentSubzones = const [],
     this.currentDevices = const [],
     this.currentIssues = const [],
-    this.viewMode = TechnicianViewMode.spatialExplorer,
     this.isLoading = false,
     this.isDrillingDown = false,
     this.errorMessage,
@@ -75,7 +65,6 @@ class TechnicianZoneTreeState {
     List<TechnicianZoneNode>? currentSubzones,
     List<DeviceModel>? currentDevices,
     List<IssueModel>? currentIssues,
-    TechnicianViewMode? viewMode,
     bool? isLoading,
     bool? isDrillingDown,
     String? errorMessage,
@@ -88,7 +77,6 @@ class TechnicianZoneTreeState {
       currentSubzones: currentSubzones ?? this.currentSubzones,
       currentDevices: currentDevices ?? this.currentDevices,
       currentIssues: currentIssues ?? this.currentIssues,
-      viewMode: viewMode ?? this.viewMode,
       isLoading: isLoading ?? this.isLoading,
       isDrillingDown: isDrillingDown ?? this.isDrillingDown,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),

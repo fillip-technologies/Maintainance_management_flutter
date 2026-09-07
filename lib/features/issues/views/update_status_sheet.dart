@@ -57,8 +57,22 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
   @override
   void initState() {
     super.initState();
-    _selectedStatus = widget.initialTargetStatus ?? _getDefaultNextStatus(widget.issue.status);
+    _selectedStatus = _resolveInitialStatus();
     _applyDefaultComment(_selectedStatus);
+  }
+
+  /// The caller can request a target status (e.g. from a card's "Resolve"
+  /// button), but only statuses that are legal from the current state are
+  /// offered as options. Clamp an out-of-range request to a safe default so the
+  /// sheet never opens on a status with no matching button.
+  IssueStatus _resolveInitialStatus() {
+    final allowed = _getAllowedTransitions(widget.issue.status);
+    final requested = widget.initialTargetStatus;
+    if (requested != null && allowed.contains(requested)) {
+      return requested;
+    }
+    final fallback = _getDefaultNextStatus(widget.issue.status);
+    return allowed.contains(fallback) ? fallback : allowed.first;
   }
 
   void _applyDefaultComment(IssueStatus status) {
@@ -100,11 +114,9 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
   Future<void> _handleSubmit() async {
     if (_isSubmitting) return;
 
+    // The work note is optional: a pre-filled default is offered, but a
+    // technician who clears it can still submit.
     final comment = _commentController.text.trim();
-    if (comment.isEmpty) {
-      setState(() => _errorMessage = 'Please provide a work note or transition comment');
-      return;
-    }
 
     setState(() {
       _isSubmitting = true;

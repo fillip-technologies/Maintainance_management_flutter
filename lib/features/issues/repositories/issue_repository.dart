@@ -335,14 +335,6 @@ class IssueRepository {
       }
     } on DioException catch (e) {
       final message = e.response?.data?['message'] as String? ?? e.message ?? 'Network error';
-      if (toStatus == IssueStatus.resolved && message.contains("Cannot move from 'open' to 'resolved'")) {
-        AppLogger.w('⚠️ [IssueRepository] Auto-transitioning open -> in_progress before resolving issue $issueId');
-        await apiClient.dio.patch('/issues/$issueId/status', data: {
-          'status': 'in_progress',
-          'notes': 'Auto-started work for hardware resolution',
-        });
-        return updateIssueStatus(issueId: issueId, toStatus: toStatus, notes: notes);
-      }
       AppLogger.e('❌ [IssueRepository] DioException in updateIssueStatus: $message', e);
       throw Exception(message);
     } catch (e, st) {
