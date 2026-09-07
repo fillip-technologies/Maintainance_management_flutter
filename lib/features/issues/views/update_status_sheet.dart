@@ -52,6 +52,7 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
   // bool _isPickingImage = false;
   // =========================================================================
   String? _errorMessage;
+  bool _isSubmitting = false;
 
   @override
   void initState() {
@@ -96,45 +97,33 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
     };
   }
 
-  // =========================================================================
-  // CAMERA PROOF CAPTURE (COMMENTED OUT FOR NOW - WILL BE ENABLED IN FUTURE)
-  // =========================================================================
-  // Future<void> _pickImage(ImageSource source) async {
-  //   Navigator.pop(context);
-  //   setState(() => _isPickingImage = true);
-  //   try {
-  //     final XFile? pickedFile = await _picker.pickImage(
-  //       source: source,
-  //       maxWidth: 1800,
-  //       maxHeight: 1800,
-  //       imageQuality: 85,
-  //     );
-  //     if (pickedFile != null) {
-  //       setState(() {
-  //         _resolutionImage = File(pickedFile.path);
-  //       });
-  //     }
-  //   } catch (e) {
-  //     AppSnackbar.error('Failed to capture photo: $e');
-  //   } finally {
-  //     if (mounted) setState(() => _isPickingImage = false);
-  //   }
-  // }
-  //
-  // void _showImageSourceModal() {
-  //   ...
-  // }
-  // =========================================================================
+  Future<void> _handleSubmit() async {
+    if (_isSubmitting) return;
 
-  void _handleSubmit() {
     final comment = _commentController.text.trim();
     if (comment.isEmpty) {
       setState(() => _errorMessage = 'Please provide a work note or transition comment');
       return;
     }
 
-    widget.onStatusUpdated(_selectedStatus, comment, null);
-    Navigator.pop(context);
+    setState(() {
+      _isSubmitting = true;
+      _errorMessage = null;
+    });
+
+    try {
+      await widget.onStatusUpdated(_selectedStatus, comment, null);
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+          _errorMessage = e.toString().replaceAll('Exception:', '').trim();
+        });
+      }
+    }
   }
 
   @override
@@ -395,12 +384,36 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
 
                   // Submit Button
                   ElevatedButton(
-                    onPressed: _handleSubmit,
+                    onPressed: _isSubmitting ? null : _handleSubmit,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: AppColors.textWhite,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
-                    child: Text('Confirm & Transition to ${_selectedStatus.label}'),
+                    child: _isSubmitting
+                        ? Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              SizedBox(width: 10),
+                              Text(
+                                'Updating status...',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          )
+                        : Text('Confirm & Transition to ${_selectedStatus.label}'),
                   ),
                 ],
               ),

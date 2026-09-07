@@ -274,24 +274,29 @@ class IssueDetailSheet extends ConsumerWidget {
                   if (isTechnician) ...[
                     ElevatedButton.icon(
                       onPressed: () {
-                        Navigator.pop(context);
+                        final actionController = ref.read(issueActionControllerProvider.notifier);
+                        final sheetContext = context;
+                        final issueId = currentIssue.id;
+
                         UpdateStatusSheet.show(
-                          context,
+                          sheetContext,
                           issue: currentIssue,
                           onStatusUpdated: (newStatus, comment, _) async {
                             try {
-                              await ref
-                                  .read(issueActionControllerProvider.notifier)
-                                  .updateStatus(
-                                    issueId: currentIssue.id,
-                                    toStatus: newStatus,
-                                    notes: comment,
-                                  );
+                              await actionController.updateStatus(
+                                issueId: issueId,
+                                toStatus: newStatus,
+                                notes: comment,
+                              );
                               AppSnackbar.success(
                                 'Ticket moved to ${newStatus.label}',
                               );
+                              if (sheetContext.mounted) {
+                                Navigator.of(sheetContext).pop();
+                              }
                             } catch (e) {
                               AppSnackbar.error('Failed to update status: $e');
+                              rethrow;
                             }
                           },
                         );
@@ -311,8 +316,12 @@ class IssueDetailSheet extends ConsumerWidget {
                       const SizedBox(height: 10),
                       OutlinedButton.icon(
                         onPressed: () {
+                          final actionController = ref.read(issueActionControllerProvider.notifier);
+                          final sheetContext = context;
+                          final issueId = currentIssue.id;
+
                           ReplaceDeviceSheet.show(
-                            context,
+                            sheetContext,
                             issue: currentIssue,
                             onConfirm: ({
                               required reason,
@@ -329,16 +338,22 @@ class IssueDetailSheet extends ConsumerWidget {
                                 ReplacementChoice.none => 'No replacement installed; slot left vacant.',
                               };
                               final fullComment = '[HARDWARE DECOMMISSIONED - ${reason.name.toUpperCase()}] $notes. $replacementText';
-                              await ref
-                                  .read(issueActionControllerProvider.notifier)
-                                  .updateStatus(
-                                    issueId: currentIssue.id,
-                                    toStatus: IssueStatus.resolved,
-                                    notes: fullComment,
-                                  );
-                              AppSnackbar.success(
-                                l10n.replacementSuccess,
-                              );
+                              try {
+                                await actionController.updateStatus(
+                                  issueId: issueId,
+                                  toStatus: IssueStatus.resolved,
+                                  notes: fullComment,
+                                );
+                                AppSnackbar.success(
+                                  l10n.replacementSuccess,
+                                );
+                                if (sheetContext.mounted) {
+                                  Navigator.of(sheetContext).pop();
+                                }
+                              } catch (e) {
+                                AppSnackbar.error('Failed to update status: $e');
+                                rethrow;
+                              }
                             },
                           );
                         },

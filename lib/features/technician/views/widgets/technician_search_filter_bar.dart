@@ -3,19 +3,26 @@ import '../../../../core/theme/colors.dart';
 import '../../../../core/widgets/app_filter_chip.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../issues/issues.dart';
+import '../../models/technician_queue_state.dart';
 
 class TechnicianSearchFilterBar extends StatefulWidget {
   final String searchQuery;
   final IssuePriority? selectedPriority;
+  final int selectedTabIndex;
+  final TechnicianKpiStats? stats;
   final ValueChanged<String> onSearchChanged;
   final ValueChanged<IssuePriority?> onPriorityChanged;
+  final ValueChanged<int>? onTabSelected;
 
   const TechnicianSearchFilterBar({
     super.key,
     required this.searchQuery,
     required this.selectedPriority,
+    this.selectedTabIndex = 0,
+    this.stats,
     required this.onSearchChanged,
     required this.onPriorityChanged,
+    this.onTabSelected,
   });
 
   @override
@@ -55,32 +62,38 @@ class _TechnicianSearchFilterBarState extends State<TechnicianSearchFilterBar> {
     final mediumLabel = l10n?.priorityMedium ?? 'Medium';
     final lowLabel = l10n?.priorityLow ?? 'Low';
 
+    final activeCount = widget.stats?.open ?? 0;
+    final onHoldCount = widget.stats?.onHold ?? 0;
+    final resolvedCount = widget.stats?.resolved ?? 0;
+
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
       color: AppColors.surface,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           TextField(
             controller: _searchController,
-            style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
+            style: const TextStyle(fontSize: 13, color: AppColors.textPrimary),
             decoration: InputDecoration(
               hintText: searchHint,
-              prefixIcon: const Icon(Icons.search, color: AppColors.icon),
+              hintStyle: const TextStyle(fontSize: 13, color: AppColors.textMuted),
+              prefixIcon: const Icon(Icons.search, size: 20, color: AppColors.icon),
               suffixIcon: widget.searchQuery.isNotEmpty
                   ? IconButton(
-                      icon: const Icon(Icons.clear, size: 18, color: AppColors.icon),
+                      icon: const Icon(Icons.clear, size: 16, color: AppColors.icon),
                       onPressed: () {
                         _searchController.clear();
                         widget.onSearchChanged('');
                       },
                     )
                   : null,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               filled: true,
               fillColor: AppColors.background,
+              isDense: true,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(10),
                 borderSide: BorderSide.none,
               ),
             ),
@@ -91,6 +104,34 @@ class _TechnicianSearchFilterBarState extends State<TechnicianSearchFilterBar> {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
+                if (widget.onTabSelected != null) ...[
+                  _buildStatusChip(
+                    index: 0,
+                    icon: Icons.assignment_outlined,
+                    label: l10n?.tabActiveQueue ?? 'Active',
+                    count: activeCount,
+                    activeColor: AppColors.primary,
+                  ),
+                  const SizedBox(width: 6),
+                  _buildStatusChip(
+                    index: 1,
+                    icon: Icons.pause_circle_outline,
+                    label: l10n?.tabOnHold ?? 'On Hold',
+                    count: onHoldCount,
+                    activeColor: AppColors.purple,
+                  ),
+                  const SizedBox(width: 6),
+                  _buildStatusChip(
+                    index: 2,
+                    icon: Icons.task_alt,
+                    label: l10n?.tabResolvedHistory ?? 'Resolved',
+                    count: resolvedCount,
+                    activeColor: AppColors.success,
+                  ),
+                  const SizedBox(width: 10),
+                  Container(height: 18, width: 1, color: AppColors.border),
+                  const SizedBox(width: 10),
+                ],
                 _buildPriorityFilterChip(allLabel, null),
                 const SizedBox(width: 6),
                 _buildPriorityFilterChip(criticalLabel, IssuePriority.critical),
@@ -104,6 +145,69 @@ class _TechnicianSearchFilterBarState extends State<TechnicianSearchFilterBar> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildStatusChip({
+    required int index,
+    required IconData icon,
+    required String label,
+    required int count,
+    required Color activeColor,
+  }) {
+    final isSelected = widget.selectedTabIndex == index;
+    return InkWell(
+      onTap: () => widget.onTabSelected?.call(index),
+      borderRadius: BorderRadius.circular(20),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: isSelected ? activeColor : AppColors.cardAlt,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? activeColor : AppColors.border,
+            width: isSelected ? 1.5 : 1.0,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 13,
+              color: isSelected ? Colors.white : AppColors.textSecondary,
+            ),
+            const SizedBox(width: 5),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                color: isSelected ? Colors.white : AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(width: 5),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? Colors.white.withValues(alpha: 0.25)
+                    : AppColors.border.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                '$count',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: isSelected ? Colors.white : AppColors.textSecondary,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

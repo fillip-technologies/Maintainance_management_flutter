@@ -36,20 +36,54 @@ class TechnicianIssueCard extends StatelessWidget {
     final resolveLabel = l10n?.btnResolve ?? 'Resolve';
     final timelineLabel = l10n?.timelineHistory ?? 'Timeline';
 
+    final isResolved = issue.status == IssueStatus.resolved || issue.status == IssueStatus.closed;
+    final isRaisedOrCritical = !isResolved && (
+        issue.status == IssueStatus.open ||
+        issue.status == IssueStatus.assigned ||
+        issue.status == IssueStatus.reopened ||
+        issue.priority == IssuePriority.critical);
+
+    final cardBg = isSelected
+        ? AppColors.primaryBg.withValues(alpha: 0.25)
+        : (isResolved
+            ? const Color(0xFFF0FDF4)
+            : (isRaisedOrCritical
+                ? const Color(0xFFFEF2F2)
+                : (issue.status == IssueStatus.inProgress
+                    ? const Color(0xFFFFFBEB)
+                    : (issue.status == IssueStatus.onHold
+                        ? const Color(0xFFFAF5FF)
+                        : AppColors.surface))));
+
+    final borderColor = isSelected
+        ? AppColors.primary
+        : (isResolved
+            ? AppColors.success
+            : (isRaisedOrCritical
+                ? AppColors.error
+                : (issue.status == IssueStatus.inProgress
+                    ? AppColors.warning
+                    : (issue.status == IssueStatus.onHold
+                        ? AppColors.purple
+                        : AppColors.border))));
+
     return Container(
       key: ValueKey(issue.id),
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
-        color: isSelected ? AppColors.primaryBg.withValues(alpha: 0.15) : AppColors.surface,
+        color: cardBg,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isSelected
-              ? AppColors.primary
-              : (issue.priority == IssuePriority.critical
-                  ? AppColors.error.withValues(alpha: 0.5)
-                  : AppColors.border),
-          width: (isSelected || issue.priority == IssuePriority.critical) ? 1.5 : 1,
+          color: borderColor,
+          width: (isSelected || isRaisedOrCritical || issue.status == IssueStatus.inProgress || isResolved) ? 2.0 : 1.0,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: borderColor.withValues(alpha: 0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: InkWell(
         onTap: isSelectable ? () => onSelect?.call(!isSelected) : onTap,
@@ -139,7 +173,11 @@ class TechnicianIssueCard extends StatelessWidget {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: AppColors.primaryBg,
+                      color: isResolved
+                          ? const Color(0xFFDCFCE7)
+                          : (isRaisedOrCritical
+                              ? const Color(0xFFFEE2E2)
+                              : AppColors.primaryBg),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Icon(
@@ -147,7 +185,9 @@ class TechnicianIssueCard extends StatelessWidget {
                         issue.categoryName.isNotEmpty ? issue.categoryName : issue.deviceName,
                       ),
                       size: 20,
-                      color: AppColors.primary,
+                      color: isResolved
+                          ? AppColors.success
+                          : (isRaisedOrCritical ? AppColors.error : AppColors.primary),
                     ),
                   ),
                   const SizedBox(width: 10),

@@ -6,8 +6,10 @@ import '../../../../l10n/app_localizations.dart';
 import '../../issues/issues.dart';
 import '../../realtime/realtime.dart';
 import '../models/technician_queue_state.dart';
+import '../models/technician_zone_tree_state.dart';
 import '../viewmodels/technician_action_viewmodel.dart';
 import '../viewmodels/technician_queue_viewmodel.dart';
+import '../viewmodels/technician_zone_tree_viewmodel.dart';
 import 'widgets/widgets.dart';
 
 class TechnicianHomePage extends ConsumerStatefulWidget {
@@ -17,29 +19,7 @@ class TechnicianHomePage extends ConsumerStatefulWidget {
   ConsumerState<TechnicianHomePage> createState() => _TechnicianHomePageState();
 }
 
-class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-    _tabController.addListener(() {
-      if (_tabController.indexIsChanging) return;
-      if (!mounted) return;
-      ref
-          .read(technicianQueueFilterProvider.notifier)
-          .setTabIndex(_tabController.index);
-    });
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
+class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage> {
   bool _isSelectionMode = false;
   final Set<String> _selectedIssueIds = {};
   IssueStatus _bulkStatus = IssueStatus.resolved;
@@ -108,23 +88,24 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage>
   }
 
   void _openUpdateStatusSheet(IssueModel issue, [IssueStatus? targetStatus]) {
+    final actionNotifier = ref.read(technicianActionViewModelProvider);
+    final issueId = issue.id;
+
     UpdateStatusSheet.show(
       context,
       issue: issue,
       initialTargetStatus: targetStatus,
       onStatusUpdated: (newStatus, comment, resolutionPhoto) async {
         try {
-          await ref
-              .read(technicianActionViewModelProvider)
-              .updateStatus(
-                issueId: issue.id,
-                toStatus: newStatus,
-                notes: comment,
-              );
+          await actionNotifier.updateStatus(
+            issueId: issueId,
+            toStatus: newStatus,
+            notes: comment,
+          );
 
-          final ticketIdStr = issue.id.length > 8
-              ? '#${issue.id.substring(0, 8)}'
-              : issue.id;
+          final ticketIdStr = issueId.length > 8
+              ? '#${issueId.substring(0, 8)}'
+              : issueId;
           final msg = 'Ticket $ticketIdStr moved to ${newStatus.label}';
           if (newStatus == IssueStatus.resolved) {
             AppSnackbar.success(msg);
@@ -135,6 +116,7 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage>
           }
         } catch (e) {
           AppSnackbar.error('Failed to update status: $e');
+          rethrow;
         }
       },
     );
@@ -174,6 +156,10 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage>
     final l10n = AppLocalizations.of(context)!;
     final queueState = ref.watch(technicianQueueStateProvider);
     final filterNotifier = ref.read(technicianQueueFilterProvider.notifier);
+    final treeAsync = ref.watch(technicianZoneTreeViewModelProvider);
+    final treeNotifier = ref.read(technicianZoneTreeViewModelProvider.notifier);
+    final isSpatialMode = (treeAsync.value?.viewMode ?? TechnicianViewMode.spatialExplorer) ==
+        TechnicianViewMode.spatialExplorer;
 
     final currentList = switch (queueState.filter.tabIndex) {
       0 => queueState.activeIssues,
@@ -184,51 +170,55 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage>
 
     return Column(
       children: [
-        // Tab Bar Navigation Header
+        // Dual-Mode View Switcher (Spatial Explorer vs My Work Queue)
         Container(
-          color: AppColors.surface,
-          child: TabBar(
-            controller: _tabController,
-            onTap: (index) => filterNotifier.setTabIndex(index),
-            labelColor: AppColors.primary,
-            unselectedLabelColor: AppColors.textSecondary,
-            indicatorColor: AppColors.primary,
-            indicatorWeight: 3,
-            labelStyle: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.bold,
-            ),
-            tabs: [
-              Tab(
-                icon: const Icon(Icons.assignment_outlined, size: 18),
-                text: l10n.tabActiveQueue,
+          margin: const EdgeInsets.fromLTRB(16, 10, 16, 6),
+          padding: const EdgeInsets.all(3),
+          decoration: BoxDecoration(
+            color: AppColors.cardAlt,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppColors.border.withValues(alpha: 0.6)),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: _ModeSwitchButton(
+                  icon: Icons.account_tree_rounded,
+                  label: 'Spatial Explorer',
+                  isActive: isSpatialMode,
+                  onTap: () => treeNotifier.setViewMode(TechnicianViewMode.spatialExplorer),
+                ),
               ),
-              Tab(
-                icon: const Icon(Icons.pause_circle_outline, size: 18),
-                text: l10n.tabOnHold,
-              ),
-              Tab(
-                icon: const Icon(Icons.task_alt, size: 18),
-                text: l10n.tabResolvedHistory,
+              Expanded(
+                child: _ModeSwitchButton(
+                  icon: Icons.list_alt_rounded,
+                  label: 'My Queue (${queueState.kpiStats.open})',
+                  isActive: !isSpatialMode,
+                  onTap: () => treeNotifier.setViewMode(TechnicianViewMode.workQueue),
+                ),
               ),
             ],
           ),
         ),
 
-        // Live KPI Metric Header Bar
-        TechnicianKpiBar(stats: queueState.kpiStats),
+        if (isSpatialMode)
+          const Expanded(child: ZoneTreeExplorerView())
+        else
+          Expanded(
+            child: Column(
+              children: [
+                // Merged Mobile-Friendly Search & Status/Priority Filter Bar
+                TechnicianSearchFilterBar(
+                  selectedTabIndex: queueState.filter.tabIndex,
+                  stats: queueState.kpiStats,
+                  onTabSelected: filterNotifier.setTabIndex,
+                  searchQuery: queueState.filter.searchQuery,
+                  selectedPriority: queueState.filter.priority,
+                  onSearchChanged: filterNotifier.setSearchQuery,
+                  onPriorityChanged: filterNotifier.setPriority,
+                ),
 
-        const Divider(height: 1, color: AppColors.divider),
-
-        // Search & Priority Filter Box
-        TechnicianSearchFilterBar(
-          searchQuery: queueState.filter.searchQuery,
-          selectedPriority: queueState.filter.priority,
-          onSearchChanged: filterNotifier.setSearchQuery,
-          onPriorityChanged: filterNotifier.setPriority,
-        ),
-
-        const Divider(height: 1, color: AppColors.divider),
+                const Divider(height: 1, color: AppColors.divider),
 
         // Selection mode toggle & select-all row
         if (currentList.isNotEmpty) ...[
@@ -406,6 +396,9 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage>
             tabIndex: queueState.filter.tabIndex,
           ),
         ),
+              ],
+            ),
+          ),
       ],
     );
   }
@@ -437,3 +430,61 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage>
     );
   }
 }
+
+class _ModeSwitchButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  const _ModeSwitchButton({
+    required this.icon,
+    required this.label,
+    required this.isActive,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          color: isActive ? AppColors.surface : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: isActive
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.06),
+                    blurRadius: 4,
+                    offset: const Offset(0, 1),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 15,
+              color: isActive ? AppColors.primary : AppColors.textSecondary,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isActive ? FontWeight.bold : FontWeight.w600,
+                color: isActive ? AppColors.primary : AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
