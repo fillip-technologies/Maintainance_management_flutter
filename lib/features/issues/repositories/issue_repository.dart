@@ -268,7 +268,12 @@ class IssueRepository {
     try {
       final queryParams = <String, dynamic>{};
       if (deviceId != null && deviceId.isNotEmpty) {
-        queryParams['deviceId'] = deviceId;
+        final isUuid = RegExp(
+          r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+        ).hasMatch(deviceId);
+        if (isUuid) {
+          queryParams['deviceId'] = deviceId;
+        }
       }
 
       final response = await apiClient.dio.get(

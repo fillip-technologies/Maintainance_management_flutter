@@ -67,8 +67,18 @@ class _RaiseIssueSheetState extends ConsumerState<RaiseIssueSheet> {
   @override
   void initState() {
     super.initState();
-    _selectedDevice = widget.initialDevice;
-    _loadCategoriesForDevice(_selectedDevice);
+    if (widget.initialDevice != null) {
+      final match = widget.devices.where((d) => d.id == widget.initialDevice!.id);
+      _selectedDevice = match.isNotEmpty ? match.first : widget.initialDevice;
+    } else if (widget.devices.isNotEmpty) {
+      _selectedDevice = widget.devices.first;
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _loadCategoriesForDevice(_selectedDevice);
+      }
+    });
   }
 
   @override
@@ -78,11 +88,12 @@ class _RaiseIssueSheetState extends ConsumerState<RaiseIssueSheet> {
   }
 
   Future<void> _loadCategoriesForDevice(DeviceModel? device) async {
-    final l10n = AppLocalizations.of(context);
+    if (!mounted) return;
     setState(() {
       _isLoadingCategories = true;
       _categories = [];
       _selectedCategory = null;
+      _errorMessage = null;
     });
 
     try {
@@ -101,6 +112,7 @@ class _RaiseIssueSheetState extends ConsumerState<RaiseIssueSheet> {
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
         setState(() => _errorMessage =
             l10n?.raiseErrLoadCategories ?? 'Failed to load defect categories');
       }
@@ -333,7 +345,10 @@ class _RaiseIssueSheetState extends ConsumerState<RaiseIssueSheet> {
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<DeviceModel>(
-                        value: _selectedDevice,
+                        value: _selectedDevice != null &&
+                                widget.devices.any((d) => d.id == _selectedDevice!.id)
+                            ? widget.devices.firstWhere((d) => d.id == _selectedDevice!.id)
+                            : null,
                         isExpanded: true,
                         hint: Text(l10n?.raiseSelectUnitHint ?? 'Choose a unit'),
                         items: widget.devices.map((d) {
@@ -391,12 +406,33 @@ class _RaiseIssueSheetState extends ConsumerState<RaiseIssueSheet> {
                         ),
                         const SizedBox(width: 10),
                         Text(
-                          l10n?.raiseLoadingCategories ?? 'Loading types...',
+                          l10n?.raiseLoadingCategories ?? 'Loading defect types...',
                           style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
                         ),
                       ],
                     )
-                  else if (_categories.isEmpty && _selectedDevice != null)
+                  else if (_selectedDevice == null)
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.info_outline, size: 16, color: AppColors.textSecondary),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              l10n?.raiseSelectUnitHint ?? 'Please choose a unit above first',
+                              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  else if (_categories.isEmpty)
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(

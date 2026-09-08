@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/colors.dart';
+import '../../../../core/widgets/hardware_stat_row.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../devices/models/technician_zone_node.dart';
 
@@ -26,6 +27,7 @@ class ZoneHealthHeroCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     var totalDevices = 0;
     var totalWorking = 0;
+    var totalNeedsFix = 0;
 
     // Zones whose enrichment failed contribute no reliable counts — leaving
     // them in would drag the % down with phantom zeroes.
@@ -33,6 +35,8 @@ class ZoneHealthHeroCard extends StatelessWidget {
     for (final z in countedZones) {
       totalDevices += z.deviceCount;
       totalWorking += z.workingCount;
+      // Distinct units with an UNRESOLVED issue (resolved/closed never count).
+      totalNeedsFix += z.unresolvedUnitsCount;
     }
 
     final operationalRate = totalDevices > 0
@@ -154,11 +158,14 @@ class ZoneHealthHeroCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
 
-          // Device-only headline: total units, working units, units needing a fix.
-          _StatRow(
+          // Headline: total units, active units, units with an unresolved issue.
+          HardwareStatRow(
             total: totalDevices,
-            working: totalWorking,
-            l10n: l10n,
+            active: totalWorking,
+            problems: totalNeedsFix,
+            totalLabel: l10n.techStatTotal,
+            activeLabel: l10n.techStatOnline,
+            problemLabel: l10n.techStatNeedsFix,
           ),
         ],
       ),
@@ -280,11 +287,14 @@ class ZoneHealthHeroCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
 
-          // Device-only headline: total units, working units, units needing a fix.
-          _StatRow(
+          // Headline: total units, active units, units with an unresolved issue.
+          HardwareStatRow(
             total: zone.deviceCount,
-            working: zone.workingCount,
-            l10n: l10n,
+            active: zone.workingCount,
+            problems: zone.unresolvedUnitsCount,
+            totalLabel: l10n.techStatTotal,
+            activeLabel: l10n.techStatOnline,
+            problemLabel: l10n.techStatNeedsFix,
           ),
         ],
       ),
@@ -338,108 +348,4 @@ class ZoneHealthHeroCard extends StatelessWidget {
   }
 }
 
-/// The hero's device-only headline: TOTAL · ACTIVE · NEEDS FIX, where
-/// "needs fix" = every unit that isn't active (= total − working).
-class _StatRow extends StatelessWidget {
-  final int total;
-  final int working;
-  final AppLocalizations l10n;
-
-  const _StatRow({
-    required this.total,
-    required this.working,
-    required this.l10n,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final needsFix = (total - working).clamp(0, total);
-    return Row(
-      children: [
-        _StatTile(
-          label: l10n.techStatTotal,
-          value: '$total',
-          color: AppColors.textPrimary,
-          bg: AppColors.cardAlt,
-          icon: Icons.inventory_2_outlined,
-        ),
-        const SizedBox(width: 8),
-        _StatTile(
-          label: l10n.techStatOnline,
-          value: '$working',
-          color: AppColors.success,
-          bg: AppColors.success.withValues(alpha: 0.08),
-          icon: Icons.check_circle_outline_rounded,
-        ),
-        const SizedBox(width: 8),
-        _StatTile(
-          label: l10n.techStatNeedsFix,
-          value: '$needsFix',
-          color: needsFix > 0 ? AppColors.error : AppColors.textSecondary,
-          bg: needsFix > 0 ? AppColors.error.withValues(alpha: 0.08) : AppColors.cardAlt,
-          icon: Icons.build_circle_outlined,
-        ),
-      ],
-    );
-  }
-}
-
-class _StatTile extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color color;
-  final Color bg;
-  final IconData icon;
-
-  const _StatTile({
-    required this.label,
-    required this.value,
-    required this.color,
-    required this.bg,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-        decoration: BoxDecoration(
-          color: bg,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withValues(alpha: 0.2)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 9,
-                    fontWeight: FontWeight.bold,
-                    color: color.withValues(alpha: 0.8),
-                    letterSpacing: 0.5,
-                  ),
-                ),
-                Icon(icon, size: 12, color: color),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w800,
-                color: color,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 

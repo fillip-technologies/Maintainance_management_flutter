@@ -135,4 +135,14 @@ class DeviceModel {
       consecutiveFailures: consecutiveFailures ?? this.consecutiveFailures,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DeviceModel &&
+          runtimeType == other.runtimeType &&
+          id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
 }

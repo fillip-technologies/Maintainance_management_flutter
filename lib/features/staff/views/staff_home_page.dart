@@ -233,8 +233,6 @@ class _StaffHomePageState extends ConsumerState<StaffHomePage>
 
     final devices = staffDevicesAsync.value ?? const <DeviceModel>[];
     final todayLogs = todayLogsAsync.value ?? const <String, DailyStatusLogModel>{};
-    final checkedTodayCount =
-        devices.where((d) => todayLogs.containsKey(d.id)).length;
 
     return Column(
       children: [
@@ -269,10 +267,9 @@ class _StaffHomePageState extends ConsumerState<StaffHomePage>
           ),
         ),
 
-        // Live KPI Metric Header Bar
+        // Live hardware headline (Total · Active · Problems)
         StaffKpiBar(
           devices: devices,
-          checkedTodayCount: checkedTodayCount,
           issues: staffIssuesAsync.value ?? const [],
         ),
 
