@@ -253,18 +253,19 @@
       "devices": { "type": "int" }
     }
   },
-  "techPercentOnline": "{percent}% ऑनलाइन",
+  "techPercentOnline": "{percent}% सक्रिय",
   "@techPercentOnline": {
     "placeholders": { "percent": { "type": "int" } }
   },
-  "techPercentHealth": "{percent}% स्वस्थ",
+  "techPercentHealth": "{percent}% सक्रिय",
   "@techPercentHealth": {
     "placeholders": { "percent": { "type": "int" } }
   },
   "techStatTotal": "कुल",
-  "techStatOnline": "चालू",
+  "techStatOnline": "सक्रिय",
   "techStatFaulty": "खराब",
   "techStatDefects": "खराबी",
+  "techStatNeedsFix": "मरम्मत बाकी",
   "techZoneClientDepth": "{client} • स्तर {depth}",
   "@techZoneClientDepth": {
     "placeholders": {
@@ -336,5 +337,102 @@
     "placeholders": { "error": { "type": "String" } }
   },
   "bulkNoPendingIssues": "हल करने के लिए कोई टिकट नहीं",
-  "bulkNoMatchingTickets": "कोई मिलता-जुलता टिकट नहीं मिला"
+  "bulkNoMatchingTickets": "कोई मिलता-जुलता टिकट नहीं मिला",
+
+  "staffKpiCheckedToday": "आज जांचे",
+  "staffKpiWorking": "चालू",
+  "staffKpiProblems": "समस्याएं",
+  "staffKpiDown": "बंद",
+  "staffMarkedDeviceAs": "{device} को {status} के रूप में दर्ज किया",
+  "@staffMarkedDeviceAs": {
+    "placeholders": {
+      "device": { "type": "String" },
+      "status": { "type": "String" }
+    }
+  },
+  "staffFailedToRecord": "सहेजा नहीं जा सका: {error}",
+  "@staffFailedToRecord": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "staffHardwareDownTitle": "उपकरण बंद है!",
+  "staffHardwareDownBody": "आपने \"{device}\" को बंद बताया। क्या अभी मरम्मत टिकट बनाएं ताकि तकनीशियन भेजा जा सके?",
+  "@staffHardwareDownBody": {
+    "placeholders": { "device": { "type": "String" } }
+  },
+  "staffNeedsAttentionTitle": "ध्यान देने की ज़रूरत",
+  "staffNeedsAttentionBody": "आपने \"{device}\" को ध्यान देने योग्य बताया। क्या टिकट बनाएं ताकि तकनीशियन जांच कर सके?",
+  "@staffNeedsAttentionBody": {
+    "placeholders": { "device": { "type": "String" } }
+  },
+  "staffLater": "बाद में",
+  "staffRaiseTicketNow": "टिकट बनाएं",
+  "staffVerifyClose": "जांचें और बंद करें",
+  "staffReopenTicket": "फिर से खोलें",
+  "staffTicketUpdated": "टिकट अपडेट हुआ",
+  "staffCouldNotUpdateTicket": "टिकट अपडेट नहीं हो सका",
+  "staffNSelected": "{count} चुने गए",
+  "@staffNSelected": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "staffCheckedTodayProgress": "आज {total} में से {done} जांचे गए",
+  "@staffCheckedTodayProgress": {
+    "placeholders": {
+      "done": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "staffFilterAll": "सभी ({count})",
+  "@staffFilterAll": { "placeholders": { "count": { "type": "int" } } },
+  "staffFilterPending": "बाकी ({count})",
+  "@staffFilterPending": { "placeholders": { "count": { "type": "int" } } },
+  "staffFilterDone": "हो गए ({count})",
+  "@staffFilterDone": { "placeholders": { "count": { "type": "int" } } },
+  "staffFilterNeedsCheck": "ठीक हुए ({count})",
+  "@staffFilterNeedsCheck": { "placeholders": { "count": { "type": "int" } } },
+  "staffFilterInProgress": "चल रहा ({count})",
+  "@staffFilterInProgress": { "placeholders": { "count": { "type": "int" } } },
+  "staffFilterDoneTickets": "हो गए ({count})",
+  "@staffFilterDoneTickets": { "placeholders": { "count": { "type": "int" } } },
+  "staffPendingCheck": "बाकी",
+  "staffChange": "बदलें",
+  "staffCancel": "रद्द करें",
+  "staffAddNote": "नोट जोड़ें (वैकल्पिक)",
+  "staffRepeatedlyDown": "{count} बार बंद बताया गया — खराब चिह्नित हो सकता है",
+  "@staffRepeatedlyDown": { "placeholders": { "count": { "type": "int" } } },
+  "staffChecklistLoadFailed": "चेकलिस्ट लोड नहीं हुई",
+  "staffCheckConnectionRetry": "अपना कनेक्शन जांचें और दोबारा कोशिश करें",
+  "staffAllChecksDone": "आज की सभी जांच पूरी। बहुत बढ़िया!",
+  "staffNoHardwareInFilter": "इस फ़िल्टर में कोई उपकरण नहीं",
+  "staffPullToRefresh": "नया देखने के लिए नीचे खींचें",
+  "staffTicketsLoadFailed": "टिकट लोड नहीं हुए",
+  "staffNoTicketsToCheck": "अभी कोई हाल में ठीक हुआ टिकट नहीं",
+  "staffNoTicketsInProgress": "किसी टिकट पर काम नहीं चल रहा",
+  "staffNoDoneTickets": "अभी कोई टिकट पूरा नहीं हुआ",
+  "staffSearchHardware": "नाम, प्रकार या ज़ोन से उपकरण खोजें",
+  "staffDirectoryLoadFailed": "उपकरण सूची लोड नहीं हुई",
+  "staffNoMatchingHardware": "कोई मिलता-जुलता उपकरण नहीं",
+  "staffTryAdjustingFilter": "दूसरी खोज या फ़िल्टर आज़माएं",
+  "staffNoHardwareRegistered": "यहां अभी कोई उपकरण दर्ज नहीं है",
+  "staffClearFilters": "फ़िल्टर हटाएं",
+
+  "raiseIssueTitle": "समस्या दर्ज करें",
+  "raiseSelectEquipment": "कौन सा उपकरण?",
+  "raiseSelectUnitHint": "एक उपकरण चुनें",
+  "raiseDefectCategory": "क्या खराबी है?",
+  "raiseLoadingCategories": "प्रकार लोड हो रहे हैं...",
+  "raiseNoCategoriesInfo": "कोई प्रकार सूचीबद्ध नहीं — सामान्य समस्या दर्ज की जाएगी।",
+  "raisePriority": "कितना ज़रूरी?",
+  "raiseDetails": "समस्या बताएं",
+  "raiseDetailsHint": "क्या हो रहा है? कोई आवाज़, त्रुटि, नुकसान...",
+  "raiseSubmit": "टिकट भेजें",
+  "raiseErrSelectEquipment": "कृपया उपकरण चुनें",
+  "raiseErrSelectCategory": "कृपया चुनें क्या खराबी है",
+  "raiseErrDescription": "कृपया समस्या बताएं",
+  "raiseErrLoadCategories": "समस्या के प्रकार लोड नहीं हुए",
+  "raiseErrGeneric": "टिकट दर्ज नहीं हो सका",
+  "raiseSuccess": "{device} के लिए टिकट भेजा गया",
+  "@raiseSuccess": { "placeholders": { "device": { "type": "String" } } },
+  "staffTicketResolvedToast": "{device} को तकनीशियन ने ठीक किया। विवरण के लिए टैप करें।",
+  "@staffTicketResolvedToast": { "placeholders": { "device": { "type": "String" } } }
 }

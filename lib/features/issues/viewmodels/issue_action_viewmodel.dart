@@ -123,7 +123,6 @@ class IssueActionController extends Notifier<IssueActionState> {
       ref.invalidate(staffIssuesProvider);
       ref.invalidate(technicianIssuesProvider);
       ref.invalidate(staffDevicesProvider);
-      ref.invalidate(staffDashboardSummaryProvider);
 
       state = state.copyWith(
         isLoading: false,
@@ -161,7 +160,6 @@ class IssueActionController extends Notifier<IssueActionState> {
       ref.invalidate(issueDetailProvider(issueId));
       ref.invalidate(issueHistoryProvider(issueId));
       ref.invalidate(staffDevicesProvider);
-      ref.invalidate(staffDashboardSummaryProvider);
 
       state = state.copyWith(isLoading: false, lastUpdatedIssue: updatedIssue);
       return updatedIssue;

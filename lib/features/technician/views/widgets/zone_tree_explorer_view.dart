@@ -178,23 +178,15 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: GridView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 10,
-                            mainAxisSpacing: 10,
-                            childAspectRatio: 1.25,
-                          ),
-                          itemCount: displayedSubzones.length,
-                          itemBuilder: (context, i) {
-                            return SubzoneGridCard(
-                              zone: displayedSubzones[i],
-                              index: i,
-                              onTap: () => viewModel.drillDown(displayedSubzones[i]),
-                            );
-                          },
+                        child: _TwoColumnGrid(
+                          children: [
+                            for (var i = 0; i < displayedSubzones.length; i++)
+                              SubzoneGridCard(
+                                zone: displayedSubzones[i],
+                                index: i,
+                                onTap: () => viewModel.drillDown(displayedSubzones[i]),
+                              ),
+                          ],
                         ),
                       ),
                     ],
@@ -238,45 +230,38 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: GridView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 10,
-                            mainAxisSpacing: 10,
-                            childAspectRatio: 0.82,
-                          ),
-                          itemCount: displayedDevices.length,
-                          itemBuilder: (context, i) {
-                            final dev = displayedDevices[i];
-                            return ZoneDeviceCard(
-                              device: dev,
-                              activeIssues: issues.where((iss) => iss.deviceId == dev.id).toList(),
-                              onInspectIssue: (issue) => IssueDetailSheet.show(context, issue),
-                              onUpdateIssueStatus: (issue, newStatus) {
-                                final issueId = issue.id;
-                                UpdateStatusSheet.show(
-                                  context,
-                                  issue: issue,
-                                  initialTargetStatus: newStatus,
-                                  onStatusUpdated: (status, comment, photo) async {
-                                    try {
-                                      await actionNotifier.updateStatus(
-                                        issueId: issueId,
-                                        toStatus: status,
-                                        notes: comment,
-                                      );
-                                      viewModel.refresh();
-                                    } catch (e) {
-                                      AppSnackbar.error('Failed to update status: $e');
-                                      rethrow;
-                                    }
-                                  },
-                                );
-                              },
-                            );
-                          },
+                        child: _TwoColumnGrid(
+                          children: [
+                            for (final dev in displayedDevices)
+                              ZoneDeviceCard(
+                                device: dev,
+                                activeIssues:
+                                    issues.where((iss) => iss.deviceId == dev.id).toList(),
+                                onInspectIssue: (issue) =>
+                                    IssueDetailSheet.show(context, issue),
+                                onUpdateIssueStatus: (issue, newStatus) {
+                                  final issueId = issue.id;
+                                  UpdateStatusSheet.show(
+                                    context,
+                                    issue: issue,
+                                    initialTargetStatus: newStatus,
+                                    onStatusUpdated: (status, comment, photo) async {
+                                      try {
+                                        await actionNotifier.updateStatus(
+                                          issueId: issueId,
+                                          toStatus: status,
+                                          notes: comment,
+                                        );
+                                        viewModel.refresh();
+                                      } catch (e) {
+                                        AppSnackbar.error('Failed to update status: $e');
+                                        rethrow;
+                                      }
+                                    },
+                                  );
+                                },
+                              ),
+                          ],
                         ),
                       ),
                     ],
@@ -370,5 +355,39 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
         );
       },
     );
+  }
+}
+
+/// Two-column card grid whose rows size to their tallest card instead of a fixed
+/// aspect ratio. A fixed `childAspectRatio` GridView either overflowed the taller
+/// device cards or left dead space under the shorter zone cards.
+class _TwoColumnGrid extends StatelessWidget {
+  final List<Widget> children;
+  const _TwoColumnGrid({required this.children});
+
+  static const _gap = 10.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final rows = <Widget>[];
+    for (var i = 0; i < children.length; i += 2) {
+      final right = i + 1 < children.length ? children[i + 1] : null;
+      rows.add(
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(child: children[i]),
+              const SizedBox(width: _gap),
+              Expanded(
+                child: right ?? const SizedBox.shrink(),
+              ),
+            ],
+          ),
+        ),
+      );
+      if (i + 2 < children.length) rows.add(const SizedBox(height: _gap));
+    }
+    return Column(children: rows);
   }
 }

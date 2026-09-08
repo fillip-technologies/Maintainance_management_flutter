@@ -96,7 +96,6 @@ final socketSyncManagerProvider = Provider<void>((ref) {
         ref.invalidate(technicianIssuesProvider);
         ref.invalidate(todayLogsProvider);
         ref.invalidate(staffDevicesProvider);
-        ref.invalidate(staffDashboardSummaryProvider);
       }
     },
   );

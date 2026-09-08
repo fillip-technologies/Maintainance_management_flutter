@@ -37,12 +37,12 @@ class SubzoneGridCard extends StatelessWidget {
     }
 
     final gradientColors = _gradients[index % _gradients.length];
-    final unresolvedUnits = zone.unresolvedUnitsCount > 0
-        ? zone.unresolvedUnitsCount
-        : (zone.notWorkingCount > 0 ? zone.notWorkingCount : zone.openIssuesCount);
-    final hasIssues = unresolvedUnits > 0;
+    // How many units in this zone need a fix (not active) — a unit count, not a
+    // ticket count. Matches the hero's "NEEDS FIX" tile.
+    final needsFix = (zone.deviceCount - zone.workingCount).clamp(0, zone.deviceCount);
+    final hasIssues = needsFix > 0;
 
-    // High visual contrast: Bold Red if has unresolved units, Clean Green if all resolved
+    // High visual contrast: Bold Red if units need fixing, Clean Green if all clear
     final cardBg = hasIssues ? const Color(0xFFFEF2F2) : const Color(0xFFF0FDF4);
     final borderColor = hasIssues ? AppColors.error : AppColors.success;
     final badgeColor = hasIssues ? AppColors.error : AppColors.success;
@@ -119,7 +119,7 @@ class SubzoneGridCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        hasIssues ? '$unresolvedUnits' : l10n.techBadgeOk,
+                        hasIssues ? '$needsFix' : l10n.techBadgeOk,
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w900,
@@ -140,19 +140,31 @@ class SubzoneGridCard extends StatelessWidget {
                 fontSize: 14,
                 fontWeight: FontWeight.w800,
                 color: AppColors.textPrimary,
+                height: 1.15,
               ),
-              maxLines: 1,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
 
             // The red number / green OK badge above already carries the health
-            // signal — here we only hint how many sub-areas are nested inside.
+            // signal — this row is a compact "what's inside" summary + drill-in hint.
             Row(
               children: [
+                const Icon(Icons.inventory_2_outlined, size: 13, color: AppColors.textSecondary),
+                const SizedBox(width: 3),
+                Text(
+                  '${zone.deviceCount}',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
                 if (zone.subzoneCount > 0) ...[
+                  const SizedBox(width: 10),
                   const Icon(Icons.account_tree_outlined, size: 13, color: AppColors.textSecondary),
-                  const SizedBox(width: 4),
+                  const SizedBox(width: 3),
                   Text(
                     '${zone.subzoneCount}',
                     style: const TextStyle(

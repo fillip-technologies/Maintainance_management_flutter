@@ -11,23 +11,19 @@ class StaffDashboardViewModel {
   void refreshAll() {
     _ref.invalidate(staffDevicesProvider);
     _ref.invalidate(todayLogsProvider);
-    _ref.invalidate(staffDashboardSummaryProvider);
     _ref.invalidate(staffIssuesProvider);
   }
 
   void refreshDevices() {
     _ref.invalidate(staffDevicesProvider);
-    _ref.invalidate(staffDashboardSummaryProvider);
   }
 
   void refreshTodayLogs() {
     _ref.invalidate(todayLogsProvider);
-    _ref.invalidate(staffDashboardSummaryProvider);
   }
 
   void refreshIssues() {
     _ref.invalidate(staffIssuesProvider);
-    _ref.invalidate(staffDashboardSummaryProvider);
   }
 }
 

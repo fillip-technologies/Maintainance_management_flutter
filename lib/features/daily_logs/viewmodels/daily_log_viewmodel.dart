@@ -8,19 +8,19 @@ final dailyLogRepositoryProvider = Provider<DailyLogRepository>((ref) {
   return DailyLogRepository(apiClient: apiClient);
 });
 
-/// Fetches today's daily status logs for the user's assigned zone, keyed by deviceId for instant lookup.
+/// Fetches today's daily status logs across every zone the staff member is
+/// assigned to (the backend scopes the response), keyed by deviceId for instant
+/// lookup. No zoneId is sent — see [staffDevicesProvider] for why.
 final todayLogsProvider = FutureProvider.autoDispose<Map<String, DailyStatusLogModel>>((ref) async {
-  final authUser = ref.watch(authStateProvider).value;
   final dailyLogRepo = ref.watch(dailyLogRepositoryProvider);
 
-  final zoneId = authUser?.assignedZoneId;
   final now = DateTime.now().toUtc();
   final dateStr = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
 
   final logs = await dailyLogRepo.getDailyLogs(
-    zoneId: zoneId,
     date: dateStr,
     includeSubzones: true,
+    limit: 100,
   );
 
   final map = <String, DailyStatusLogModel>{};

@@ -271,3 +271,15 @@ extension IssueStatusLocalization on IssueStatus {
     };
   }
 }
+
+extension DailyLogStatusLocalization on DailyLogStatus {
+  String localized(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) return label;
+    return switch (this) {
+      DailyLogStatus.working => l10n.logStatusWorking,
+      DailyLogStatus.notWorking => l10n.logStatusNotWorking,
+      DailyLogStatus.needsAttention => l10n.logStatusNeedsAttention,
+    };
+  }
+}

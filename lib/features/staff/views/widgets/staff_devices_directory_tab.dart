@@ -67,7 +67,6 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
     final maintCount = widget.devices.where((d) => d.status == DeviceStatus.underMaintenance).length;
     final faultyCount = widget.devices.where((d) => d.status == DeviceStatus.faulty).length;
     final provCount = widget.devices.where((d) => d.status == DeviceStatus.provisioned).length;
-    final retiredCount = widget.devices.where((d) => d.status == DeviceStatus.retired).length;
 
     var list = widget.devices;
 
@@ -105,7 +104,7 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
                       controller: _searchController,
                       style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
                       decoration: InputDecoration(
-                        hintText: 'Search hardware by name, type, or zone...',
+                        hintText: l10n?.staffSearchHardware ?? 'Search hardware by name, type, or zone',
                         prefixIcon: const Icon(Icons.search, color: AppColors.icon),
                         suffixIcon: _searchQuery.isNotEmpty
                             ? IconButton(
@@ -214,14 +213,6 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
                       activeColor: AppColors.info,
                       onTap: () => setState(() => _filterStatus = DeviceStatus.provisioned),
                     ),
-                    const SizedBox(width: 6),
-                    AppFilterChip(
-                      label: l10n?.deviceStatusRetired ?? 'Removed',
-                      badgeText: retiredCount > 0 ? '$retiredCount' : null,
-                      isSelected: _filterStatus == DeviceStatus.retired,
-                      activeColor: AppColors.neutral,
-                      onTap: () => setState(() => _filterStatus = DeviceStatus.retired),
-                    ),
                   ],
                 ),
               ),
@@ -286,8 +277,9 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
                   return Padding(
                     padding: const EdgeInsets.only(top: 40),
                     child: ErrorStateView(
-                      title: 'Failed to load hardware directory',
-                      subtitle: 'Please check your connection and try again',
+                      title: l10n?.staffDirectoryLoadFailed ?? "Couldn't load the hardware list",
+                      subtitle: l10n?.staffCheckConnectionRetry ??
+                          'Check your connection and tap to retry',
                       onRetry: widget.onRefresh,
                     ),
                   );
@@ -297,11 +289,11 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
                     padding: const EdgeInsets.only(top: 40),
                     child: EmptyStateView(
                       icon: hasActiveFilter ? Icons.search_off_rounded : Icons.devices_other_rounded,
-                      title: 'No matching hardware found',
+                      title: l10n?.staffNoMatchingHardware ?? 'No matching hardware',
                       subtitle: hasActiveFilter
-                          ? 'Try adjusting your search keywords or status filter'
-                          : 'No equipment units have been registered in this zone yet',
-                      actionLabel: hasActiveFilter ? 'Clear Filters' : null,
+                          ? (l10n?.staffTryAdjustingFilter ?? 'Try a different search or filter')
+                          : (l10n?.staffNoHardwareRegistered ?? 'No equipment registered here yet'),
+                      actionLabel: hasActiveFilter ? (l10n?.staffClearFilters ?? 'Clear Filters') : null,
                       actionIcon: Icons.filter_alt_off_rounded,
                       onAction: hasActiveFilter ? _clearFilters : null,
                     ),

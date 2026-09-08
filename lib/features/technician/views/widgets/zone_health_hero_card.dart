@@ -26,36 +26,20 @@ class ZoneHealthHeroCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     var totalDevices = 0;
     var totalWorking = 0;
-    var totalFaulty = 0;
-    var totalCritical = 0;
-    var totalHigh = 0;
-    var totalOpen = 0;
 
     // Zones whose enrichment failed contribute no reliable counts — leaving
-    // them in would drag the health % down with phantom zeroes.
+    // them in would drag the % down with phantom zeroes.
     final countedZones = rootZones.where((z) => !z.dataLoadFailed);
     for (final z in countedZones) {
       totalDevices += z.deviceCount;
       totalWorking += z.workingCount;
-      totalFaulty += z.notWorkingCount;
-      totalCritical += z.criticalIssuesCount;
-      totalHigh += z.highIssuesCount;
-      totalOpen += z.openIssuesCount;
     }
-    final totalNotWorking = totalFaulty;
 
     final operationalRate = totalDevices > 0
         ? ((totalWorking / totalDevices) * 100).round().clamp(0, 100)
         : 100;
 
-    final isCritical = totalCritical > 0;
-    final isWarning = !isCritical && (totalHigh > 0 || totalOpen > 0 || totalNotWorking > 0);
-
-    final statusColor = isCritical
-        ? AppColors.error
-        : isWarning
-            ? AppColors.warning
-            : AppColors.success;
+    final statusColor = _statusColor(totalWorking, totalDevices);
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -76,45 +60,54 @@ class ZoneHealthHeroCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(
-                      Icons.radar_rounded,
-                      size: 20,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.techCoverageOverview,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                        ),
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      Text(
-                        l10n.techZonesDevicesSummary(rootZones.length, totalDevices),
-                        style: const TextStyle(
-                          fontSize: 11,
-                          color: AppColors.textSecondary,
-                        ),
+                      child: const Icon(
+                        Icons.radar_rounded,
+                        size: 20,
+                        color: AppColors.primary,
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.techCoverageOverview,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          Text(
+                            l10n.techZonesDevicesSummary(rootZones.length, totalDevices),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
+              const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
@@ -161,49 +154,23 @@ class ZoneHealthHeroCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
 
-          // 4-Tile Stat Grid (Total, Online, Faulty, Defects)
-          Row(
-            children: [
-              _StatTile(
-                label: l10n.techStatTotal,
-                value: '$totalDevices',
-                color: AppColors.textPrimary,
-                bg: AppColors.cardAlt,
-                icon: Icons.inventory_2_outlined,
-              ),
-              const SizedBox(width: 8),
-              _StatTile(
-                label: l10n.techStatOnline,
-                value: '$totalWorking',
-                color: AppColors.success,
-                bg: AppColors.success.withValues(alpha: 0.08),
-                icon: Icons.check_circle_outline_rounded,
-              ),
-              const SizedBox(width: 8),
-              _StatTile(
-                label: l10n.techStatFaulty,
-                value: '$totalNotWorking',
-                color: totalNotWorking > 0 ? AppColors.error : AppColors.textSecondary,
-                bg: totalNotWorking > 0
-                    ? AppColors.error.withValues(alpha: 0.08)
-                    : AppColors.cardAlt,
-                icon: Icons.highlight_off_rounded,
-              ),
-              const SizedBox(width: 8),
-              _StatTile(
-                label: l10n.techStatDefects,
-                value: '$totalOpen',
-                color: totalOpen > 0 ? AppColors.warning : AppColors.textSecondary,
-                bg: totalOpen > 0
-                    ? AppColors.warning.withValues(alpha: 0.08)
-                    : AppColors.cardAlt,
-                icon: Icons.build_circle_outlined,
-              ),
-            ],
+          // Device-only headline: total units, working units, units needing a fix.
+          _StatRow(
+            total: totalDevices,
+            working: totalWorking,
+            l10n: l10n,
           ),
         ],
       ),
     );
+  }
+
+  /// Traffic-light colour from device health alone: all working → green,
+  /// most working → amber, a lot down → red.
+  static Color _statusColor(int working, int total) {
+    if (total == 0 || working >= total) return AppColors.success;
+    if (working < total * 0.75) return AppColors.error;
+    return AppColors.warning;
   }
 
   Widget _buildZoneHero(BuildContext context, TechnicianZoneNode zone) {
@@ -212,15 +179,8 @@ class ZoneHealthHeroCard extends StatelessWidget {
       return _buildUnknownHero(l10n, zone);
     }
 
-    final healthStatus = zone.healthStatus;
-    final statusColor = healthStatus == ZoneHealthStatus.critical
-        ? AppColors.error
-        : healthStatus == ZoneHealthStatus.warning
-            ? AppColors.warning
-            : AppColors.success;
-
+    final statusColor = _statusColor(zone.workingCount, zone.deviceCount);
     final operationalRate = zone.operationalPercentage;
-    final faultyCount = zone.unresolvedUnitsCount > 0 ? zone.unresolvedUnitsCount : zone.notWorkingCount;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -262,11 +222,14 @@ class ZoneHealthHeroCard extends StatelessWidget {
                   children: [
                     Text(
                       zone.name,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w800,
                         color: AppColors.textPrimary,
                         letterSpacing: -0.2,
+                        height: 1.15,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -274,6 +237,8 @@ class ZoneHealthHeroCard extends StatelessWidget {
                       zone.clientName != null
                           ? l10n.techZoneClientDepth(zone.clientName!, zone.depth)
                           : l10n.techZoneDepthStatus(zone.depth, zone.status.toUpperCase()),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontSize: 11,
                         color: AppColors.textSecondary,
@@ -282,6 +247,7 @@ class ZoneHealthHeroCard extends StatelessWidget {
                   ],
                 ),
               ),
+              const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
@@ -314,45 +280,11 @@ class ZoneHealthHeroCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
 
-          // 4-Tile Stat Grid (Total, Online, Faulty, Defects)
-          Row(
-            children: [
-              _StatTile(
-                label: l10n.techStatTotal,
-                value: '${zone.deviceCount}',
-                color: AppColors.textPrimary,
-                bg: AppColors.cardAlt,
-                icon: Icons.inventory_2_outlined,
-              ),
-              const SizedBox(width: 8),
-              _StatTile(
-                label: l10n.techStatOnline,
-                value: '${zone.workingCount}',
-                color: AppColors.success,
-                bg: AppColors.success.withValues(alpha: 0.08),
-                icon: Icons.check_circle_outline_rounded,
-              ),
-              const SizedBox(width: 8),
-              _StatTile(
-                label: l10n.techStatFaulty,
-                value: '$faultyCount',
-                color: faultyCount > 0 ? AppColors.error : AppColors.textSecondary,
-                bg: faultyCount > 0
-                    ? AppColors.error.withValues(alpha: 0.08)
-                    : AppColors.cardAlt,
-                icon: Icons.highlight_off_rounded,
-              ),
-              const SizedBox(width: 8),
-              _StatTile(
-                label: l10n.techStatDefects,
-                value: '${zone.openIssuesCount}',
-                color: zone.openIssuesCount > 0 ? AppColors.warning : AppColors.textSecondary,
-                bg: zone.openIssuesCount > 0
-                    ? AppColors.warning.withValues(alpha: 0.08)
-                    : AppColors.cardAlt,
-                icon: Icons.build_circle_outlined,
-              ),
-            ],
+          // Device-only headline: total units, working units, units needing a fix.
+          _StatRow(
+            total: zone.deviceCount,
+            working: zone.workingCount,
+            l10n: l10n,
           ),
         ],
       ),
@@ -402,6 +334,52 @@ class ZoneHealthHeroCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// The hero's device-only headline: TOTAL · ACTIVE · NEEDS FIX, where
+/// "needs fix" = every unit that isn't active (= total − working).
+class _StatRow extends StatelessWidget {
+  final int total;
+  final int working;
+  final AppLocalizations l10n;
+
+  const _StatRow({
+    required this.total,
+    required this.working,
+    required this.l10n,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final needsFix = (total - working).clamp(0, total);
+    return Row(
+      children: [
+        _StatTile(
+          label: l10n.techStatTotal,
+          value: '$total',
+          color: AppColors.textPrimary,
+          bg: AppColors.cardAlt,
+          icon: Icons.inventory_2_outlined,
+        ),
+        const SizedBox(width: 8),
+        _StatTile(
+          label: l10n.techStatOnline,
+          value: '$working',
+          color: AppColors.success,
+          bg: AppColors.success.withValues(alpha: 0.08),
+          icon: Icons.check_circle_outline_rounded,
+        ),
+        const SizedBox(width: 8),
+        _StatTile(
+          label: l10n.techStatNeedsFix,
+          value: '$needsFix',
+          color: needsFix > 0 ? AppColors.error : AppColors.textSecondary,
+          bg: needsFix > 0 ? AppColors.error.withValues(alpha: 0.08) : AppColors.cardAlt,
+          icon: Icons.build_circle_outlined,
+        ),
+      ],
     );
   }
 }

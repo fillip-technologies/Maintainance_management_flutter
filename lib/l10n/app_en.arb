@@ -345,18 +345,19 @@
       "devices": { "type": "int" }
     }
   },
-  "techPercentOnline": "{percent}% Online",
+  "techPercentOnline": "{percent}% active",
   "@techPercentOnline": {
     "placeholders": { "percent": { "type": "int" } }
   },
-  "techPercentHealth": "{percent}% Health",
+  "techPercentHealth": "{percent}% active",
   "@techPercentHealth": {
     "placeholders": { "percent": { "type": "int" } }
   },
   "techStatTotal": "TOTAL",
-  "techStatOnline": "ONLINE",
+  "techStatOnline": "ACTIVE",
   "techStatFaulty": "FAULTY",
   "techStatDefects": "DEFECTS",
+  "techStatNeedsFix": "NEEDS FIX",
   "techZoneClientDepth": "{client} • Depth Level {depth}",
   "@techZoneClientDepth": {
     "placeholders": {
@@ -428,5 +429,102 @@
     "placeholders": { "error": { "type": "String" } }
   },
   "bulkNoPendingIssues": "No pending issues to resolve",
-  "bulkNoMatchingTickets": "No matching tickets found"
+  "bulkNoMatchingTickets": "No matching tickets found",
+
+  "staffKpiCheckedToday": "Checked Today",
+  "staffKpiWorking": "Working",
+  "staffKpiProblems": "Problems",
+  "staffKpiDown": "Down",
+  "staffMarkedDeviceAs": "Marked {device} as {status}",
+  "@staffMarkedDeviceAs": {
+    "placeholders": {
+      "device": { "type": "String" },
+      "status": { "type": "String" }
+    }
+  },
+  "staffFailedToRecord": "Couldn't save: {error}",
+  "@staffFailedToRecord": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "staffHardwareDownTitle": "Hardware Down!",
+  "staffHardwareDownBody": "You marked \"{device}\" as Not Working. Raise a repair ticket now so a technician can be sent?",
+  "@staffHardwareDownBody": {
+    "placeholders": { "device": { "type": "String" } }
+  },
+  "staffNeedsAttentionTitle": "Needs a Look",
+  "staffNeedsAttentionBody": "You marked \"{device}\" as Needs Attention. Want to raise a ticket so a technician can check it?",
+  "@staffNeedsAttentionBody": {
+    "placeholders": { "device": { "type": "String" } }
+  },
+  "staffLater": "Later",
+  "staffRaiseTicketNow": "Raise Ticket",
+  "staffVerifyClose": "Verify & Close",
+  "staffReopenTicket": "Reopen",
+  "staffTicketUpdated": "Ticket updated",
+  "staffCouldNotUpdateTicket": "Couldn't update ticket",
+  "staffNSelected": "{count} Selected",
+  "@staffNSelected": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "staffCheckedTodayProgress": "{done} / {total} checked today",
+  "@staffCheckedTodayProgress": {
+    "placeholders": {
+      "done": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "staffFilterAll": "All ({count})",
+  "@staffFilterAll": { "placeholders": { "count": { "type": "int" } } },
+  "staffFilterPending": "Pending ({count})",
+  "@staffFilterPending": { "placeholders": { "count": { "type": "int" } } },
+  "staffFilterDone": "Done ({count})",
+  "@staffFilterDone": { "placeholders": { "count": { "type": "int" } } },
+  "staffFilterNeedsCheck": "Fixed ({count})",
+  "@staffFilterNeedsCheck": { "placeholders": { "count": { "type": "int" } } },
+  "staffFilterInProgress": "In Progress ({count})",
+  "@staffFilterInProgress": { "placeholders": { "count": { "type": "int" } } },
+  "staffFilterDoneTickets": "Done ({count})",
+  "@staffFilterDoneTickets": { "placeholders": { "count": { "type": "int" } } },
+  "staffPendingCheck": "Pending",
+  "staffChange": "Change",
+  "staffCancel": "Cancel",
+  "staffAddNote": "Add a note (optional)",
+  "staffRepeatedlyDown": "Reported down {count} times — may be marked faulty",
+  "@staffRepeatedlyDown": { "placeholders": { "count": { "type": "int" } } },
+  "staffChecklistLoadFailed": "Couldn't load the checklist",
+  "staffCheckConnectionRetry": "Check your connection and tap to retry",
+  "staffAllChecksDone": "All checks done for today. Great work!",
+  "staffNoHardwareInFilter": "No hardware in this filter",
+  "staffPullToRefresh": "Pull down to refresh",
+  "staffTicketsLoadFailed": "Couldn't load tickets",
+  "staffNoTicketsToCheck": "No recently fixed tickets",
+  "staffNoTicketsInProgress": "No tickets being worked on",
+  "staffNoDoneTickets": "No finished tickets yet",
+  "staffSearchHardware": "Search hardware by name, type, or zone",
+  "staffDirectoryLoadFailed": "Couldn't load the hardware list",
+  "staffNoMatchingHardware": "No matching hardware",
+  "staffTryAdjustingFilter": "Try a different search or filter",
+  "staffNoHardwareRegistered": "No equipment registered here yet",
+  "staffClearFilters": "Clear Filters",
+
+  "raiseIssueTitle": "Report a Problem",
+  "raiseSelectEquipment": "Which equipment?",
+  "raiseSelectUnitHint": "Choose a unit",
+  "raiseDefectCategory": "What is wrong?",
+  "raiseLoadingCategories": "Loading types...",
+  "raiseNoCategoriesInfo": "No types listed — a general problem will be reported.",
+  "raisePriority": "How urgent?",
+  "raiseDetails": "Describe the problem",
+  "raiseDetailsHint": "What is happening? Any sounds, errors, damage...",
+  "raiseSubmit": "Send Ticket",
+  "raiseErrSelectEquipment": "Please choose the equipment",
+  "raiseErrSelectCategory": "Please choose what is wrong",
+  "raiseErrDescription": "Please describe the problem",
+  "raiseErrLoadCategories": "Couldn't load problem types",
+  "raiseErrGeneric": "Couldn't raise the ticket",
+  "raiseSuccess": "Ticket sent for {device}",
+  "@raiseSuccess": { "placeholders": { "device": { "type": "String" } } },
+  "staffTicketResolvedToast": "{device} was fixed by a technician. Tap for details.",
+  "@staffTicketResolvedToast": { "placeholders": { "device": { "type": "String" } } }
 }

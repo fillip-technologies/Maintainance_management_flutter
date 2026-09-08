@@ -29,12 +29,24 @@ class StaffDeviceCheckCard extends StatelessWidget {
     required this.onLogStatus,
   });
 
+  ({Color color, IconData icon}) _statusStyle(DailyLogStatus status) {
+    return switch (status) {
+      DailyLogStatus.working => (color: AppColors.success, icon: Icons.check_circle_rounded),
+      DailyLogStatus.needsAttention => (color: AppColors.warning, icon: Icons.warning_amber_rounded),
+      DailyLogStatus.notWorking => (color: AppColors.error, icon: Icons.error_rounded),
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final workingLabel = l10n?.logStatusWorking ?? 'Working';
-    final attentionLabel = l10n?.logStatusNeedsAttention ?? 'Needs Attention';
-    final notWorkingLabel = l10n?.logStatusNotWorking ?? 'Not Working';
+    final logged = todayLog;
+
+    // Backend soft-flips a device to `faulty` after several consecutive
+    // "not working" logs — warn before that silent status change happens.
+    final repeatedlyDown = device.consecutiveFailures > 1 &&
+        device.status != DeviceStatus.faulty &&
+        device.status != DeviceStatus.retired;
 
     return Container(
       key: ValueKey(device.id),
@@ -43,10 +55,10 @@ class StaffDeviceCheckCard extends StatelessWidget {
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: todayLog != null
-              ? AppColors.success.withValues(alpha: 0.4)
+          color: logged != null
+              ? _statusStyle(logged.status).color.withValues(alpha: 0.45)
               : AppColors.border,
-          width: todayLog != null ? 1.4 : 1,
+          width: logged != null ? 1.5 : 1,
         ),
       ),
       child: Padding(
@@ -54,6 +66,7 @@ class StaffDeviceCheckCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Header: icon, name, location, today's status
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -84,7 +97,9 @@ class StaffDeviceCheckCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        '${device.hardwareTypeName} • ${device.zoneName} (${device.location})',
+                        '${device.hardwareTypeName} • ${device.zoneName}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontSize: 12,
                           color: AppColors.textSecondary,
@@ -93,8 +108,8 @@ class StaffDeviceCheckCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (todayLog != null)
-                  StatusBadge.dailyLog(todayLog!.status)
+                if (logged != null)
+                  StatusBadge.dailyLog(logged.status)
                 else
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -103,9 +118,9 @@ class StaffDeviceCheckCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(6),
                       border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
                     ),
-                    child: const Text(
-                      'Pending Check',
-                      style: TextStyle(
+                    child: Text(
+                      l10n?.staffPendingCheck ?? 'Pending',
+                      style: const TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                         color: AppColors.warningText,
@@ -114,77 +129,102 @@ class StaffDeviceCheckCard extends StatelessWidget {
                   ),
               ],
             ),
-            const SizedBox(height: 12),
-            const Divider(height: 1, color: AppColors.divider),
-            const SizedBox(height: 10),
 
-            if (todayLog != null && !isEditing) ...[
+            if (repeatedlyDown) ...[
+              const SizedBox(height: 10),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  const Icon(Icons.report_gmailerrorred_rounded, size: 15, color: AppColors.warningText),
+                  const SizedBox(width: 6),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Recorded Today: ${todayLog!.status.label}',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        if (todayLog!.notes != null && todayLog!.notes!.isNotEmpty) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            '"${todayLog!.notes}"',
-                            style: const TextStyle(
-                              fontSize: 11,
-                              fontStyle: FontStyle.italic,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                  TextButton.icon(
-                    onPressed: onToggleEdit,
-                    icon: const Icon(Icons.edit_outlined, size: 14),
-                    label: const Text('Change', style: TextStyle(fontSize: 12)),
-                    style: TextButton.styleFrom(
-                      foregroundColor: AppColors.primary,
-                      visualDensity: VisualDensity.compact,
+                    child: Text(
+                      l10n?.staffRepeatedlyDown(device.consecutiveFailures) ??
+                          'Reported down ${device.consecutiveFailures} times — may be marked faulty',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.warningText,
+                      ),
                     ),
                   ),
                 ],
               ),
-            ] else ...[
-              if (isEditing)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Row(
-                    children: [
-                      const Text(
-                        'Update status:',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textMuted),
-                      ),
-                      const Spacer(),
-                      TextButton(
-                        onPressed: onCancelEdit,
-                        style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
-                        child: const Text('Cancel', style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
-                      ),
-                    ],
+            ],
+
+            const SizedBox(height: 12),
+            const Divider(height: 1, color: AppColors.divider),
+            const SizedBox(height: 12),
+
+            if (isSubmitting)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 10),
+                  child: SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
                   ),
                 ),
-
+              )
+            else if (logged != null && !isEditing)
+              _RecordedStrip(
+                status: logged.status,
+                style: _statusStyle(logged.status),
+                note: logged.notes,
+                changeLabel: l10n?.staffChange ?? 'Change',
+                onChange: onToggleEdit,
+              )
+            else ...[
+              if (isEditing)
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: onCancelEdit,
+                    style: TextButton.styleFrom(
+                      visualDensity: VisualDensity.compact,
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                    ),
+                    child: Text(
+                      l10n?.staffCancel ?? 'Cancel',
+                      style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                    ),
+                  ),
+                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: _BigStatusButton(
+                      label: l10n?.logStatusWorking ?? 'Working',
+                      style: _statusStyle(DailyLogStatus.working),
+                      onTap: () => onLogStatus(DailyLogStatus.working),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _BigStatusButton(
+                      label: l10n?.logStatusNeedsAttention ?? 'Attention',
+                      style: _statusStyle(DailyLogStatus.needsAttention),
+                      onTap: () => onLogStatus(DailyLogStatus.needsAttention),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _BigStatusButton(
+                      label: l10n?.logStatusNotWorking ?? 'Not Working',
+                      style: _statusStyle(DailyLogStatus.notWorking),
+                      onTap: () => onLogStatus(DailyLogStatus.notWorking),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
               TextFormField(
                 initialValue: noteText,
                 onChanged: onNoteChanged,
                 style: const TextStyle(fontSize: 12, color: AppColors.textPrimary),
                 decoration: InputDecoration(
-                  hintText: 'Add check note (optional)...',
+                  hintText: l10n?.staffAddNote ?? 'Add a note (optional)',
+                  hintStyle: const TextStyle(fontSize: 12, color: AppColors.textMuted),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                   filled: true,
                   fillColor: AppColors.background,
@@ -198,90 +238,125 @@ class StaffDeviceCheckCard extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 10),
-
-              if (isSubmitting)
-                const Center(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8),
-                    child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
-                    ),
-                  ),
-                )
-              else
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildStatusButton(
-                        label: workingLabel,
-                        status: DailyLogStatus.working,
-                        color: AppColors.success,
-                        textColor: AppColors.textWhite,
-                        icon: Icons.check_circle_outline,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: _buildStatusButton(
-                        label: attentionLabel,
-                        status: DailyLogStatus.needsAttention,
-                        color: AppColors.warning,
-                        textColor: AppColors.textWhite,
-                        icon: Icons.warning_amber_rounded,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: _buildStatusButton(
-                        label: notWorkingLabel,
-                        status: DailyLogStatus.notWorking,
-                        color: AppColors.error,
-                        textColor: AppColors.textWhite,
-                        icon: Icons.error_outline,
-                      ),
-                    ),
-                  ],
-                ),
             ],
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildStatusButton({
-    required String label,
-    required DailyLogStatus status,
-    required Color color,
-    required Color textColor,
-    required IconData icon,
-  }) {
-    return ElevatedButton(
-      onPressed: () => onLogStatus(status),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        foregroundColor: textColor,
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-        visualDensity: VisualDensity.compact,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+class _BigStatusButton extends StatelessWidget {
+  final String label;
+  final ({Color color, IconData icon}) style;
+  final VoidCallback onTap;
+
+  const _BigStatusButton({
+    required this.label,
+    required this.style,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        height: 66,
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        decoration: BoxDecoration(
+          color: style.color,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(style.icon, size: 20, color: AppColors.textWhite),
+            const SizedBox(height: 3),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              style: const TextStyle(
+                fontSize: 11.5,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textWhite,
+                height: 1.05,
+              ),
+            ),
+          ],
+        ),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14),
-          const SizedBox(height: 2),
+    );
+  }
+}
+
+class _RecordedStrip extends StatelessWidget {
+  final DailyLogStatus status;
+  final ({Color color, IconData icon}) style;
+  final String? note;
+  final String changeLabel;
+  final VoidCallback onChange;
+
+  const _RecordedStrip({
+    required this.status,
+    required this.style,
+    required this.note,
+    required this.changeLabel,
+    required this.onChange,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          decoration: BoxDecoration(
+            color: style.color.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: style.color.withValues(alpha: 0.4)),
+          ),
+          child: Row(
+            children: [
+              Icon(style.icon, size: 20, color: style.color),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  status.localized(context),
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: style.color,
+                  ),
+                ),
+              ),
+              TextButton.icon(
+                onPressed: onChange,
+                icon: const Icon(Icons.edit_outlined, size: 15),
+                label: Text(changeLabel, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (note != null && note!.isNotEmpty) ...[
+          const SizedBox(height: 6),
           Text(
-            label,
-            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+            '"$note"',
+            style: const TextStyle(
+              fontSize: 12,
+              fontStyle: FontStyle.italic,
+              color: AppColors.textSecondary,
+            ),
           ),
         ],
-      ),
+      ],
     );
   }
 }

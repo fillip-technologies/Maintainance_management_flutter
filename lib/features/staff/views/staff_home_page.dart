@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/utils/app_snackbar.dart';
+import '../../../../core/widgets/status_badge.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'package:equipment_management_system/features/daily_logs/daily_logs.dart';
 import 'package:equipment_management_system/features/devices/devices.dart';
@@ -23,6 +26,9 @@ class _StaffHomePageState extends ConsumerState<StaffHomePage>
   late TabController _tabController;
   int _currentTabIndex = 0;
 
+  /// Collapses a burst of realtime events into a single set of refreshes.
+  Timer? _realtimeDebounce;
+
   @override
   void initState() {
     super.initState();
@@ -36,21 +42,32 @@ class _StaffHomePageState extends ConsumerState<StaffHomePage>
 
   @override
   void dispose() {
+    _realtimeDebounce?.cancel();
     _tabController.dispose();
     super.dispose();
+  }
+
+  void _debouncedRefresh(void Function() refresh) {
+    _realtimeDebounce?.cancel();
+    _realtimeDebounce = Timer(const Duration(milliseconds: 700), () {
+      if (mounted) refresh();
+    });
   }
 
   Future<void> _handleDeviceStatusLog(
     DeviceModel device,
     DailyLogStatus status,
   ) async {
+    final l10n = AppLocalizations.of(context);
+    final statusLabel = status.localized(context);
     try {
       await ref.read(staffChecklistViewModelProvider.notifier).submitStatus(
             device: device,
             status: status,
           );
 
-      final msg = 'Marked ${device.name} as ${status.label}';
+      final msg = l10n?.staffMarkedDeviceAs(device.name, statusLabel) ??
+          'Marked ${device.name} as ${status.label}';
       if (status == DailyLogStatus.working) {
         AppSnackbar.success(msg);
       } else if (status == DailyLogStatus.needsAttention) {
@@ -59,39 +76,50 @@ class _StaffHomePageState extends ConsumerState<StaffHomePage>
         AppSnackbar.error(msg);
       }
 
-      if (status == DailyLogStatus.notWorking) {
+      // A "Not Working" log is urgent; "Needs Attention" is a softer nudge.
+      // Both offer to raise a ticket so a technician can be sent.
+      if (status == DailyLogStatus.notWorking ||
+          status == DailyLogStatus.needsAttention) {
+        final urgent = status == DailyLogStatus.notWorking;
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) _promptRaiseIssue(device);
+          if (mounted) _promptRaiseIssue(device, urgent: urgent);
         });
       }
     } catch (e) {
-      AppSnackbar.error('Failed to record status: $e');
+      AppSnackbar.error(l10n?.staffFailedToRecord('$e') ?? 'Failed to record status: $e');
     }
   }
 
-  void _promptRaiseIssue(DeviceModel device) {
+  void _promptRaiseIssue(DeviceModel device, {bool urgent = true}) {
+    final l10n = AppLocalizations.of(context);
+    final accent = urgent ? AppColors.error : AppColors.warning;
+    final title = urgent
+        ? (l10n?.staffHardwareDownTitle ?? 'Hardware Down!')
+        : (l10n?.staffNeedsAttentionTitle ?? 'Needs a Look');
+    final body = urgent
+        ? (l10n?.staffHardwareDownBody(device.name) ??
+            'You marked "${device.name}" as Not Working. Raise a repair ticket now so a technician can be sent?')
+        : (l10n?.staffNeedsAttentionBody(device.name) ??
+            'You marked "${device.name}" as Needs Attention. Want to raise a ticket so a technician can check it?');
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(
-              Icons.warning_amber_rounded,
-              color: AppColors.error,
-              size: 24,
-            ),
-            SizedBox(width: 8),
+            Icon(Icons.warning_amber_rounded, color: accent, size: 24),
+            const SizedBox(width: 8),
             Expanded(
               child: Text(
-                'Hardware Down!',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                title,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
             ),
           ],
         ),
         content: Text(
-          'You marked "${device.name}" as Down / Faulty.\n\nWould you like to raise a maintenance defect ticket now so the technician team can dispatch immediately?',
+          body,
           style: const TextStyle(
             fontSize: 14,
             color: AppColors.textPrimary,
@@ -101,9 +129,9 @@ class _StaffHomePageState extends ConsumerState<StaffHomePage>
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text(
-              'Later',
-              style: TextStyle(color: AppColors.textSecondary),
+            child: Text(
+              l10n?.staffLater ?? 'Later',
+              style: const TextStyle(color: AppColors.textSecondary),
             ),
           ),
           ElevatedButton(
@@ -112,13 +140,13 @@ class _StaffHomePageState extends ConsumerState<StaffHomePage>
               _openRaiseIssueSheet(device);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
+              backgroundColor: accent,
               foregroundColor: AppColors.textWhite,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
-            child: const Text('Raise Ticket Now'),
+            child: Text(l10n?.staffRaiseTicketNow ?? 'Raise Ticket'),
           ),
         ],
       ),
@@ -150,8 +178,10 @@ class _StaffHomePageState extends ConsumerState<StaffHomePage>
       socketLogSubmittedStreamProvider,
       (previous, next) {
         if (next.value == null) return;
-        dashboardVm.refreshTodayLogs();
-        dashboardVm.refreshDevices();
+        _debouncedRefresh(() {
+          dashboardVm.refreshTodayLogs();
+          dashboardVm.refreshDevices();
+        });
       },
     );
 
@@ -160,8 +190,10 @@ class _StaffHomePageState extends ConsumerState<StaffHomePage>
       socketIssueCreatedStreamProvider,
       (previous, next) {
         if (next.value == null) return;
-        dashboardVm.refreshIssues();
-        dashboardVm.refreshDevices();
+        _debouncedRefresh(() {
+          dashboardVm.refreshIssues();
+          dashboardVm.refreshDevices();
+        });
       },
     );
 
@@ -172,16 +204,19 @@ class _StaffHomePageState extends ConsumerState<StaffHomePage>
         final issue = next.value;
         if (issue == null) return;
 
-        dashboardVm.refreshIssues();
-        dashboardVm.refreshDevices();
         ref.invalidate(issueDetailProvider(issue.id));
+        _debouncedRefresh(() {
+          dashboardVm.refreshIssues();
+          dashboardVm.refreshDevices();
+        });
 
         // If issue was marked resolved by tech, notify staff to verify
         if (issue.status == IssueStatus.resolved) {
           RealtimeToastHelper.showSimpleToast(
             context,
             title: l10n?.issueResolvedAlert ?? 'Defect Resolved',
-            message: '${issue.deviceName} has been resolved by technician. Tap to verify & close.',
+            message: l10n?.staffTicketResolvedToast(issue.deviceName) ??
+                '${issue.deviceName} was fixed by a technician. Tap to check & close.',
             icon: Icons.check_circle_outline,
             iconColor: AppColors.success,
             onTap: () => IssueDetailSheet.show(context, issue),
@@ -191,11 +226,15 @@ class _StaffHomePageState extends ConsumerState<StaffHomePage>
     );
 
     final staffDevicesAsync = ref.watch(staffDevicesProvider);
-    final staffSummaryAsync = ref.watch(staffDashboardSummaryProvider);
     final staffIssuesAsync = ref.watch(staffIssuesProvider);
     final todayLogsAsync = ref.watch(todayLogsProvider);
     final checklistState = ref.watch(staffChecklistViewModelProvider);
     final checklistNotifier = ref.read(staffChecklistViewModelProvider.notifier);
+
+    final devices = staffDevicesAsync.value ?? const <DeviceModel>[];
+    final todayLogs = todayLogsAsync.value ?? const <String, DailyStatusLogModel>{};
+    final checkedTodayCount =
+        devices.where((d) => todayLogs.containsKey(d.id)).length;
 
     return Column(
       children: [
@@ -232,8 +271,9 @@ class _StaffHomePageState extends ConsumerState<StaffHomePage>
 
         // Live KPI Metric Header Bar
         StaffKpiBar(
-          summaryAsync: staffSummaryAsync,
-          devices: staffDevicesAsync.value,
+          devices: devices,
+          checkedTodayCount: checkedTodayCount,
+          issues: staffIssuesAsync.value ?? const [],
         ),
 
         const Divider(height: 1, color: AppColors.divider),
@@ -242,15 +282,15 @@ class _StaffHomePageState extends ConsumerState<StaffHomePage>
         Expanded(
           child: switch (_currentTabIndex) {
             0 => StaffDevicesDirectoryTab(
-                devices: staffDevicesAsync.value ?? [],
+                devices: devices,
                 isLoading: staffDevicesAsync.isLoading,
                 hasError: staffDevicesAsync.hasError,
                 onRefresh: () async => dashboardVm.refreshDevices(),
                 onOpenRaiseIssue: _openRaiseIssueSheet,
               ),
             1 => StaffDailyChecklistTab(
-                allDevices: staffDevicesAsync.value ?? [],
-                todayLogsMap: todayLogsAsync.value ?? {},
+                allDevices: devices,
+                todayLogsMap: todayLogs,
                 isLoading: staffDevicesAsync.isLoading,
                 hasError: staffDevicesAsync.hasError,
                 checklistState: checklistState,

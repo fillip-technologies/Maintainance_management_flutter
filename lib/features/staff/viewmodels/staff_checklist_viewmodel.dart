@@ -58,7 +58,6 @@ class StaffChecklistNotifier extends Notifier<StaffChecklistState> {
       // Invalidate relevant queries
       ref.invalidate(todayLogsProvider);
       ref.invalidate(staffDevicesProvider);
-      ref.invalidate(staffDashboardSummaryProvider);
 
       // Clean up editing & submitting state for this device
       final finalSubmitting = Set<String>.from(state.submittingDeviceLogIds)..remove(deviceId);

@@ -749,25 +749,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String techPercentOnline(int percent) {
-    return '$percent% Online';
+    return '$percent% active';
   }
 
   @override
   String techPercentHealth(int percent) {
-    return '$percent% Health';
+    return '$percent% active';
   }
 
   @override
   String get techStatTotal => 'TOTAL';
 
   @override
-  String get techStatOnline => 'ONLINE';
+  String get techStatOnline => 'ACTIVE';
 
   @override
   String get techStatFaulty => 'FAULTY';
 
   @override
   String get techStatDefects => 'DEFECTS';
+
+  @override
+  String get techStatNeedsFix => 'NEEDS FIX';
 
   @override
   String techZoneClientDepth(String client, int depth) {
@@ -865,4 +868,220 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bulkNoMatchingTickets => 'No matching tickets found';
+
+  @override
+  String get staffKpiCheckedToday => 'Checked Today';
+
+  @override
+  String get staffKpiWorking => 'Working';
+
+  @override
+  String get staffKpiProblems => 'Problems';
+
+  @override
+  String get staffKpiDown => 'Down';
+
+  @override
+  String staffMarkedDeviceAs(String device, String status) {
+    return 'Marked $device as $status';
+  }
+
+  @override
+  String staffFailedToRecord(String error) {
+    return 'Couldn\'t save: $error';
+  }
+
+  @override
+  String get staffHardwareDownTitle => 'Hardware Down!';
+
+  @override
+  String staffHardwareDownBody(String device) {
+    return 'You marked \"$device\" as Not Working. Raise a repair ticket now so a technician can be sent?';
+  }
+
+  @override
+  String get staffNeedsAttentionTitle => 'Needs a Look';
+
+  @override
+  String staffNeedsAttentionBody(String device) {
+    return 'You marked \"$device\" as Needs Attention. Want to raise a ticket so a technician can check it?';
+  }
+
+  @override
+  String get staffLater => 'Later';
+
+  @override
+  String get staffRaiseTicketNow => 'Raise Ticket';
+
+  @override
+  String get staffVerifyClose => 'Verify & Close';
+
+  @override
+  String get staffReopenTicket => 'Reopen';
+
+  @override
+  String get staffTicketUpdated => 'Ticket updated';
+
+  @override
+  String get staffCouldNotUpdateTicket => 'Couldn\'t update ticket';
+
+  @override
+  String staffNSelected(int count) {
+    return '$count Selected';
+  }
+
+  @override
+  String staffCheckedTodayProgress(int done, int total) {
+    return '$done / $total checked today';
+  }
+
+  @override
+  String staffFilterAll(int count) {
+    return 'All ($count)';
+  }
+
+  @override
+  String staffFilterPending(int count) {
+    return 'Pending ($count)';
+  }
+
+  @override
+  String staffFilterDone(int count) {
+    return 'Done ($count)';
+  }
+
+  @override
+  String staffFilterNeedsCheck(int count) {
+    return 'Fixed ($count)';
+  }
+
+  @override
+  String staffFilterInProgress(int count) {
+    return 'In Progress ($count)';
+  }
+
+  @override
+  String staffFilterDoneTickets(int count) {
+    return 'Done ($count)';
+  }
+
+  @override
+  String get staffPendingCheck => 'Pending';
+
+  @override
+  String get staffChange => 'Change';
+
+  @override
+  String get staffCancel => 'Cancel';
+
+  @override
+  String get staffAddNote => 'Add a note (optional)';
+
+  @override
+  String staffRepeatedlyDown(int count) {
+    return 'Reported down $count times — may be marked faulty';
+  }
+
+  @override
+  String get staffChecklistLoadFailed => 'Couldn\'t load the checklist';
+
+  @override
+  String get staffCheckConnectionRetry =>
+      'Check your connection and tap to retry';
+
+  @override
+  String get staffAllChecksDone => 'All checks done for today. Great work!';
+
+  @override
+  String get staffNoHardwareInFilter => 'No hardware in this filter';
+
+  @override
+  String get staffPullToRefresh => 'Pull down to refresh';
+
+  @override
+  String get staffTicketsLoadFailed => 'Couldn\'t load tickets';
+
+  @override
+  String get staffNoTicketsToCheck => 'No recently fixed tickets';
+
+  @override
+  String get staffNoTicketsInProgress => 'No tickets being worked on';
+
+  @override
+  String get staffNoDoneTickets => 'No finished tickets yet';
+
+  @override
+  String get staffSearchHardware => 'Search hardware by name, type, or zone';
+
+  @override
+  String get staffDirectoryLoadFailed => 'Couldn\'t load the hardware list';
+
+  @override
+  String get staffNoMatchingHardware => 'No matching hardware';
+
+  @override
+  String get staffTryAdjustingFilter => 'Try a different search or filter';
+
+  @override
+  String get staffNoHardwareRegistered => 'No equipment registered here yet';
+
+  @override
+  String get staffClearFilters => 'Clear Filters';
+
+  @override
+  String get raiseIssueTitle => 'Report a Problem';
+
+  @override
+  String get raiseSelectEquipment => 'Which equipment?';
+
+  @override
+  String get raiseSelectUnitHint => 'Choose a unit';
+
+  @override
+  String get raiseDefectCategory => 'What is wrong?';
+
+  @override
+  String get raiseLoadingCategories => 'Loading types...';
+
+  @override
+  String get raiseNoCategoriesInfo =>
+      'No types listed — a general problem will be reported.';
+
+  @override
+  String get raisePriority => 'How urgent?';
+
+  @override
+  String get raiseDetails => 'Describe the problem';
+
+  @override
+  String get raiseDetailsHint =>
+      'What is happening? Any sounds, errors, damage...';
+
+  @override
+  String get raiseSubmit => 'Send Ticket';
+
+  @override
+  String get raiseErrSelectEquipment => 'Please choose the equipment';
+
+  @override
+  String get raiseErrSelectCategory => 'Please choose what is wrong';
+
+  @override
+  String get raiseErrDescription => 'Please describe the problem';
+
+  @override
+  String get raiseErrLoadCategories => 'Couldn\'t load problem types';
+
+  @override
+  String get raiseErrGeneric => 'Couldn\'t raise the ticket';
+
+  @override
+  String raiseSuccess(String device) {
+    return 'Ticket sent for $device';
+  }
+
+  @override
+  String staffTicketResolvedToast(String device) {
+    return '$device was fixed by a technician. Tap for details.';
+  }
 }

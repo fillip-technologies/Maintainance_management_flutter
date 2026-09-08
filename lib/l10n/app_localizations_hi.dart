@@ -745,25 +745,28 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String techPercentOnline(int percent) {
-    return '$percent% ऑनलाइन';
+    return '$percent% सक्रिय';
   }
 
   @override
   String techPercentHealth(int percent) {
-    return '$percent% स्वस्थ';
+    return '$percent% सक्रिय';
   }
 
   @override
   String get techStatTotal => 'कुल';
 
   @override
-  String get techStatOnline => 'चालू';
+  String get techStatOnline => 'सक्रिय';
 
   @override
   String get techStatFaulty => 'खराब';
 
   @override
   String get techStatDefects => 'खराबी';
+
+  @override
+  String get techStatNeedsFix => 'मरम्मत बाकी';
 
   @override
   String techZoneClientDepth(String client, int depth) {
@@ -861,4 +864,219 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get bulkNoMatchingTickets => 'कोई मिलता-जुलता टिकट नहीं मिला';
+
+  @override
+  String get staffKpiCheckedToday => 'आज जांचे';
+
+  @override
+  String get staffKpiWorking => 'चालू';
+
+  @override
+  String get staffKpiProblems => 'समस्याएं';
+
+  @override
+  String get staffKpiDown => 'बंद';
+
+  @override
+  String staffMarkedDeviceAs(String device, String status) {
+    return '$device को $status के रूप में दर्ज किया';
+  }
+
+  @override
+  String staffFailedToRecord(String error) {
+    return 'सहेजा नहीं जा सका: $error';
+  }
+
+  @override
+  String get staffHardwareDownTitle => 'उपकरण बंद है!';
+
+  @override
+  String staffHardwareDownBody(String device) {
+    return 'आपने \"$device\" को बंद बताया। क्या अभी मरम्मत टिकट बनाएं ताकि तकनीशियन भेजा जा सके?';
+  }
+
+  @override
+  String get staffNeedsAttentionTitle => 'ध्यान देने की ज़रूरत';
+
+  @override
+  String staffNeedsAttentionBody(String device) {
+    return 'आपने \"$device\" को ध्यान देने योग्य बताया। क्या टिकट बनाएं ताकि तकनीशियन जांच कर सके?';
+  }
+
+  @override
+  String get staffLater => 'बाद में';
+
+  @override
+  String get staffRaiseTicketNow => 'टिकट बनाएं';
+
+  @override
+  String get staffVerifyClose => 'जांचें और बंद करें';
+
+  @override
+  String get staffReopenTicket => 'फिर से खोलें';
+
+  @override
+  String get staffTicketUpdated => 'टिकट अपडेट हुआ';
+
+  @override
+  String get staffCouldNotUpdateTicket => 'टिकट अपडेट नहीं हो सका';
+
+  @override
+  String staffNSelected(int count) {
+    return '$count चुने गए';
+  }
+
+  @override
+  String staffCheckedTodayProgress(int done, int total) {
+    return 'आज $total में से $done जांचे गए';
+  }
+
+  @override
+  String staffFilterAll(int count) {
+    return 'सभी ($count)';
+  }
+
+  @override
+  String staffFilterPending(int count) {
+    return 'बाकी ($count)';
+  }
+
+  @override
+  String staffFilterDone(int count) {
+    return 'हो गए ($count)';
+  }
+
+  @override
+  String staffFilterNeedsCheck(int count) {
+    return 'ठीक हुए ($count)';
+  }
+
+  @override
+  String staffFilterInProgress(int count) {
+    return 'चल रहा ($count)';
+  }
+
+  @override
+  String staffFilterDoneTickets(int count) {
+    return 'हो गए ($count)';
+  }
+
+  @override
+  String get staffPendingCheck => 'बाकी';
+
+  @override
+  String get staffChange => 'बदलें';
+
+  @override
+  String get staffCancel => 'रद्द करें';
+
+  @override
+  String get staffAddNote => 'नोट जोड़ें (वैकल्पिक)';
+
+  @override
+  String staffRepeatedlyDown(int count) {
+    return '$count बार बंद बताया गया — खराब चिह्नित हो सकता है';
+  }
+
+  @override
+  String get staffChecklistLoadFailed => 'चेकलिस्ट लोड नहीं हुई';
+
+  @override
+  String get staffCheckConnectionRetry =>
+      'अपना कनेक्शन जांचें और दोबारा कोशिश करें';
+
+  @override
+  String get staffAllChecksDone => 'आज की सभी जांच पूरी। बहुत बढ़िया!';
+
+  @override
+  String get staffNoHardwareInFilter => 'इस फ़िल्टर में कोई उपकरण नहीं';
+
+  @override
+  String get staffPullToRefresh => 'नया देखने के लिए नीचे खींचें';
+
+  @override
+  String get staffTicketsLoadFailed => 'टिकट लोड नहीं हुए';
+
+  @override
+  String get staffNoTicketsToCheck => 'अभी कोई हाल में ठीक हुआ टिकट नहीं';
+
+  @override
+  String get staffNoTicketsInProgress => 'किसी टिकट पर काम नहीं चल रहा';
+
+  @override
+  String get staffNoDoneTickets => 'अभी कोई टिकट पूरा नहीं हुआ';
+
+  @override
+  String get staffSearchHardware => 'नाम, प्रकार या ज़ोन से उपकरण खोजें';
+
+  @override
+  String get staffDirectoryLoadFailed => 'उपकरण सूची लोड नहीं हुई';
+
+  @override
+  String get staffNoMatchingHardware => 'कोई मिलता-जुलता उपकरण नहीं';
+
+  @override
+  String get staffTryAdjustingFilter => 'दूसरी खोज या फ़िल्टर आज़माएं';
+
+  @override
+  String get staffNoHardwareRegistered => 'यहां अभी कोई उपकरण दर्ज नहीं है';
+
+  @override
+  String get staffClearFilters => 'फ़िल्टर हटाएं';
+
+  @override
+  String get raiseIssueTitle => 'समस्या दर्ज करें';
+
+  @override
+  String get raiseSelectEquipment => 'कौन सा उपकरण?';
+
+  @override
+  String get raiseSelectUnitHint => 'एक उपकरण चुनें';
+
+  @override
+  String get raiseDefectCategory => 'क्या खराबी है?';
+
+  @override
+  String get raiseLoadingCategories => 'प्रकार लोड हो रहे हैं...';
+
+  @override
+  String get raiseNoCategoriesInfo =>
+      'कोई प्रकार सूचीबद्ध नहीं — सामान्य समस्या दर्ज की जाएगी।';
+
+  @override
+  String get raisePriority => 'कितना ज़रूरी?';
+
+  @override
+  String get raiseDetails => 'समस्या बताएं';
+
+  @override
+  String get raiseDetailsHint => 'क्या हो रहा है? कोई आवाज़, त्रुटि, नुकसान...';
+
+  @override
+  String get raiseSubmit => 'टिकट भेजें';
+
+  @override
+  String get raiseErrSelectEquipment => 'कृपया उपकरण चुनें';
+
+  @override
+  String get raiseErrSelectCategory => 'कृपया चुनें क्या खराबी है';
+
+  @override
+  String get raiseErrDescription => 'कृपया समस्या बताएं';
+
+  @override
+  String get raiseErrLoadCategories => 'समस्या के प्रकार लोड नहीं हुए';
+
+  @override
+  String get raiseErrGeneric => 'टिकट दर्ज नहीं हो सका';
+
+  @override
+  String raiseSuccess(String device) {
+    return '$device के लिए टिकट भेजा गया';
+  }
+
+  @override
+  String staffTicketResolvedToast(String device) {
+    return '$device को तकनीशियन ने ठीक किया। विवरण के लिए टैप करें।';
+  }
 }

@@ -22,7 +22,10 @@ class ProfilePage extends ConsumerWidget {
           children: [
             const Icon(Icons.logout_rounded, color: AppColors.error, size: 22),
             const SizedBox(width: 8),
-            Text(l10n.signOut, style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text(
+              l10n.signOut,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
           ],
         ),
         content: Text(
@@ -121,9 +124,9 @@ class ProfilePage extends ConsumerWidget {
                 value: isTech
                     ? l10n.orgWideQueue
                     : (user.assignedZoneName != null &&
-                            user.assignedZoneName!.isNotEmpty
-                        ? user.assignedZoneName!
-                        : l10n.unassignedScope),
+                              user.assignedZoneName!.isNotEmpty
+                          ? user.assignedZoneName!
+                          : l10n.unassignedScope),
               ),
               if (user.clientId != null && user.clientId!.isNotEmpty) ...[
                 const Divider(color: AppColors.divider, height: 1),
@@ -202,7 +205,7 @@ class ProfilePage extends ConsumerWidget {
               ProfileInfoTile(
                 icon: Icons.verified_outlined,
                 label: l10n.appVersion,
-                value: '${AppConfig.appName} v${AppConfig.appVersion} (Production)',
+                value: '${AppConfig.appName} v${AppConfig.appVersion}',
               ),
             ]),
 
@@ -219,7 +222,9 @@ class ProfilePage extends ConsumerWidget {
                 border: Border.all(color: AppColors.border),
               ),
               child: InkWell(
-                onTap: profileState.isLoggingOut ? null : () => _handleSignOut(context, ref),
+                onTap: profileState.isLoggingOut
+                    ? null
+                    : () => _handleSignOut(context, ref),
                 borderRadius: BorderRadius.circular(16),
                 child: Padding(
                   padding: const EdgeInsets.all(16),
@@ -321,9 +326,7 @@ class ProfilePage extends ConsumerWidget {
           ),
         ],
       ),
-      child: Column(
-        children: children,
-      ),
+      child: Column(children: children),
     );
   }
 }

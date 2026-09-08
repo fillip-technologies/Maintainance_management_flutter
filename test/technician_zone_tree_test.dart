@@ -266,9 +266,8 @@ void main() {
       expect(find.text('CAM-001'), findsOneWidget);
       expect(find.text('CCTV Camera'), findsOneWidget);
 
-      // Verify visual defect strip rendered
+      // Verify visual defect strip rendered (priority is shown by colour, not text)
       expect(find.text('Lens cracked'), findsOneWidget);
-      expect(find.text('CRITICAL'), findsOneWidget);
       expect(find.text('Open'), findsOneWidget);
 
       // Tap defect strip to inspect
@@ -303,7 +302,7 @@ void main() {
       expect(find.text('CRITICAL'), findsNothing);
     });
 
-    testWidgets('renders resolved device with green background and RESOLVED badge, not red or CRITICAL', (tester) async {
+    testWidgets('device whose only issue is resolved shows the ALL OK safety strip, no red callout', (tester) async {
       const device = DeviceModel(
         id: 'dev-res',
         zoneId: 'zone-1',
@@ -342,10 +341,9 @@ void main() {
       );
 
       expect(find.text('Turnstile A'), findsOneWidget);
-      expect(find.text('RESOLVED'), findsOneWidget);
-      expect(find.text('Active'), findsOneWidget);
-      // Ensure red critical defect banner is NOT rendered
-      expect(find.text('CRITICAL'), findsNothing);
+      expect(find.text('ALL OK'), findsOneWidget);
+      // No red defect callout for a device with no unresolved issue
+      expect(find.text('Sensor misaligned'), findsNothing);
     });
 
     test('filters devices strictly to only those with unresolved issues in spatial view', () {
@@ -424,14 +422,13 @@ void main() {
       expect(displayedDevices.map((d) => d.id).toList(), ['d1', 'd2']);
     });
 
-    testWidgets('SubzoneGridCard renders unresolved units count and nested zones count', (tester) async {
+    testWidgets('SubzoneGridCard badge shows units needing a fix (total - working)', (tester) async {
       const zone = TechnicianZoneNode(
         id: 'z-nested',
         name: 'Surgical Wing',
         deviceCount: 10,
+        workingCount: 8, // 2 units need a fix
         subzoneCount: 3,
-        unresolvedUnitsCount: 2,
-        openIssuesCount: 2,
       );
 
       await tester.pumpWidget(
@@ -439,21 +436,18 @@ void main() {
       );
 
       expect(find.text('Surgical Wing'), findsOneWidget);
-      // Health signal is the red count badge; nested sub-zone count is icon + number.
-      expect(find.text('3'), findsOneWidget);
-      expect(find.text('2'), findsOneWidget);
+      expect(find.text('2'), findsOneWidget); // red badge = units needing fix
+      expect(find.text('3'), findsOneWidget); // nested sub-zone count
       expect(find.text('2 not resolved'), findsNothing);
-      expect(find.text('10 units'), findsNothing);
     });
 
-    testWidgets('SubzoneGridCard renders All resolved when zone has 0 unresolved units', (tester) async {
+    testWidgets('SubzoneGridCard shows OK when every unit is working', (tester) async {
       const zone = TechnicianZoneNode(
         id: 'z-clean',
         name: 'Radiology Area',
         deviceCount: 8,
+        workingCount: 8,
         subzoneCount: 1,
-        unresolvedUnitsCount: 0,
-        openIssuesCount: 0,
       );
 
       await tester.pumpWidget(
@@ -462,9 +456,7 @@ void main() {
 
       expect(find.text('Radiology Area'), findsOneWidget);
       expect(find.text('OK'), findsOneWidget);
-      expect(find.text('1'), findsOneWidget);
-      expect(find.text('All resolved'), findsNothing);
-      expect(find.text('8 units'), findsNothing);
+      expect(find.text('1'), findsOneWidget); // nested sub-zone count
     });
 
     test('Spatial Explorer excludes resolved issues from active defects list', () {

@@ -9,15 +9,18 @@ final issueRepositoryProvider = Provider<IssueRepository>((ref) {
   return IssueRepository(apiClient: apiClient);
 });
 
-/// 2. Staff Issues Provider (scoped to user's assigned zone tree)
+/// 2. Staff Issues Provider.
+///
+/// No zoneId is sent: the backend scopes issues to every zone the staff member
+/// is assigned to. Filtering (Open / Closed / All) is applied client-side over
+/// this list, so we pull the largest page the backend allows (100). Zones with
+/// more than 100 live tickets will need server-side pagination wired in here.
 final staffIssuesProvider = FutureProvider.autoDispose<List<IssueModel>>((ref) async {
-  final authUser = ref.watch(authStateProvider).value;
   final issueRepo = ref.watch(issueRepositoryProvider);
 
-  final zoneId = authUser?.assignedZoneId;
   return issueRepo.getIssues(
-    zoneId: zoneId,
     includeSubzones: true,
+    limit: 100,
   );
 });
 

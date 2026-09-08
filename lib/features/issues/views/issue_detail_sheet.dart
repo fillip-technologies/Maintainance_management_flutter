@@ -128,8 +128,9 @@ class IssueDetailSheet extends ConsumerWidget {
                     children: [
                       StatusBadge.issue(currentIssue.status),
                       StatusBadge.priority(currentIssue.priority),
-                      if (currentIssue.deviceStatus != null)
-                        StatusBadge.device(currentIssue.deviceStatus!),
+                      // Hardware status badge commented out for now
+                      // if (currentIssue.deviceStatus != null)
+                      //   StatusBadge.device(currentIssue.deviceStatus!),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                         decoration: BoxDecoration(
@@ -164,14 +165,15 @@ class IssueDetailSheet extends ConsumerWidget {
                     l10n.equipmentUnit,
                     '${currentIssue.deviceName}${currentIssue.deviceCode != null ? " (${currentIssue.deviceCode})" : ""}',
                   ),
-                  if (currentIssue.deviceStatus != null) ...[
-                    const SizedBox(height: 8),
-                    _buildMetaWidget(
-                      Icons.settings_suggest_outlined,
-                      l10n.hardwareStatus,
-                      StatusBadge.device(currentIssue.deviceStatus!),
-                    ),
-                  ],
+                  // Hardware status commented out for now
+                  // if (currentIssue.deviceStatus != null) ...[
+                  //   const SizedBox(height: 8),
+                  //   _buildMetaWidget(
+                  //     Icons.settings_suggest_outlined,
+                  //     l10n.hardwareStatus,
+                  //     StatusBadge.device(currentIssue.deviceStatus!),
+                  //   ),
+                  // ],
                   const SizedBox(height: 8),
                   _buildMetaRow(
                     Icons.person_outline,
@@ -378,24 +380,25 @@ class IssueDetailSheet extends ConsumerWidget {
     );
   }
 
-  Widget _buildMetaWidget(IconData icon, String label, Widget trailing) {
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: AppColors.icon),
-        const SizedBox(width: 8),
-        Text(
-          '$label: ',
-          style: const TextStyle(
-            fontSize: 13,
-            color: AppColors.textSecondary,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const Spacer(),
-        trailing,
-      ],
-    );
-  }
+  // Commented out with hardware status:
+  // Widget _buildMetaWidget(IconData icon, String label, Widget trailing) {
+  //   return Row(
+  //     children: [
+  //       Icon(icon, size: 16, color: AppColors.icon),
+  //       const SizedBox(width: 8),
+  //       Text(
+  //         '$label: ',
+  //         style: const TextStyle(
+  //           fontSize: 13,
+  //           color: AppColors.textSecondary,
+  //           fontWeight: FontWeight.w500,
+  //         ),
+  //       ),
+  //       const Spacer(),
+  //       trailing,
+  //     ],
+  //   );
+  // }
 
   Widget _buildMetaRow(IconData icon, String label, String value) {
     return Row(
@@ -427,3 +430,4 @@ class IssueDetailSheet extends ConsumerWidget {
     );
   }
 }
+

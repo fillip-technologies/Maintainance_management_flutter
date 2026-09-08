@@ -239,23 +239,6 @@ void main() {
       expect(log.notes, 'Lens cleaned and verified');
     });
 
-    test('7. DashboardSummaryModel parses backend summary metrics correctly', () {
-      final backendSummaryJson = {
-        'openIssues': 7,
-        'faultyDevices': 0,
-        'devicesMissingTodayLog': 3,
-        'totalDevices': 4,
-      };
-
-      final summary = DashboardSummaryModel.fromJson(backendSummaryJson);
-
-      expect(summary.totalDevices, 4);
-      expect(summary.activeDevices, 4);
-      expect(summary.openIssues, 7);
-      expect(summary.faultyDevices, 0);
-      expect(summary.devicesMissingTodayLog, 3);
-    });
-
     test('8. IssueStatusHistoryModel parses backend timeline response correctly', () {
       final backendHistoryItem = {
         'id': 'hist-uuid-01',

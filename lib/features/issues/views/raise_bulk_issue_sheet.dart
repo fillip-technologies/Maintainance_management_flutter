@@ -256,7 +256,6 @@ class _RaiseBulkIssueSheetState extends ConsumerState<RaiseBulkIssueSheet> {
 
       if (newIssues != null && newIssues.isNotEmpty) {
         ref.invalidate(staffDevicesProvider);
-        ref.invalidate(staffDashboardSummaryProvider);
 
         if (mounted) {
           Navigator.pop(context, newIssues);

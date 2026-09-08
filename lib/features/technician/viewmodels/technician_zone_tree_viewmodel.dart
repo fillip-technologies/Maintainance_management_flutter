@@ -105,9 +105,11 @@ class TechnicianZoneTreeViewModel extends AsyncNotifier<TechnicianZoneTreeState>
             i.status != IssueStatus.resolved && i.status != IssueStatus.closed)
         .toList();
 
-    final affectedDeviceIds =
-        active.map((i) => i.deviceId).where((id) => id.isNotEmpty).toSet();
-    final areaIncidents = active.where((i) => i.deviceId.isEmpty).length;
+    // How many distinct hardware UNITS are affected — not the ticket count.
+    // (A unit with 3 open tickets counts once; device-less area incidents are
+    // shown separately as "facility incidents", not here.)
+    final affectedUnits =
+        active.map((i) => i.deviceId).where((id) => id.isNotEmpty).toSet().length;
 
     return node.copyWith(
       deviceCount: total,
@@ -116,7 +118,7 @@ class TechnicianZoneTreeViewModel extends AsyncNotifier<TechnicianZoneTreeState>
       notWorkingCount: faulty,
       maintenanceCount: maintenance,
       openIssuesCount: active.length,
-      unresolvedUnitsCount: affectedDeviceIds.length + areaIncidents,
+      unresolvedUnitsCount: affectedUnits,
       criticalIssuesCount:
           active.where((i) => i.priority == IssuePriority.critical).length,
       highIssuesCount:

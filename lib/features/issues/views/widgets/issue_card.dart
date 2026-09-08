@@ -140,8 +140,11 @@ class IssueCard extends StatelessWidget {
                     ),
                   ],
                   const Spacer(),
-                  StatusBadge.priority(issue.priority),
-                  const SizedBox(width: 6),
+                  if (issue.priority == IssuePriority.critical ||
+                      issue.priority == IssuePriority.high) ...[
+                    StatusBadge.priority(issue.priority),
+                    const SizedBox(width: 6),
+                  ],
                   StatusBadge.issue(issue.status),
                 ],
               ),
@@ -232,24 +235,9 @@ class IssueCard extends StatelessWidget {
                 const SizedBox(height: 12),
                 const Divider(height: 1, color: AppColors.divider),
                 const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.history, size: 14, color: AppColors.textMuted),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${issue.history.length} events',
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: AppColors.textMuted,
-                          ),
-                        ),
-                      ],
-                    ),
-                    trailingAction!,
-                  ],
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: trailingAction!,
                 ),
               ],
             ],

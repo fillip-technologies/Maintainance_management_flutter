@@ -1487,13 +1487,13 @@ abstract class AppLocalizations {
   /// No description provided for @techPercentOnline.
   ///
   /// In en, this message translates to:
-  /// **'{percent}% Online'**
+  /// **'{percent}% active'**
   String techPercentOnline(int percent);
 
   /// No description provided for @techPercentHealth.
   ///
   /// In en, this message translates to:
-  /// **'{percent}% Health'**
+  /// **'{percent}% active'**
   String techPercentHealth(int percent);
 
   /// No description provided for @techStatTotal.
@@ -1505,7 +1505,7 @@ abstract class AppLocalizations {
   /// No description provided for @techStatOnline.
   ///
   /// In en, this message translates to:
-  /// **'ONLINE'**
+  /// **'ACTIVE'**
   String get techStatOnline;
 
   /// No description provided for @techStatFaulty.
@@ -1519,6 +1519,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'DEFECTS'**
   String get techStatDefects;
+
+  /// No description provided for @techStatNeedsFix.
+  ///
+  /// In en, this message translates to:
+  /// **'NEEDS FIX'**
+  String get techStatNeedsFix;
 
   /// No description provided for @techZoneClientDepth.
   ///
@@ -1663,6 +1669,372 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No matching tickets found'**
   String get bulkNoMatchingTickets;
+
+  /// No description provided for @staffKpiCheckedToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Checked Today'**
+  String get staffKpiCheckedToday;
+
+  /// No description provided for @staffKpiWorking.
+  ///
+  /// In en, this message translates to:
+  /// **'Working'**
+  String get staffKpiWorking;
+
+  /// No description provided for @staffKpiProblems.
+  ///
+  /// In en, this message translates to:
+  /// **'Problems'**
+  String get staffKpiProblems;
+
+  /// No description provided for @staffKpiDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Down'**
+  String get staffKpiDown;
+
+  /// No description provided for @staffMarkedDeviceAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Marked {device} as {status}'**
+  String staffMarkedDeviceAs(String device, String status);
+
+  /// No description provided for @staffFailedToRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save: {error}'**
+  String staffFailedToRecord(String error);
+
+  /// No description provided for @staffHardwareDownTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Hardware Down!'**
+  String get staffHardwareDownTitle;
+
+  /// No description provided for @staffHardwareDownBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You marked \"{device}\" as Not Working. Raise a repair ticket now so a technician can be sent?'**
+  String staffHardwareDownBody(String device);
+
+  /// No description provided for @staffNeedsAttentionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs a Look'**
+  String get staffNeedsAttentionTitle;
+
+  /// No description provided for @staffNeedsAttentionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You marked \"{device}\" as Needs Attention. Want to raise a ticket so a technician can check it?'**
+  String staffNeedsAttentionBody(String device);
+
+  /// No description provided for @staffLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get staffLater;
+
+  /// No description provided for @staffRaiseTicketNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Raise Ticket'**
+  String get staffRaiseTicketNow;
+
+  /// No description provided for @staffVerifyClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify & Close'**
+  String get staffVerifyClose;
+
+  /// No description provided for @staffReopenTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'Reopen'**
+  String get staffReopenTicket;
+
+  /// No description provided for @staffTicketUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket updated'**
+  String get staffTicketUpdated;
+
+  /// No description provided for @staffCouldNotUpdateTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t update ticket'**
+  String get staffCouldNotUpdateTicket;
+
+  /// No description provided for @staffNSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Selected'**
+  String staffNSelected(int count);
+
+  /// No description provided for @staffCheckedTodayProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} / {total} checked today'**
+  String staffCheckedTodayProgress(int done, int total);
+
+  /// No description provided for @staffFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All ({count})'**
+  String staffFilterAll(int count);
+
+  /// No description provided for @staffFilterPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending ({count})'**
+  String staffFilterPending(int count);
+
+  /// No description provided for @staffFilterDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done ({count})'**
+  String staffFilterDone(int count);
+
+  /// No description provided for @staffFilterNeedsCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed ({count})'**
+  String staffFilterNeedsCheck(int count);
+
+  /// No description provided for @staffFilterInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In Progress ({count})'**
+  String staffFilterInProgress(int count);
+
+  /// No description provided for @staffFilterDoneTickets.
+  ///
+  /// In en, this message translates to:
+  /// **'Done ({count})'**
+  String staffFilterDoneTickets(int count);
+
+  /// No description provided for @staffPendingCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get staffPendingCheck;
+
+  /// No description provided for @staffChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get staffChange;
+
+  /// No description provided for @staffCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get staffCancel;
+
+  /// No description provided for @staffAddNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a note (optional)'**
+  String get staffAddNote;
+
+  /// No description provided for @staffRepeatedlyDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Reported down {count} times — may be marked faulty'**
+  String staffRepeatedlyDown(int count);
+
+  /// No description provided for @staffChecklistLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load the checklist'**
+  String get staffChecklistLoadFailed;
+
+  /// No description provided for @staffCheckConnectionRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your connection and tap to retry'**
+  String get staffCheckConnectionRetry;
+
+  /// No description provided for @staffAllChecksDone.
+  ///
+  /// In en, this message translates to:
+  /// **'All checks done for today. Great work!'**
+  String get staffAllChecksDone;
+
+  /// No description provided for @staffNoHardwareInFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'No hardware in this filter'**
+  String get staffNoHardwareInFilter;
+
+  /// No description provided for @staffPullToRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull down to refresh'**
+  String get staffPullToRefresh;
+
+  /// No description provided for @staffTicketsLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load tickets'**
+  String get staffTicketsLoadFailed;
+
+  /// No description provided for @staffNoTicketsToCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'No recently fixed tickets'**
+  String get staffNoTicketsToCheck;
+
+  /// No description provided for @staffNoTicketsInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'No tickets being worked on'**
+  String get staffNoTicketsInProgress;
+
+  /// No description provided for @staffNoDoneTickets.
+  ///
+  /// In en, this message translates to:
+  /// **'No finished tickets yet'**
+  String get staffNoDoneTickets;
+
+  /// No description provided for @staffSearchHardware.
+  ///
+  /// In en, this message translates to:
+  /// **'Search hardware by name, type, or zone'**
+  String get staffSearchHardware;
+
+  /// No description provided for @staffDirectoryLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load the hardware list'**
+  String get staffDirectoryLoadFailed;
+
+  /// No description provided for @staffNoMatchingHardware.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching hardware'**
+  String get staffNoMatchingHardware;
+
+  /// No description provided for @staffTryAdjustingFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a different search or filter'**
+  String get staffTryAdjustingFilter;
+
+  /// No description provided for @staffNoHardwareRegistered.
+  ///
+  /// In en, this message translates to:
+  /// **'No equipment registered here yet'**
+  String get staffNoHardwareRegistered;
+
+  /// No description provided for @staffClearFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Filters'**
+  String get staffClearFilters;
+
+  /// No description provided for @raiseIssueTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report a Problem'**
+  String get raiseIssueTitle;
+
+  /// No description provided for @raiseSelectEquipment.
+  ///
+  /// In en, this message translates to:
+  /// **'Which equipment?'**
+  String get raiseSelectEquipment;
+
+  /// No description provided for @raiseSelectUnitHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a unit'**
+  String get raiseSelectUnitHint;
+
+  /// No description provided for @raiseDefectCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'What is wrong?'**
+  String get raiseDefectCategory;
+
+  /// No description provided for @raiseLoadingCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading types...'**
+  String get raiseLoadingCategories;
+
+  /// No description provided for @raiseNoCategoriesInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'No types listed — a general problem will be reported.'**
+  String get raiseNoCategoriesInfo;
+
+  /// No description provided for @raisePriority.
+  ///
+  /// In en, this message translates to:
+  /// **'How urgent?'**
+  String get raisePriority;
+
+  /// No description provided for @raiseDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe the problem'**
+  String get raiseDetails;
+
+  /// No description provided for @raiseDetailsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What is happening? Any sounds, errors, damage...'**
+  String get raiseDetailsHint;
+
+  /// No description provided for @raiseSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Ticket'**
+  String get raiseSubmit;
+
+  /// No description provided for @raiseErrSelectEquipment.
+  ///
+  /// In en, this message translates to:
+  /// **'Please choose the equipment'**
+  String get raiseErrSelectEquipment;
+
+  /// No description provided for @raiseErrSelectCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Please choose what is wrong'**
+  String get raiseErrSelectCategory;
+
+  /// No description provided for @raiseErrDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Please describe the problem'**
+  String get raiseErrDescription;
+
+  /// No description provided for @raiseErrLoadCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load problem types'**
+  String get raiseErrLoadCategories;
+
+  /// No description provided for @raiseErrGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t raise the ticket'**
+  String get raiseErrGeneric;
+
+  /// No description provided for @raiseSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket sent for {device}'**
+  String raiseSuccess(String device);
+
+  /// No description provided for @staffTicketResolvedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'{device} was fixed by a technician. Tap for details.'**
+  String staffTicketResolvedToast(String device);
 }
 
 class _AppLocalizationsDelegate

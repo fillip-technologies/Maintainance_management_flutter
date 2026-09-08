@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/widgets/app_filter_chip.dart';
 import '../../../../core/widgets/empty_state_view.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../daily_logs/daily_logs.dart';
 import '../../../devices/devices.dart';
 import '../../models/staff_checklist_state.dart';
@@ -37,8 +38,12 @@ class StaffDailyChecklistTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final total = allDevices.length;
     final completedCount = allDevices.where((d) => todayLogsMap.containsKey(d.id)).length;
-    final pendingCount = allDevices.length - completedCount;
+    final pendingCount = total - completedCount;
+    final allDone = total > 0 && pendingCount == 0;
+    final progress = total > 0 ? completedCount / total : 0.0;
 
     var displayedDevices = allDevices;
     if (checklistState.filterIndex == 1) {
@@ -49,32 +54,86 @@ class StaffDailyChecklistTab extends StatelessWidget {
 
     return Column(
       children: [
-        // Segmented Status Filter Bar
+        // Today's progress — the whole point of the staff role
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
           color: AppColors.surface,
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              AppFilterChip(
-                label: 'All (${allDevices.length})',
-                isSelected: checklistState.filterIndex == 0,
-                onTap: () => onFilterChanged(0),
+              Row(
+                children: [
+                  Icon(
+                    allDone ? Icons.check_circle_rounded : Icons.checklist_rounded,
+                    size: 20,
+                    color: allDone ? AppColors.successText : AppColors.warningText,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      l10n?.staffCheckedTodayProgress(completedCount, total) ??
+                          '$completedCount / $total checked today',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 8),
-              AppFilterChip(
-                label: 'Pending ($pendingCount)',
-                isSelected: checklistState.filterIndex == 1,
-                badgeColor: pendingCount > 0 ? AppColors.warningText : null,
-                onTap: () => onFilterChanged(1),
-              ),
-              const SizedBox(width: 8),
-              AppFilterChip(
-                label: 'Done ($completedCount)',
-                isSelected: checklistState.filterIndex == 2,
-                badgeColor: completedCount > 0 ? AppColors.successText : null,
-                onTap: () => onFilterChanged(2),
+              const SizedBox(height: 8),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: LinearProgressIndicator(
+                  value: progress.clamp(0.0, 1.0),
+                  minHeight: 8,
+                  backgroundColor: AppColors.border.withValues(alpha: 0.4),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    allDone ? AppColors.successText : AppColors.warningText,
+                  ),
+                ),
               ),
             ],
+          ),
+        ),
+
+        // Segmented Status Filter Bar
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          color: AppColors.background,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                AppFilterChip(
+                  label: l10n?.staffFilterAll(total) ?? 'All ($total)',
+                  isSelected: checklistState.filterIndex == 0,
+                  onTap: () => onFilterChanged(0),
+                ),
+                const SizedBox(width: 8),
+                AppFilterChip(
+                  label: l10n?.staffFilterPending(pendingCount) ?? 'Pending ($pendingCount)',
+                  isSelected: checklistState.filterIndex == 1,
+                  activeColor: AppColors.warning,
+                  badgeColor: pendingCount > 0 ? AppColors.warningText : null,
+                  onTap: () => onFilterChanged(1),
+                ),
+                const SizedBox(width: 8),
+                AppFilterChip(
+                  label: l10n?.staffFilterDone(completedCount) ?? 'Done ($completedCount)',
+                  isSelected: checklistState.filterIndex == 2,
+                  activeColor: AppColors.success,
+                  badgeColor: completedCount > 0 ? AppColors.successText : null,
+                  onTap: () => onFilterChanged(2),
+                ),
+              ],
+            ),
           ),
         ),
         const Divider(height: 1, color: AppColors.divider),
@@ -102,30 +161,29 @@ class StaffDailyChecklistTab extends StatelessWidget {
                   return Padding(
                     padding: const EdgeInsets.only(top: 40),
                     child: ErrorStateView(
-                      title: 'Failed to load hardware checklist',
-                      subtitle: 'Please check your connection and tap to retry',
+                      title: l10n?.staffChecklistLoadFailed ?? "Couldn't load the checklist",
+                      subtitle: l10n?.staffCheckConnectionRetry ??
+                          'Check your connection and tap to retry',
                       onRetry: onRefresh,
                     ),
                   );
                 }
 
                 if (displayedDevices.isEmpty) {
+                  final isPendingFilter = checklistState.filterIndex == 1;
                   return Padding(
                     padding: const EdgeInsets.only(top: 40),
                     child: EmptyStateView(
-                      icon: checklistState.filterIndex == 1
+                      icon: isPendingFilter
                           ? Icons.task_alt_rounded
                           : Icons.devices_outlined,
-                      iconColor: checklistState.filterIndex == 1
-                          ? AppColors.successText
-                          : AppColors.icon,
-                      iconBackgroundColor: checklistState.filterIndex == 1
-                          ? AppColors.successLight
-                          : AppColors.cardAlt,
-                      title: checklistState.filterIndex == 1
-                          ? 'All checks complete for today! Great work.'
-                          : 'No hardware found in this filter',
-                      subtitle: 'Pull down to refresh the catalogue',
+                      iconColor: isPendingFilter ? AppColors.successText : AppColors.icon,
+                      iconBackgroundColor:
+                          isPendingFilter ? AppColors.successLight : AppColors.cardAlt,
+                      title: isPendingFilter
+                          ? (l10n?.staffAllChecksDone ?? 'All checks done for today. Great work!')
+                          : (l10n?.staffNoHardwareInFilter ?? 'No hardware in this filter'),
+                      subtitle: l10n?.staffPullToRefresh ?? 'Pull down to refresh',
                     ),
                   );
                 }
