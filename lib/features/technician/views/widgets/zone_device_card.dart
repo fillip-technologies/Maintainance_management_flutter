@@ -93,15 +93,30 @@ class ZoneDeviceCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: borderColor.withValues(alpha: 0.3)),
                       ),
-                      child: Icon(
-                        HardwareIconHelper.getIcon(
-                          device.hardwareTypeName.isNotEmpty
-                              ? device.hardwareTypeName
-                              : device.name,
-                        ),
-                        size: 23,
-                        color: borderColor,
-                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: (device.imageUrl != null && device.imageUrl!.isNotEmpty)
+                          ? Image.network(
+                              device.imageUrl!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, _, _) => Icon(
+                                HardwareIconHelper.getIcon(
+                                  device.hardwareTypeName.isNotEmpty
+                                      ? device.hardwareTypeName
+                                      : device.name,
+                                ),
+                                size: 23,
+                                color: borderColor,
+                              ),
+                            )
+                          : Icon(
+                              HardwareIconHelper.getIcon(
+                                device.hardwareTypeName.isNotEmpty
+                                    ? device.hardwareTypeName
+                                    : device.name,
+                              ),
+                              size: 23,
+                              color: borderColor,
+                            ),
                     ),
                     Positioned(
                       top: -4,

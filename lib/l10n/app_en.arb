@@ -112,6 +112,7 @@
   "attachDefectPhoto": "Attach Defect Photo",
   "attachDefectPhotoButton": "Attach Evidence Photo (Camera / Gallery)",
   "defectPhotoAdded": "Defect Photo Added",
+  "evidencePhotos": "Evidence & Attachments",
   "submitDefectTicket": "Submit & Raise Maintenance Ticket",
 
   "statusOpen": "Open",

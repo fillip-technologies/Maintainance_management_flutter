@@ -99,6 +99,7 @@
   "attachDefectPhoto": "दोष की फोटो संलग्न करें",
   "attachDefectPhotoButton": "प्रमाण फोटो संलग्न करें (कैमरा / गैलरी)",
   "defectPhotoAdded": "दोष की फोटो जोड़ी गई",
+  "evidencePhotos": "साक्ष्य एवं संलग्नक",
   "submitDefectTicket": "समस्या टिकट दर्ज करें",
 
   "statusOpen": "खुला",

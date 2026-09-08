@@ -1,8 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-// import 'package:image_picker/image_picker.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../core/theme/colors.dart';
-// import '../../../core/utils/app_snackbar.dart';
 import '../models/issue_model.dart';
 import 'replace_device_sheet.dart';
 
@@ -44,13 +43,10 @@ class UpdateStatusSheet extends StatefulWidget {
 class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
   late IssueStatus _selectedStatus;
   final _commentController = TextEditingController();
-  // =========================================================================
-  // CAMERA PROOF CAPTURE (COMMENTED OUT FOR NOW - WILL BE ENABLED IN FUTURE)
-  // =========================================================================
-  // File? _resolutionImage;
-  // final ImagePicker _picker = ImagePicker();
-  // bool _isPickingImage = false;
-  // =========================================================================
+
+  File? _resolutionImage;
+  final ImagePicker _picker = ImagePicker();
+  bool _isPickingImage = false;
   String? _errorMessage;
   bool _isSubmitting = false;
 
@@ -111,6 +107,59 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
     };
   }
 
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      setState(() => _isPickingImage = true);
+      final picked = await _picker.pickImage(
+        source: source,
+        imageQuality: 75,
+        maxWidth: 1600,
+        maxHeight: 1600,
+      );
+      if (picked != null) {
+        setState(() => _resolutionImage = File(picked.path));
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _errorMessage = 'Failed to pick photo: $e');
+      }
+    } finally {
+      if (mounted) setState(() => _isPickingImage = false);
+    }
+  }
+
+  void _showImageSourceModal() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt, color: AppColors.primary),
+              title: const Text('Take Verification Photo'),
+              onTap: () {
+                Navigator.pop(ctx);
+                _pickImage(ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library, color: AppColors.primary),
+              title: const Text('Choose from Gallery'),
+              onTap: () {
+                Navigator.pop(ctx);
+                _pickImage(ImageSource.gallery);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _handleSubmit() async {
     if (_isSubmitting) return;
 
@@ -124,7 +173,7 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
     });
 
     try {
-      await widget.onStatusUpdated(_selectedStatus, comment, null);
+      await widget.onStatusUpdated(_selectedStatus, comment, _resolutionImage);
       if (mounted) {
         Navigator.pop(context);
       }
@@ -377,20 +426,83 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
 
                   const SizedBox(height: 14),
 
-                  // =========================================================================
-                  // CAMERA PROOF CAPTURE (COMMENTED OUT FOR NOW - WILL BE ENABLED IN FUTURE)
-                  // =========================================================================
-                  // const Text(
-                  //   'Proof / Verification Photo (Optional)',
-                  //   style: TextStyle(
-                  //     fontSize: 13,
-                  //     fontWeight: FontWeight.w600,
-                  //     color: AppColors.textSecondary,
-                  //   ),
-                  // ),
-                  // const SizedBox(height: 8),
-                  // ... (Camera / Gallery Picker)
-                  // =========================================================================
+                  // 3. Verification / Proof Photo (Optional)
+                  const Text(
+                    'Work Proof / Verification Photo (Optional)',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  if (_resolutionImage != null)
+                    Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(14),
+                          child: Image.file(
+                            _resolutionImage!,
+                            height: 140,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        Positioned(
+                          top: 8,
+                          right: 8,
+                          child: InkWell(
+                            onTap: () => setState(() => _resolutionImage = null),
+                            child: Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: const BoxDecoration(
+                                color: Colors.black54,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.close, color: Colors.white, size: 18),
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  else
+                    InkWell(
+                      onTap: _isPickingImage ? null : _showImageSourceModal,
+                      borderRadius: BorderRadius.circular(14),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: AppColors.background,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: AppColors.border,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            if (_isPickingImage)
+                              const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                              )
+                            else ...[
+                              const Icon(Icons.add_a_photo_outlined, size: 20, color: AppColors.primary),
+                              const SizedBox(width: 8),
+                              const Text(
+                                'Add Proof Photo',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ),
 
                   const SizedBox(height: 20),
 

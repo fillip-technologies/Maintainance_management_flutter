@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:path/path.dart' as p;
 import '../../../core/network/api_client.dart';
 import '../../../core/utils/app_logger.dart';
 import '../models/issue_model.dart';
@@ -123,21 +125,47 @@ class IssueRepository {
   }
 
   /// Creates a new maintenance issue ticket.
+  /// Optionally accepts [attachments] files that will be uploaded to Cloudinary.
   Future<IssueModel> createIssue({
     required String deviceId,
     required String categoryId,
     required IssuePriority priority,
     required String description,
+    List<File>? attachments,
   }) async {
     try {
-      final payload = {
-        'deviceId': deviceId,
-        'categoryId': categoryId,
-        'priority': priority.value,
-        'description': description.trim(),
-      };
+      dynamic payload;
+      if (attachments != null && attachments.isNotEmpty) {
+        final multipartFiles = <MultipartFile>[];
+        for (final file in attachments) {
+          if (await file.exists()) {
+            final fileName = p.basename(file.path);
+            multipartFiles.add(
+              await MultipartFile.fromFile(
+                file.path,
+                filename: fileName,
+              ),
+            );
+          }
+        }
 
-      AppLogger.d('📡 [IssueRepository] POST /issues with: $payload');
+        payload = FormData.fromMap({
+          'deviceId': deviceId,
+          'categoryId': categoryId,
+          'priority': priority.value,
+          'description': description.trim(),
+          if (multipartFiles.isNotEmpty) 'attachments': multipartFiles,
+        });
+        AppLogger.d('📡 [IssueRepository] POST /issues as multipart form-data with ${multipartFiles.length} file(s)');
+      } else {
+        payload = {
+          'deviceId': deviceId,
+          'categoryId': categoryId,
+          'priority': priority.value,
+          'description': description.trim(),
+        };
+        AppLogger.d('📡 [IssueRepository] POST /issues as JSON: $payload');
+      }
 
       final response = await apiClient.dio.post(
         '/issues',
@@ -310,18 +338,42 @@ class IssueRepository {
   }
 
   /// Updates the status of an issue (e.g. assigned -> in_progress -> on_hold -> resolved -> closed).
+  /// Optionally accepts [attachments] files (e.g. repair proof) that will be uploaded to Cloudinary.
   Future<IssueModel> updateIssueStatus({
     required String issueId,
     required IssueStatus toStatus,
     String? notes,
+    List<File>? attachments,
   }) async {
     try {
-      final payload = {
-        'status': toStatus.value,
-        if (notes != null && notes.trim().isNotEmpty) 'notes': notes.trim(),
-      };
+      dynamic payload;
+      if (attachments != null && attachments.isNotEmpty) {
+        final multipartFiles = <MultipartFile>[];
+        for (final file in attachments) {
+          if (await file.exists()) {
+            final fileName = p.basename(file.path);
+            multipartFiles.add(
+              await MultipartFile.fromFile(
+                file.path,
+                filename: fileName,
+              ),
+            );
+          }
+        }
 
-      AppLogger.d('📡 [IssueRepository] PATCH /issues/$issueId/status with: $payload');
+        payload = FormData.fromMap({
+          'status': toStatus.value,
+          if (notes != null && notes.trim().isNotEmpty) 'notes': notes.trim(),
+          if (multipartFiles.isNotEmpty) 'attachments': multipartFiles,
+        });
+        AppLogger.d('📡 [IssueRepository] PATCH /issues/$issueId/status as multipart with ${multipartFiles.length} file(s)');
+      } else {
+        payload = {
+          'status': toStatus.value,
+          if (notes != null && notes.trim().isNotEmpty) 'notes': notes.trim(),
+        };
+        AppLogger.d('📡 [IssueRepository] PATCH /issues/$issueId/status with: $payload');
+      }
 
       final response = await apiClient.dio.patch(
         '/issues/$issueId/status',

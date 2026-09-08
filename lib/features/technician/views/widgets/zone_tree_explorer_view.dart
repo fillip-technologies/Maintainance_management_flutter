@@ -251,6 +251,7 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                                           issueId: issueId,
                                           toStatus: status,
                                           notes: comment,
+                                          attachments: photo != null ? [photo] : null,
                                         );
                                         viewModel.refresh();
                                       } catch (e) {
@@ -313,6 +314,7 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                                           issueId: issueId,
                                           toStatus: status,
                                           notes: comment,
+                                          attachments: photo != null ? [photo] : null,
                                         );
                                         viewModel.refresh();
                                       } catch (e) {

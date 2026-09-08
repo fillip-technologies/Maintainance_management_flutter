@@ -179,15 +179,30 @@ class IssueCard extends StatelessWidget {
                               : AppColors.primaryBg),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: Icon(
-                      HardwareIconHelper.getIcon(
-                        issue.categoryName.isNotEmpty ? issue.categoryName : issue.deviceName,
-                      ),
-                      size: 20,
-                      color: isResolved
-                          ? AppColors.success
-                          : (isRaisedOrCritical ? AppColors.error : AppColors.primary),
-                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: (issue.primaryImageUrl != null && issue.primaryImageUrl!.isNotEmpty)
+                        ? Image.network(
+                            issue.primaryImageUrl!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, _, _) => Icon(
+                              HardwareIconHelper.getIcon(
+                                issue.categoryName.isNotEmpty ? issue.categoryName : issue.deviceName,
+                              ),
+                              size: 20,
+                              color: isResolved
+                                  ? AppColors.success
+                                  : (isRaisedOrCritical ? AppColors.error : AppColors.primary),
+                            ),
+                          )
+                        : Icon(
+                            HardwareIconHelper.getIcon(
+                              issue.categoryName.isNotEmpty ? issue.categoryName : issue.deviceName,
+                            ),
+                            size: 20,
+                            color: isResolved
+                                ? AppColors.success
+                                : (isRaisedOrCritical ? AppColors.error : AppColors.primary),
+                          ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(

@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../issues/issues.dart';
 
@@ -10,12 +11,14 @@ class TechnicianActionViewModel {
     required String issueId,
     required IssueStatus toStatus,
     String? notes,
+    List<File>? attachments,
   }) async {
     final issueRepo = _ref.read(issueRepositoryProvider);
     await issueRepo.updateIssueStatus(
       issueId: issueId,
       toStatus: toStatus,
       notes: notes,
+      attachments: attachments,
     );
 
     _ref.invalidate(technicianIssuesProvider);

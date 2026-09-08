@@ -289,6 +289,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get defectPhotoAdded => 'दोष की फोटो जोड़ी गई';
 
   @override
+  String get evidencePhotos => 'साक्ष्य एवं संलग्नक';
+
+  @override
   String get submitDefectTicket => 'समस्या टिकट दर्ज करें';
 
   @override

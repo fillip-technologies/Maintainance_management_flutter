@@ -1,7 +1,7 @@
-// import 'dart:io';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-// import 'package:image_picker/image_picker.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../devices/devices.dart';
 import '../../../core/theme/colors.dart';
 import '../../../core/utils/app_snackbar.dart';
@@ -55,13 +55,10 @@ class _RaiseIssueSheetState extends ConsumerState<RaiseIssueSheet> {
 
   IssuePriority _selectedPriority = IssuePriority.medium;
   final _descriptionController = TextEditingController();
-  // =========================================================================
-  // CAMERA PROOF CAPTURE (COMMENTED OUT FOR NOW - WILL BE ENABLED IN FUTURE)
-  // =========================================================================
-  // File? _attachedImage;
-  // final ImagePicker _picker = ImagePicker();
-  // bool _isPickingImage = false;
-  // =========================================================================
+
+  File? _attachedImage;
+  final ImagePicker _picker = ImagePicker();
+  bool _isPickingImage = false;
   String? _errorMessage;
 
   @override
@@ -123,58 +120,56 @@ class _RaiseIssueSheetState extends ConsumerState<RaiseIssueSheet> {
     }
   }
 
-  // =========================================================================
-  // CAMERA PROOF CAPTURE HELPERS (COMMENTED OUT FOR NOW)
-  // =========================================================================
-  // Future<void> _pickImage(ImageSource source) async {
-  //   try {
-  //     setState(() => _isPickingImage = true);
-  //     final picked = await _picker.pickImage(
-  //       source: source,
-  //       imageQuality: 70,
-  //       maxWidth: 1024,
-  //     );
-  //     if (picked != null) {
-  //       setState(() => _attachedImage = File(picked.path));
-  //     }
-  //   } catch (e) {
-  //     AppSnackbar.error('Failed to capture photo: $e');
-  //   } finally {
-  //     if (mounted) setState(() => _isPickingImage = false);
-  //   }
-  // }
-  //
-  // void _showImageSourceModal() {
-  //   showModalBottomSheet(
-  //     context: context,
-  //     shape: const RoundedRectangleBorder(
-  //       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-  //     ),
-  //     builder: (ctx) => SafeArea(
-  //       child: Wrap(
-  //         children: [
-  //           ListTile(
-  //             leading: const Icon(Icons.camera_alt, color: AppColors.primary),
-  //             title: const Text('Take Defect Photo'),
-  //             onTap: () {
-  //               Navigator.pop(ctx);
-  //               _pickImage(ImageSource.camera);
-  //             },
-  //           ),
-  //           ListTile(
-  //             leading: const Icon(Icons.photo_library, color: AppColors.primary),
-  //             title: const Text('Choose from Gallery'),
-  //             onTap: () {
-  //               Navigator.pop(ctx);
-  //               _pickImage(ImageSource.gallery);
-  //             },
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
-  // =========================================================================
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      setState(() => _isPickingImage = true);
+      final picked = await _picker.pickImage(
+        source: source,
+        imageQuality: 75,
+        maxWidth: 1600,
+        maxHeight: 1600,
+      );
+      if (picked != null) {
+        setState(() => _attachedImage = File(picked.path));
+      }
+    } catch (e) {
+      AppSnackbar.error('Failed to capture photo: $e');
+    } finally {
+      if (mounted) setState(() => _isPickingImage = false);
+    }
+  }
+
+  void _showImageSourceModal() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt, color: AppColors.primary),
+              title: const Text('Take Defect Photo'),
+              onTap: () {
+                Navigator.pop(ctx);
+                _pickImage(ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library, color: AppColors.primary),
+              title: const Text('Choose from Gallery'),
+              onTap: () {
+                Navigator.pop(ctx);
+                _pickImage(ImageSource.gallery);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   Future<void> _handleSubmit() async {
     final l10n = AppLocalizations.of(context);
@@ -204,6 +199,7 @@ class _RaiseIssueSheetState extends ConsumerState<RaiseIssueSheet> {
             categoryId: _selectedCategory!.id,
             priority: _selectedPriority,
             description: desc,
+            attachments: _attachedImage != null ? [_attachedImage!] : null,
           );
 
       if (newIssue != null) {
@@ -562,6 +558,85 @@ class _RaiseIssueSheetState extends ConsumerState<RaiseIssueSheet> {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 14),
+
+                  // 5. Evidence Photo (Optional)
+                  const Text(
+                    'Photo Proof (Optional)',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  if (_attachedImage != null)
+                    Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(14),
+                          child: Image.file(
+                            _attachedImage!,
+                            height: 140,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        Positioned(
+                          top: 8,
+                          right: 8,
+                          child: InkWell(
+                            onTap: () => setState(() => _attachedImage = null),
+                            child: Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: const BoxDecoration(
+                                color: Colors.black54,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.close, color: Colors.white, size: 18),
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  else
+                    InkWell(
+                      onTap: _isPickingImage ? null : _showImageSourceModal,
+                      borderRadius: BorderRadius.circular(14),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: AppColors.background,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: AppColors.border,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            if (_isPickingImage)
+                              const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                              )
+                            else ...[
+                              const Icon(Icons.add_a_photo_outlined, size: 20, color: AppColors.primary),
+                              const SizedBox(width: 8),
+                              const Text(
+                                'Add Photo Evidence',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ),
 
                   const SizedBox(height: 22),
 

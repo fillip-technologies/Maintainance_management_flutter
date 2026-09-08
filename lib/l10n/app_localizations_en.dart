@@ -289,6 +289,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get defectPhotoAdded => 'Defect Photo Added';
 
   @override
+  String get evidencePhotos => 'Evidence & Attachments';
+
+  @override
   String get submitDefectTicket => 'Submit & Raise Maintenance Ticket';
 
   @override

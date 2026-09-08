@@ -80,6 +80,54 @@ class IssueCategoryModel {
   int get hashCode => id.hashCode;
 }
 
+class IssueAttachmentModel {
+  final String url;
+  final String publicId;
+  final String type; // 'image' | 'video'
+  final String filename;
+  final DateTime? uploadedAt;
+
+  const IssueAttachmentModel({
+    required this.url,
+    this.publicId = '',
+    this.type = 'image',
+    this.filename = '',
+    this.uploadedAt,
+  });
+
+  factory IssueAttachmentModel.fromJson(Map<String, dynamic> json) {
+    final uploadDateStr = (json['uploadedAt'] ?? json['uploaded_at']) as String?;
+    return IssueAttachmentModel(
+      url: (json['url'] as String?) ?? '',
+      publicId: (json['publicId'] ?? json['public_id']) as String? ?? '',
+      type: (json['type'] as String?) ?? 'image',
+      filename: (json['filename'] as String?) ?? 'attachment',
+      uploadedAt: uploadDateStr != null ? DateTime.tryParse(uploadDateStr) : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'url': url,
+      'publicId': publicId,
+      'type': type,
+      'filename': filename,
+      'uploadedAt': uploadedAt?.toIso8601String(),
+    };
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is IssueAttachmentModel &&
+          runtimeType == other.runtimeType &&
+          url == other.url &&
+          publicId == other.publicId;
+
+  @override
+  int get hashCode => Object.hash(url, publicId);
+}
+
 class IssueStatusHistoryModel {
   final String id;
   final String issueId;
@@ -154,6 +202,7 @@ class IssueModel {
   final String createdByUserId;
   final String createdByUserName;
   final String? imagePath;
+  final List<IssueAttachmentModel> attachments;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DeviceStatus? deviceStatus;
@@ -181,6 +230,7 @@ class IssueModel {
     required this.createdByUserId,
     required this.createdByUserName,
     this.imagePath,
+    this.attachments = const [],
     required this.createdAt,
     required this.updatedAt,
     this.resolvedAt,
@@ -205,6 +255,15 @@ class IssueModel {
 
     final catName = (json['categoryName'] ?? json['category_name'] ?? categoryObj?['name']) as String? ?? 'General Fault';
     final devName = (json['deviceName'] ?? json['device_name'] ?? deviceObj?['name']) as String? ?? 'Unknown Device';
+    final rawAttachments = (json['attachments']) as List<dynamic>?;
+    final parsedAttachments = rawAttachments
+            ?.whereType<Map>()
+            .map((e) => IssueAttachmentModel.fromJson(Map<String, dynamic>.from(e)))
+            .toList() ??
+        const <IssueAttachmentModel>[];
+
+    final rawImagePath = (json['imagePath'] ?? json['image_path']) as String?;
+    final firstAttachmentUrl = parsedAttachments.isNotEmpty ? parsedAttachments.first.url : null;
     final defaultTitle = (json['title'] as String?) ?? '$devName - $catName';
 
     return IssueModel(
@@ -225,7 +284,8 @@ class IssueModel {
       assignedTechnicianName: (json['assignedTechnicianName'] ?? json['assigned_technician_name'] ?? techUserObj?['name']) as String?,
       createdByUserId: (json['raisedByUserId'] ?? json['raised_by_user_id'] ?? json['createdByUserId'] ?? raisedByObj?['id']) as String? ?? '',
       createdByUserName: (json['raisedByUserName'] ?? json['raised_by_user_name'] ?? json['createdByUserName'] ?? raisedByObj?['name']) as String? ?? 'Staff',
-      imagePath: (json['imagePath'] ?? json['image_path']) as String?,
+      imagePath: rawImagePath ?? firstAttachmentUrl,
+      attachments: parsedAttachments,
       createdAt: createdDateStr != null ? (DateTime.tryParse(createdDateStr) ?? DateTime.now()) : DateTime.now(),
       updatedAt: updatedDateStr != null ? (DateTime.tryParse(updatedDateStr) ?? DateTime.now()) : DateTime.now(),
       resolvedAt: resolvedDateStr != null ? DateTime.tryParse(resolvedDateStr) : null,
@@ -257,6 +317,7 @@ class IssueModel {
       'raised_by_user_id': createdByUserId,
       'raised_by_user_name': createdByUserName,
       'image_path': imagePath,
+      'attachments': attachments.map((a) => a.toJson()).toList(),
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
       'resolved_at': resolvedAt?.toIso8601String(),
@@ -271,6 +332,8 @@ class IssueModel {
     String? description,
     String? deviceId,
     String? deviceName,
+    DeviceStatus? deviceStatus,
+    String? deviceCode,
     String? zoneId,
     String? zoneName,
     String? categoryId,
@@ -282,6 +345,7 @@ class IssueModel {
     String? createdByUserId,
     String? createdByUserName,
     String? imagePath,
+    List<IssueAttachmentModel>? attachments,
     DateTime? createdAt,
     DateTime? updatedAt,
     DateTime? resolvedAt,
@@ -294,6 +358,8 @@ class IssueModel {
       description: description ?? this.description,
       deviceId: deviceId ?? this.deviceId,
       deviceName: deviceName ?? this.deviceName,
+      deviceStatus: deviceStatus ?? this.deviceStatus,
+      deviceCode: deviceCode ?? this.deviceCode,
       zoneId: zoneId ?? this.zoneId,
       zoneName: zoneName ?? this.zoneName,
       categoryId: categoryId ?? this.categoryId,
@@ -306,12 +372,24 @@ class IssueModel {
       createdByUserId: createdByUserId ?? this.createdByUserId,
       createdByUserName: createdByUserName ?? this.createdByUserName,
       imagePath: imagePath ?? this.imagePath,
+      attachments: attachments ?? this.attachments,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       resolvedAt: resolvedAt ?? this.resolvedAt,
       closedAt: closedAt ?? this.closedAt,
       history: history ?? this.history,
     );
+  }
+
+  /// Returns only image/photo attachments.
+  List<IssueAttachmentModel> get photoAttachments =>
+      attachments.where((a) => a.type == 'image' || a.url.isNotEmpty).toList();
+
+  /// Primary image url for thumbnails and headers (falls back to legacy imagePath).
+  String? get primaryImageUrl {
+    if (photoAttachments.isNotEmpty) return photoAttachments.first.url;
+    if (imagePath != null && imagePath!.isNotEmpty) return imagePath;
+    return null;
   }
 
   String get raisedByName => createdByUserName;

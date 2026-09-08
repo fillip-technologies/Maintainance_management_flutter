@@ -101,6 +101,7 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage> {
             issueId: issueId,
             toStatus: newStatus,
             notes: comment,
+            attachments: resolutionPhoto != null ? [resolutionPhoto] : null,
           );
 
           final ticketIdStr = issueId.length > 8

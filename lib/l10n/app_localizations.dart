@@ -644,6 +644,12 @@ abstract class AppLocalizations {
   /// **'Defect Photo Added'**
   String get defectPhotoAdded;
 
+  /// No description provided for @evidencePhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Evidence & Attachments'**
+  String get evidencePhotos;
+
   /// No description provided for @submitDefectTicket.
   ///
   /// In en, this message translates to:

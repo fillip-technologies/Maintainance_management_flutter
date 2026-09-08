@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../devices/devices.dart';
 import '../../../core/utils/app_logger.dart';
@@ -41,6 +42,7 @@ class IssueActionController extends Notifier<IssueActionState> {
     required String categoryId,
     required IssuePriority priority,
     required String description,
+    List<File>? attachments,
   }) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
@@ -50,6 +52,7 @@ class IssueActionController extends Notifier<IssueActionState> {
         categoryId: categoryId,
         priority: priority,
         description: description,
+        attachments: attachments,
       );
 
       // Invalidate issue queues so UI reflects the new defect immediately
@@ -140,10 +143,12 @@ class IssueActionController extends Notifier<IssueActionState> {
   }
 
   /// Transitions issue status (e.g., open -> in_progress -> on_hold -> resolved -> closed).
+  /// Optionally accepts [attachments] files (e.g. proof of fix) that will be uploaded to Cloudinary.
   Future<IssueModel?> updateStatus({
     required String issueId,
     required IssueStatus toStatus,
     String? notes,
+    List<File>? attachments,
   }) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
@@ -152,6 +157,7 @@ class IssueActionController extends Notifier<IssueActionState> {
         issueId: issueId,
         toStatus: toStatus,
         notes: notes,
+        attachments: attachments,
       );
 
       // Invalidate queues, single detail, device inventory, and history timeline

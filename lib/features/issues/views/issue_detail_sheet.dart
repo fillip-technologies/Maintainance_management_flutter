@@ -224,6 +224,11 @@ class IssueDetailSheet extends ConsumerWidget {
                     ),
                   ],
 
+                  const SizedBox(height: 16),
+
+                  // Evidence & Attachments Gallery
+                  _buildAttachmentsGallery(context, currentIssue, l10n),
+
                   const SizedBox(height: 20),
 
                   // Chronological Status History & Timeline Section
@@ -283,12 +288,13 @@ class IssueDetailSheet extends ConsumerWidget {
                         UpdateStatusSheet.show(
                           sheetContext,
                           issue: currentIssue,
-                          onStatusUpdated: (newStatus, comment, _) async {
+                          onStatusUpdated: (newStatus, comment, resolutionPhoto) async {
                             try {
                               await actionController.updateStatus(
                                 issueId: issueId,
                                 toStatus: newStatus,
                                 notes: comment,
+                                attachments: resolutionPhoto != null ? [resolutionPhoto] : null,
                               );
                               AppSnackbar.success(
                                 'Ticket moved to ${newStatus.label}',
@@ -345,6 +351,7 @@ class IssueDetailSheet extends ConsumerWidget {
                                   issueId: issueId,
                                   toStatus: IssueStatus.resolved,
                                   notes: fullComment,
+                                  attachments: proofPhoto != null ? [proofPhoto] : null,
                                 );
                                 AppSnackbar.success(
                                   l10n.replacementSuccess,
@@ -427,6 +434,217 @@ class IssueDetailSheet extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildAttachmentsGallery(
+    BuildContext context,
+    IssueModel issue,
+    AppLocalizations l10n,
+  ) {
+    final photoList = issue.photoAttachments;
+    final items = photoList.isNotEmpty
+        ? photoList
+        : (issue.imagePath != null && issue.imagePath!.isNotEmpty)
+            ? [
+                IssueAttachmentModel(
+                  url: issue.imagePath!,
+                  filename: 'Evidence Photo',
+                )
+              ]
+            : <IssueAttachmentModel>[];
+
+    if (items.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(
+              Icons.photo_library_outlined,
+              size: 16,
+              color: AppColors.primary,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              l10n.evidencePhotos,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                '${items.length}',
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        SizedBox(
+          height: 100,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: items.length,
+            separatorBuilder: (_, _) => const SizedBox(width: 10),
+            itemBuilder: (context, index) {
+              final item = items[index];
+              return _buildThumbnailCard(context, item);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildThumbnailCard(BuildContext context, IssueAttachmentModel item) {
+    return GestureDetector(
+      onTap: () => _showFullScreenImage(context, item.url, item.filename),
+      child: Container(
+        width: 100,
+        height: 100,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.border),
+          color: AppColors.cardAlt,
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.network(
+              item.url,
+              fit: BoxFit.cover,
+              loadingBuilder: (context, child, progress) {
+                if (progress == null) return child;
+                return const Center(
+                  child: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                );
+              },
+              errorBuilder: (_, _, _) => const Center(
+                child: Icon(
+                  Icons.broken_image_outlined,
+                  size: 28,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ),
+            Positioned(
+              right: 4,
+              bottom: 4,
+              child: Container(
+                padding: const EdgeInsets.all(3),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.6),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.zoom_in,
+                  size: 14,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showFullScreenImage(
+    BuildContext context,
+    String imageUrl,
+    String title,
+  ) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black87,
+      builder: (ctx) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.all(12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Align(
+                alignment: Alignment.topRight,
+                child: IconButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  icon: const Icon(Icons.close, color: Colors.white, size: 28),
+                ),
+              ),
+              Flexible(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: InteractiveViewer(
+                    maxScale: 4.0,
+                    minScale: 0.8,
+                    child: Image.network(
+                      imageUrl,
+                      fit: BoxFit.contain,
+                      loadingBuilder: (context, child, progress) {
+                        if (progress == null) return child;
+                        return const Center(
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                          ),
+                        );
+                      },
+                      errorBuilder: (_, _, _) => Container(
+                        padding: const EdgeInsets.all(24),
+                        color: AppColors.card,
+                        child: const Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.broken_image, size: 48, color: Colors.grey),
+                            SizedBox(height: 8),
+                            Text(
+                              'Failed to load image',
+                              style: TextStyle(color: Colors.white70),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              if (title.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 12,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ],
+          ),
+        );
+      },
     );
   }
 }

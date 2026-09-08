@@ -697,5 +697,84 @@ void main() {
       expect(en.selectTickets(3), 'Select Tickets (3/50)');
       expect(hi.selectTickets(3), 'टिकट चुनें (3/50)');
     });
+
+    test('21. IssueModel parses Cloudinary attachments array and getters correctly', () {
+      final json = {
+        'id': 'issue-cloud-123',
+        'deviceId': 'dev-1',
+        'categoryId': 'cat-1',
+        'title': 'Broken lens',
+        'description': 'Camera lens cracked',
+        'status': 'open',
+        'priority': 'high',
+        'attachments': [
+          {
+            'url': 'https://res.cloudinary.com/demo/image/upload/v12345/evidence1.jpg',
+            'publicId': 'evidence1',
+            'type': 'image',
+            'filename': 'photo_2026_09_08.jpg',
+            'uploadedAt': '2026-09-08T12:00:00.000Z',
+          },
+          {
+            'url': 'https://res.cloudinary.com/demo/raw/upload/v12345/log.txt',
+            'publicId': 'log_txt',
+            'type': 'raw',
+            'filename': 'syslog.txt',
+          }
+        ],
+      };
+
+      final issue = IssueModel.fromJson(json);
+
+      expect(issue.attachments.length, 2);
+      expect(issue.attachments[0].url, 'https://res.cloudinary.com/demo/image/upload/v12345/evidence1.jpg');
+      expect(issue.attachments[0].publicId, 'evidence1');
+      expect(issue.attachments[0].type, 'image');
+      expect(issue.attachments[0].filename, 'photo_2026_09_08.jpg');
+      expect(issue.attachments[0].uploadedAt, isNotNull);
+
+      // photoAttachments filters for images
+      expect(issue.photoAttachments.length, 2); // both have url or image
+      expect(issue.primaryImageUrl, 'https://res.cloudinary.com/demo/image/upload/v12345/evidence1.jpg');
+
+      // Round-trip toJson
+      final exportedJson = issue.toJson();
+      expect(exportedJson['attachments'], isA<List>());
+      expect((exportedJson['attachments'] as List).length, 2);
+    });
+
+    test('22. DeviceModel parses Cloudinary imageUrl correctly', () {
+      final json = {
+        'id': 'dev-cloud-456',
+        'name': 'Dome Camera 4',
+        'zoneId': 'zone-1',
+        'imageUrl': 'https://res.cloudinary.com/demo/image/upload/v999/cctv_dome.jpg',
+      };
+
+      final device = DeviceModel.fromJson(json);
+      expect(device.imageUrl, 'https://res.cloudinary.com/demo/image/upload/v999/cctv_dome.jpg');
+
+      // snake_case support
+      final snakeJson = {
+        'id': 'dev-cloud-789',
+        'name': 'PTZ Unit',
+        'zone_id': 'zone-1',
+        'image_url': 'https://res.cloudinary.com/demo/image/upload/v999/ptz.jpg',
+      };
+      final snakeDevice = DeviceModel.fromJson(snakeJson);
+      expect(snakeDevice.imageUrl, 'https://res.cloudinary.com/demo/image/upload/v999/ptz.jpg');
+
+      // Round-trip
+      final exported = device.toJson();
+      expect(exported['image_url'], 'https://res.cloudinary.com/demo/image/upload/v999/cctv_dome.jpg');
+    });
+
+    test('23. Evidence & Attachments localization keys parity between EN and HI', () {
+      final en = lookupAppLocalizations(const Locale('en'));
+      final hi = lookupAppLocalizations(const Locale('hi'));
+
+      expect(en.evidencePhotos, 'Evidence & Attachments');
+      expect(hi.evidencePhotos, 'साक्ष्य एवं संलग्नक');
+    });
   });
 }
