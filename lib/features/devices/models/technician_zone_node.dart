@@ -27,6 +27,7 @@ class TechnicianZoneNode {
   final int depth;
   final String status;
   final String? clientName;
+  final String? imageUrl;
 
   // Inventory & operational counts
   final int deviceCount;
@@ -58,6 +59,7 @@ class TechnicianZoneNode {
     this.depth = 0,
     this.status = 'active',
     this.clientName,
+    this.imageUrl,
     this.deviceCount = 0,
     this.subzoneCount = 0,
     this.workingCount = 0,
@@ -105,6 +107,7 @@ class TechnicianZoneNode {
     int? depth,
     String? status,
     String? clientName,
+    String? imageUrl,
     int? deviceCount,
     int? subzoneCount,
     int? workingCount,
@@ -126,6 +129,7 @@ class TechnicianZoneNode {
       depth: depth ?? this.depth,
       status: status ?? this.status,
       clientName: clientName ?? this.clientName,
+      imageUrl: imageUrl ?? this.imageUrl,
       deviceCount: deviceCount ?? this.deviceCount,
       subzoneCount: subzoneCount ?? this.subzoneCount,
       workingCount: workingCount ?? this.workingCount,
@@ -181,6 +185,7 @@ class TechnicianZoneNode {
       depth: (json['depth'] as num?)?.toInt() ?? 0,
       status: (json['status'] as String?) ?? 'active',
       clientName: (json['clientName'] as String?) ?? (clientObj?['name'] as String?),
+      imageUrl: (json['imageUrl'] ?? json['image_url'] ?? json['logoUrl'] ?? json['logo_url']) as String?,
       deviceCount: deviceCount,
       subzoneCount: subzoneCount,
       workingCount: (json['workingCount'] ?? json['working'] as num?)?.toInt() ?? 0,

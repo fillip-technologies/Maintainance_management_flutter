@@ -21,6 +21,7 @@ class ZoneModel {
   final String? parentZoneId;
   final String name;
   final ZoneStatus status;
+  final String? imageUrl;
   final int depth;
   final int deviceCount;
   final int openIssuesCount;
@@ -32,6 +33,7 @@ class ZoneModel {
     this.parentZoneId,
     required this.name,
     this.status = ZoneStatus.active,
+    this.imageUrl,
     this.depth = 0,
     this.deviceCount = 0,
     this.openIssuesCount = 0,
@@ -45,6 +47,7 @@ class ZoneModel {
       parentZoneId: (json['parentZoneId'] ?? json['parent_zone_id']) as String?,
       name: (json['name'] as String?) ?? 'Unknown Zone',
       status: ZoneStatus.fromString(json['status'] as String?),
+      imageUrl: (json['imageUrl'] ?? json['image_url'] ?? json['logoUrl'] ?? json['logo_url']) as String?,
       depth: (json['depth'] as num?)?.toInt() ?? 0,
       deviceCount: (json['device_count'] ?? json['deviceCount'] as num?)?.toInt() ?? 0,
       openIssuesCount: (json['open_issues_count'] ?? json['openIssuesCount'] as num?)?.toInt() ?? 0,
@@ -62,6 +65,7 @@ class ZoneModel {
       'parent_zone_id': parentZoneId,
       'name': name,
       'status': status.value,
+      'image_url': imageUrl,
       'depth': depth,
       'device_count': deviceCount,
       'open_issues_count': openIssuesCount,
@@ -75,6 +79,7 @@ class ZoneModel {
     String? parentZoneId,
     String? name,
     ZoneStatus? status,
+    String? imageUrl,
     int? depth,
     int? deviceCount,
     int? openIssuesCount,
@@ -86,6 +91,7 @@ class ZoneModel {
       parentZoneId: parentZoneId ?? this.parentZoneId,
       name: name ?? this.name,
       status: status ?? this.status,
+      imageUrl: imageUrl ?? this.imageUrl,
       depth: depth ?? this.depth,
       deviceCount: deviceCount ?? this.deviceCount,
       openIssuesCount: openIssuesCount ?? this.openIssuesCount,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:equipment_management_system/core/theme/colors.dart';
 import 'package:equipment_management_system/features/devices/devices.dart';
 import 'package:equipment_management_system/features/issues/issues.dart';
 import 'package:equipment_management_system/features/technician/models/technician_queue_state.dart';
@@ -422,12 +423,12 @@ void main() {
       expect(displayedDevices.map((d) => d.id).toList(), ['d1', 'd2']);
     });
 
-    testWidgets('SubzoneGridCard badge shows units needing a fix (total - working)', (tester) async {
+    testWidgets('SubzoneGridCard shows yellow border on partial issue (some devices defective)', (tester) async {
       const zone = TechnicianZoneNode(
         id: 'z-nested',
         name: 'Surgical Wing',
         deviceCount: 10,
-        workingCount: 8, // 2 units need a fix
+        workingCount: 8, // 2 units need a fix (partial issue -> YELLOW border)
         subzoneCount: 3,
       );
 
@@ -436,12 +437,38 @@ void main() {
       );
 
       expect(find.text('Surgical Wing'), findsOneWidget);
-      expect(find.text('2'), findsOneWidget); // red badge = units needing fix
+      expect(find.text('2'), findsOneWidget); // badge = units needing fix
       expect(find.text('3'), findsOneWidget); // nested sub-zone count
-      expect(find.text('2 not resolved'), findsNothing);
+
+      final inkWell = tester.widget<InkWell>(find.byType(InkWell).first);
+      final container = inkWell.child as Container;
+      final decoration = container.decoration as BoxDecoration;
+      expect((decoration.border as Border).top.color, AppColors.warning);
     });
 
-    testWidgets('SubzoneGridCard shows OK when every unit is working', (tester) async {
+    testWidgets('SubzoneGridCard shows red border only when ALL devices in zone are under issue', (tester) async {
+      const zone = TechnicianZoneNode(
+        id: 'z-critical',
+        name: 'ICU Ward',
+        deviceCount: 4,
+        workingCount: 0, // All 4 units broken -> RED border
+        subzoneCount: 0,
+      );
+
+      await tester.pumpWidget(
+        _localized(SubzoneGridCard(zone: zone, onTap: () {})),
+      );
+
+      expect(find.text('ICU Ward'), findsOneWidget);
+      expect(find.text('4'), findsNWidgets(2)); // badge = 4 broken & inventory = 4 total
+
+      final inkWell = tester.widget<InkWell>(find.byType(InkWell).first);
+      final container = inkWell.child as Container;
+      final decoration = container.decoration as BoxDecoration;
+      expect((decoration.border as Border).top.color, AppColors.error);
+    });
+
+    testWidgets('SubzoneGridCard shows green border and OK badge when every unit is working', (tester) async {
       const zone = TechnicianZoneNode(
         id: 'z-clean',
         name: 'Radiology Area',
@@ -457,6 +484,11 @@ void main() {
       expect(find.text('Radiology Area'), findsOneWidget);
       expect(find.text('OK'), findsOneWidget);
       expect(find.text('1'), findsOneWidget); // nested sub-zone count
+
+      final inkWell = tester.widget<InkWell>(find.byType(InkWell).first);
+      final container = inkWell.child as Container;
+      final decoration = container.decoration as BoxDecoration;
+      expect((decoration.border as Border).top.color, AppColors.success);
     });
 
     test('Spatial Explorer excludes resolved issues from active defects list', () {

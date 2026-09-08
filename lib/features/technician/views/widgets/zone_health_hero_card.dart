@@ -211,16 +211,28 @@ class ZoneHealthHeroCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
+                width: 42,
+                height: 42,
                 decoration: BoxDecoration(
                   color: statusColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: Icon(
-                  Icons.location_on_rounded,
-                  size: 22,
-                  color: statusColor,
-                ),
+                clipBehavior: Clip.antiAlias,
+                child: (zone.imageUrl != null && zone.imageUrl!.isNotEmpty)
+                    ? Image.network(
+                        zone.imageUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => Icon(
+                          Icons.location_on_rounded,
+                          size: 22,
+                          color: statusColor,
+                        ),
+                      )
+                    : Icon(
+                        Icons.location_on_rounded,
+                        size: 22,
+                        color: statusColor,
+                      ),
               ),
               const SizedBox(width: 12),
               Expanded(

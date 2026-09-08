@@ -776,5 +776,47 @@ void main() {
       expect(en.evidencePhotos, 'Evidence & Attachments');
       expect(hi.evidencePhotos, 'साक्ष्य एवं संलग्नक');
     });
+
+    test('24. TechnicianZoneNode parses Cloudinary logoUrl / imageUrl from backend JSON', () {
+      final json = {
+        'id': 'a40fe182-c44c-4119-afc6-8eb8521d1fec',
+        'name': 'TIGER ZONE',
+        'status': 'active',
+        'logoUrl': 'https://res.cloudinary.com/dxf54lmgf/image/upload/v1788870015/fixly/zones/tbiki3uqmkk9wv6add0r.jpg',
+        'deviceCount': 5,
+        'workingCount': 3,
+      };
+
+      final node = TechnicianZoneNode.fromJson(json);
+      expect(node.id, 'a40fe182-c44c-4119-afc6-8eb8521d1fec');
+      expect(node.name, 'TIGER ZONE');
+      expect(node.imageUrl, 'https://res.cloudinary.com/dxf54lmgf/image/upload/v1788870015/fixly/zones/tbiki3uqmkk9wv6add0r.jpg');
+
+      // snake_case logo_url test
+      final snakeJson = {
+        'id': 'e63880f0-858d-430f-86ae-431e25919fc1',
+        'name': 'LION ZONE',
+        'logo_url': 'https://res.cloudinary.com/dxf54lmgf/image/upload/v1788870037/fixly/zones/gg9mryuquxofyudvrfln.jpg',
+      };
+      final snakeNode = TechnicianZoneNode.fromJson(snakeJson);
+      expect(snakeNode.imageUrl, 'https://res.cloudinary.com/dxf54lmgf/image/upload/v1788870037/fixly/zones/gg9mryuquxofyudvrfln.jpg');
+    });
+
+    test('25. ZoneModel parses Cloudinary logoUrl / imageUrl and serializes correctly', () {
+      final json = {
+        'id': '7328d5e5-1641-4f22-904c-d8559b8c367b',
+        'client_id': 'client-99',
+        'name': 'MONKEY ZONE',
+        'status': 'active',
+        'logoUrl': 'https://res.cloudinary.com/dxf54lmgf/image/upload/v1788870271/fixly/zones/md2gmq0cti2oqmkxours.jpg',
+      };
+
+      final zone = ZoneModel.fromJson(json);
+      expect(zone.id, '7328d5e5-1641-4f22-904c-d8559b8c367b');
+      expect(zone.imageUrl, 'https://res.cloudinary.com/dxf54lmgf/image/upload/v1788870271/fixly/zones/md2gmq0cti2oqmkxours.jpg');
+
+      final exported = zone.toJson();
+      expect(exported['image_url'], 'https://res.cloudinary.com/dxf54lmgf/image/upload/v1788870271/fixly/zones/md2gmq0cti2oqmkxours.jpg');
+    });
   });
 }

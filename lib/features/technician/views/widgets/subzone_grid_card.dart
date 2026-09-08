@@ -37,15 +37,39 @@ class SubzoneGridCard extends StatelessWidget {
     }
 
     final gradientColors = _gradients[index % _gradients.length];
-    // How many units in this zone need a fix (not active) — a unit count, not a
-    // ticket count. Matches the hero's "NEEDS FIX" tile.
-    final needsFix = (zone.deviceCount - zone.workingCount).clamp(0, zone.deviceCount);
-    final hasIssues = needsFix > 0;
+    final totalDevices = zone.deviceCount;
+    final needsFix = (totalDevices - zone.workingCount).clamp(0, totalDevices);
+    final hasIssues = needsFix > 0 || zone.hasIssues;
 
-    // High visual contrast: Bold Red if units need fixing, Clean Green if all clear
-    final cardBg = hasIssues ? const Color(0xFFFEF2F2) : const Color(0xFFF0FDF4);
-    final borderColor = hasIssues ? AppColors.error : AppColors.success;
-    final badgeColor = hasIssues ? AppColors.error : AppColors.success;
+    // 1. RED: ALL units in this zone are under issue (100% outage)
+    final isAllUnderIssue = totalDevices > 0 && (needsFix >= totalDevices || zone.workingCount == 0);
+
+    // 2. YELLOW: Partial issues (at least 1 device broken, but NOT all)
+    final isPartialIssue = hasIssues && !isAllUnderIssue;
+
+    // High visual contrast:
+    // - Red border & tint if ALL devices under issue
+    // - Yellow border & warm amber tint if SOME devices under issue
+    // - Green border & clean tint if all nominal
+    final cardBg = isAllUnderIssue
+        ? const Color(0xFFFEF2F2)
+        : (isPartialIssue ? const Color(0xFFFFFBEB) : const Color(0xFFF0FDF4));
+
+    final borderColor = isAllUnderIssue
+        ? AppColors.error
+        : (isPartialIssue ? AppColors.warning : AppColors.success);
+
+    final badgeColor = isAllUnderIssue
+        ? AppColors.error
+        : (isPartialIssue ? const Color(0xFFD97706) : AppColors.success);
+
+    final iconGradient = isAllUnderIssue
+        ? const [Color(0xFFEF4444), Color(0xFFDC2626)]
+        : (isPartialIssue
+            ? const [Color(0xFFF59E0B), Color(0xFFD97706)]
+            : gradientColors);
+
+    final hasZoneImage = zone.imageUrl != null && zone.imageUrl!.isNotEmpty;
 
     return InkWell(
       onTap: onTap,
@@ -71,7 +95,7 @@ class SubzoneGridCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Top: Gradient Icon + Defect / Health Badge
+            // Top: Zone Image / Gradient Icon + Defect / Health Badge
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -79,27 +103,49 @@ class SubzoneGridCard extends StatelessWidget {
                   width: 42,
                   height: 42,
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: hasIssues
-                          ? [const Color(0xFFEF4444), const Color(0xFFDC2626)]
-                          : gradientColors,
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
+                    color: hasZoneImage ? borderColor.withValues(alpha: 0.1) : null,
+                    gradient: hasZoneImage
+                        ? null
+                        : LinearGradient(
+                            colors: iconGradient,
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
                     borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: borderColor.withValues(alpha: 0.3)),
                     boxShadow: [
                       BoxShadow(
-                        color: (hasIssues ? AppColors.error : gradientColors[0]).withValues(alpha: 0.3),
+                        color: borderColor.withValues(alpha: 0.25),
                         blurRadius: 6,
                         offset: const Offset(0, 2),
                       ),
                     ],
                   ),
-                  child: Icon(
-                    hasIssues ? Icons.warning_amber_rounded : Icons.location_on_rounded,
-                    color: Colors.white,
-                    size: 22,
-                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: hasZoneImage
+                      ? Image.network(
+                          zone.imageUrl!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, _, _) => Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: iconGradient,
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                            ),
+                            child: Icon(
+                              hasIssues ? Icons.warning_amber_rounded : Icons.location_on_rounded,
+                              color: Colors.white,
+                              size: 22,
+                            ),
+                          ),
+                        )
+                      : Icon(
+                          hasIssues ? Icons.warning_amber_rounded : Icons.location_on_rounded,
+                          color: Colors.white,
+                          size: 22,
+                        ),
                 ),
 
                 // Bold visual status badge for non-literate recognition
@@ -119,7 +165,9 @@ class SubzoneGridCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        hasIssues ? '$needsFix' : l10n.techBadgeOk,
+                        needsFix > 0
+                            ? '$needsFix'
+                            : (hasIssues ? '${zone.openIssuesCount}' : l10n.techBadgeOk),
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w900,
