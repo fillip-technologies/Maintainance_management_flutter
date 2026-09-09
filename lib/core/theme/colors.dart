@@ -17,6 +17,8 @@ class AppLightColors {
   static const Color card = Color(0xFFFFFFFF);
   static const Color cardAlt = Color(0xFFF8FAFC);
   static const Color cardShadow = Color(0x0A000000);
+  static const Color sidebar = Color(0xFFF8FAFC);
+  static const Color header = Color(0xFFFFFFFF);
 
   // Text
   static const Color textPrimary = Color(0xFF1A1D29);
@@ -27,6 +29,7 @@ class AppLightColors {
   // Border
   static const Color border = Color(0xFFE5E7EB);
   static const Color borderLight = Color(0xFFF3F4F6);
+  static const Color borderHover = Color(0xFFCBD5E1);
 
   // Icons
   static const Color icon = Color(0xFF6B7280);
@@ -145,6 +148,8 @@ class AppColors {
   static Color get card => isDark ? AppDarkColors.card : AppLightColors.card;
   static Color get cardAlt => isDark ? AppDarkColors.cardAlt : AppLightColors.cardAlt;
   static Color get cardShadow => isDark ? AppDarkColors.cardShadow : AppLightColors.cardShadow;
+  static Color get sidebar => isDark ? AppDarkColors.sidebar : AppLightColors.sidebar;
+  static Color get header => isDark ? AppDarkColors.header : AppLightColors.header;
 
   // Text
   static Color get textPrimary => isDark ? AppDarkColors.textPrimary : AppLightColors.textPrimary;
@@ -155,6 +160,7 @@ class AppColors {
   // Border
   static Color get border => isDark ? AppDarkColors.border : AppLightColors.border;
   static Color get borderLight => isDark ? AppDarkColors.borderLight : AppLightColors.borderLight;
+  static Color get borderHover => isDark ? AppDarkColors.borderHover : AppLightColors.borderHover;
 
   // Icons
   static Color get icon => isDark ? AppDarkColors.icon : AppLightColors.icon;

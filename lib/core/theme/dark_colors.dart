@@ -9,24 +9,27 @@ class AppDarkColors {
   static const Color primary = Color(0xFF3B82F6);
   static const Color primaryDark = Color(0xFF2563EB);
   static const Color primaryLight = Color(0xFF60A5FA);
-  static const Color primaryBg = Color(0xFF1E293B);
+  static const Color primaryBg = Color(0xFF0D1E3A); // Deep navy-blue tint
 
-  // Background & Surfaces
-  static const Color background = Color(0xFF0F172A); // Slate 900
-  static const Color surface = Color(0xFF1E293B); // Slate 800
-  static const Color card = Color(0xFF1E293B); // Slate 800
-  static const Color cardAlt = Color(0xFF334155); // Slate 700
-  static const Color cardShadow = Color(0x33000000);
+  // Background & Surfaces (Matching Web index.css Master Theme)
+  static const Color background = Color(0xFF070E1E); // --bg-main: #070e1e
+  static const Color surface = Color(0xFF0C172C); // --bg-card: #0c172c
+  static const Color card = Color(0xFF0C172C); // --bg-card: #0c172c
+  static const Color cardAlt = Color(0xFF0F1D38); // --bg-card-hover: #0f1d38
+  static const Color cardShadow = Color(0x40000000);
+  static const Color sidebar = Color(0xFF060B18); // --bg-sidebar: #060b18
+  static const Color header = Color(0xFF070E1E); // --bg-header: #070e1e
 
-  // Text
-  static const Color textPrimary = Color(0xFFF8FAFC); // Slate 50
-  static const Color textSecondary = Color(0xFF94A3B8); // Slate 400
+  // Text (Matching Web index.css Master Theme)
+  static const Color textPrimary = Color(0xFFFFFFFF); // --text-main: #ffffff
+  static const Color textSecondary = Color(0xFF94A3B8); // --text-muted: #94a3b8
   static const Color textMuted = Color(0xFF64748B); // Slate 500
   static const Color textWhite = Color(0xFFFFFFFF);
 
-  // Border
-  static const Color border = Color(0xFF334155); // Slate 700
-  static const Color borderLight = Color(0xFF1E293B);
+  // Border (Matching Web index.css Master Theme)
+  static const Color border = Color(0xFF162544); // --border-color: #162544
+  static const Color borderLight = Color(0xFF101B33);
+  static const Color borderHover = Color(0xFF1E3A66); // --border-hover: #1e3a66
 
   // Icons
   static const Color icon = Color(0xFF94A3B8);
@@ -38,34 +41,34 @@ class AppDarkColors {
   static const Color successText = Color(0xFF4ADE80);
 
   static const Color error = Color(0xFFEF4444);
-  static const Color errorLight = Color(0xFF7F1D1D);
+  static const Color errorLight = Color(0xFF450A0A);
   static const Color errorText = Color(0xFFF87171);
 
   static const Color warning = Color(0xFFF59E0B);
-  static const Color warningLight = Color(0xFF78350F);
+  static const Color warningLight = Color(0xFF451A03);
   static const Color warningText = Color(0xFFFBBF24);
 
   static const Color info = Color(0xFF3B82F6);
-  static const Color infoLight = Color(0xFF1E3A8A);
+  static const Color infoLight = Color(0xFF0C244A);
   static const Color infoText = Color(0xFF60A5FA);
 
   static const Color purple = Color(0xFFA855F7);
-  static const Color purpleLight = Color(0xFF581C87);
+  static const Color purpleLight = Color(0xFF3B0764);
   static const Color purpleText = Color(0xFFC084FC);
 
   static const Color orange = Color(0xFFF97316);
-  static const Color orangeLight = Color(0xFF7C2D12);
+  static const Color orangeLight = Color(0xFF431407);
   static const Color orangeText = Color(0xFFFB923C);
 
   static const Color neutral = Color(0xFF94A3B8);
-  static const Color neutralLight = Color(0xFF334155);
+  static const Color neutralLight = Color(0xFF0F1D38);
   static const Color neutralText = Color(0xFFCBD5E1);
 
   // Social & Brand
   static const Color google = Color(0xFFEA4335);
 
   // Divider
-  static const Color divider = Color(0xFF334155);
+  static const Color divider = Color(0xFF162544); // --border-color: #162544
 
   // Transparent / Shading
   static const Color transparent = Colors.transparent;
@@ -79,14 +82,14 @@ class AppDarkColors {
   static const Color grey = Color(0xFF64748B);
 
   // Status Card Backgrounds (Soft dark tints)
-  static const Color statusSuccessBg = Color(0xFF064E3B);
-  static const Color statusErrorBg = Color(0xFF450A0A);
-  static const Color statusWarningBg = Color(0xFF451A03);
-  static const Color statusPurpleBg = Color(0xFF3B0764);
+  static const Color statusSuccessBg = Color(0xFF063B2B);
+  static const Color statusErrorBg = Color(0xFF330C12);
+  static const Color statusWarningBg = Color(0xFF2E1906);
+  static const Color statusPurpleBg = Color(0xFF260C38);
 
   // Status Tag Backgrounds
-  static const Color statusSuccessTagBg = Color(0xFF065F46);
-  static const Color statusErrorTagBg = Color(0xFF7F1D1D);
+  static const Color statusSuccessTagBg = Color(0xFF084C37);
+  static const Color statusErrorTagBg = Color(0xFF4C131A);
 
   // Specific Status Variants
   static const Color statusWarningTextDark = Color(0xFFFBBF24);
@@ -99,19 +102,19 @@ class AppDarkColors {
   static const Color brown = Color(0xFF8D6E63);
 
   // Component Specific
-  static const Color trackBackground = Color(0xFF334155);
-  static const Color snackbarBg = Color(0xF00F172A);
+  static const Color trackBackground = Color(0xFF0F1D38);
+  static const Color snackbarBg = Color(0xF20C172C);
   static const Color sunAccent = Color(0xFFFACC15);
   static const Color overlayScrim = Color(0xF0000000);
   static const Color overlayScrimLight = Color(0xAA000000);
 
   // Gradients
   static const List<List<Color>> subzoneGradients = [
-    [Color(0xFF3730A3), Color(0xFF0284C7)],
-    [Color(0xFF5B21B6), Color(0xFF7C3AED)],
-    [Color(0xFF065F46), Color(0xFF0D9488)],
-    [Color(0xFF9F1239), Color(0xFFBE123C)],
-    [Color(0xFF92400E), Color(0xFFB45309)],
+    [Color(0xFF1E3A8A), Color(0xFF0284C7)],
+    [Color(0xFF4C1D95), Color(0xFF7C3AED)],
+    [Color(0xFF064E3B), Color(0xFF0D9488)],
+    [Color(0xFF881337), Color(0xFFBE123C)],
+    [Color(0xFF78350F), Color(0xFFB45309)],
     [Color(0xFF0369A1), Color(0xFF0284C7)],
   ];
 

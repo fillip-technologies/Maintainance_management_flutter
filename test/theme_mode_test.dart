@@ -76,10 +76,10 @@ void main() {
     test('AppTheme.light and AppTheme.dark have correct brightness and colors', () {
       expect(AppTheme.light.brightness, Brightness.light);
       expect(AppTheme.dark.brightness, Brightness.dark);
-      expect(AppDarkColors.background, const Color(0xFF0F172A));
-      expect(AppDarkColors.surface, const Color(0xFF1E293B));
-      expect(AppDarkColors.card, const Color(0xFF1E293B));
-      expect(AppDarkColors.textPrimary, const Color(0xFFF8FAFC));
+      expect(AppDarkColors.background, const Color(0xFF070E1E));
+      expect(AppDarkColors.surface, const Color(0xFF0C172C));
+      expect(AppDarkColors.card, const Color(0xFF0C172C));
+      expect(AppDarkColors.textPrimary, const Color(0xFFFFFFFF));
     });
   });
 

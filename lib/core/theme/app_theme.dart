@@ -29,6 +29,8 @@ class AppTheme {
         backgroundColor: AppDarkColors.surface,
         foregroundColor: AppDarkColors.textPrimary,
         elevation: 0,
+        scrolledUnderElevation: 0.0,
+        surfaceTintColor: Colors.transparent,
         centerTitle: true,
       ),
 
@@ -119,8 +121,25 @@ class AppTheme {
       cardTheme: CardThemeData(
         color: AppDarkColors.card,
         elevation: 0,
+        surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: AppDarkColors.border),
+        ),
+      ),
+
+      // BottomSheet
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: AppDarkColors.surface,
+        surfaceTintColor: Colors.transparent,
+      ),
+
+      // Dialog
+      dialogTheme: DialogThemeData(
+        backgroundColor: AppDarkColors.surface,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
           side: const BorderSide(color: AppDarkColors.border),
         ),
       ),
