@@ -957,8 +957,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String staffFilterOpen(int count) {
+    return 'Open ($count)';
+  }
+
+  @override
   String staffFilterNeedsCheck(int count) {
-    return 'Fixed ($count)';
+    return 'Open ($count)';
   }
 
   @override
@@ -1008,7 +1013,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get staffTicketsLoadFailed => 'Couldn\'t load tickets';
 
   @override
-  String get staffNoTicketsToCheck => 'No recently fixed tickets';
+  String get staffNoOpenTickets => 'No open tickets';
+
+  @override
+  String get staffNoTicketsToCheck => 'No open tickets';
 
   @override
   String get staffNoTicketsInProgress => 'No tickets being worked on';

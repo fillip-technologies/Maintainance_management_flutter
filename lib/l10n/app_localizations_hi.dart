@@ -953,8 +953,13 @@ class AppLocalizationsHi extends AppLocalizations {
   }
 
   @override
+  String staffFilterOpen(int count) {
+    return 'खुले ($count)';
+  }
+
+  @override
   String staffFilterNeedsCheck(int count) {
-    return 'ठीक हुए ($count)';
+    return 'खुले ($count)';
   }
 
   @override
@@ -1004,7 +1009,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get staffTicketsLoadFailed => 'टिकट लोड नहीं हुए';
 
   @override
-  String get staffNoTicketsToCheck => 'अभी कोई हाल में ठीक हुआ टिकट नहीं';
+  String get staffNoOpenTickets => 'कोई खुली टिकट नहीं';
+
+  @override
+  String get staffNoTicketsToCheck => 'कोई खुली टिकट नहीं';
 
   @override
   String get staffNoTicketsInProgress => 'किसी टिकट पर काम नहीं चल रहा';

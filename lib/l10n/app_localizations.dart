@@ -1808,10 +1808,16 @@ abstract class AppLocalizations {
   /// **'Done ({count})'**
   String staffFilterDone(int count);
 
+  /// No description provided for @staffFilterOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open ({count})'**
+  String staffFilterOpen(int count);
+
   /// No description provided for @staffFilterNeedsCheck.
   ///
   /// In en, this message translates to:
-  /// **'Fixed ({count})'**
+  /// **'Open ({count})'**
   String staffFilterNeedsCheck(int count);
 
   /// No description provided for @staffFilterInProgress.
@@ -1892,10 +1898,16 @@ abstract class AppLocalizations {
   /// **'Couldn\'t load tickets'**
   String get staffTicketsLoadFailed;
 
+  /// No description provided for @staffNoOpenTickets.
+  ///
+  /// In en, this message translates to:
+  /// **'No open tickets'**
+  String get staffNoOpenTickets;
+
   /// No description provided for @staffNoTicketsToCheck.
   ///
   /// In en, this message translates to:
-  /// **'No recently fixed tickets'**
+  /// **'No open tickets'**
   String get staffNoTicketsToCheck;
 
   /// No description provided for @staffNoTicketsInProgress.

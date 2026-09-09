@@ -29,21 +29,32 @@ class StaffIssuesTrackerTab extends StatefulWidget {
 }
 
 class _StaffIssuesTrackerTabState extends State<StaffIssuesTrackerTab> {
-  int _filterIndex = 0; // 0: Fixed (resolved), 1: In Progress, 2: Done (closed)
+  int _filterIndex = 0; // 0: Open, 1: In Progress, 2: Done
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final allIssues = widget.issues;
 
-    final fixed = allIssues.where((i) => i.status == IssueStatus.resolved).toList();
-    final inProgress = allIssues
-        .where((i) => i.status != IssueStatus.resolved && i.status != IssueStatus.closed)
+    final open = allIssues
+        .where((i) =>
+            i.status == IssueStatus.open ||
+            i.status == IssueStatus.assigned ||
+            i.status == IssueStatus.reopened)
         .toList();
-    final done = allIssues.where((i) => i.status == IssueStatus.closed).toList();
+    final inProgress = allIssues
+        .where((i) =>
+            i.status == IssueStatus.inProgress ||
+            i.status == IssueStatus.onHold)
+        .toList();
+    final done = allIssues
+        .where((i) =>
+            i.status == IssueStatus.resolved ||
+            i.status == IssueStatus.closed)
+        .toList();
 
     final displayedIssues = switch (_filterIndex) {
-      0 => fixed,
+      0 => open,
       1 => inProgress,
       _ => done,
     };
@@ -61,10 +72,10 @@ class _StaffIssuesTrackerTabState extends State<StaffIssuesTrackerTab> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 AppFilterChip(
-                  label: l10n?.staffFilterNeedsCheck(fixed.length) ?? 'Fixed (${fixed.length})',
+                  label: l10n?.staffFilterOpen(open.length) ?? 'Open (${open.length})',
                   isSelected: _filterIndex == 0,
-                  activeColor: AppColors.success,
-                  badgeColor: fixed.isNotEmpty ? AppColors.successText : null,
+                  activeColor: AppColors.primary,
+                  badgeColor: open.isNotEmpty ? AppColors.primaryLight : null,
                   onTap: () => setState(() => _filterIndex = 0),
                 ),
                 const SizedBox(width: 8),
@@ -80,6 +91,8 @@ class _StaffIssuesTrackerTabState extends State<StaffIssuesTrackerTab> {
                 AppFilterChip(
                   label: l10n?.staffFilterDoneTickets(done.length) ?? 'Done (${done.length})',
                   isSelected: _filterIndex == 2,
+                  activeColor: AppColors.success,
+                  badgeColor: done.isNotEmpty ? AppColors.successText : null,
                   onTap: () => setState(() => _filterIndex = 2),
                 ),
               ],
@@ -118,17 +131,20 @@ class _StaffIssuesTrackerTabState extends State<StaffIssuesTrackerTab> {
                 }
                 if (displayedIssues.isEmpty) {
                   final (icon, title) = switch (_filterIndex) {
-                    0 => (Icons.task_alt_rounded, l10n?.staffNoTicketsToCheck ?? 'No recently fixed tickets'),
+                    0 => (Icons.inbox_outlined, l10n?.staffNoOpenTickets ?? 'No open tickets'),
                     1 => (Icons.engineering_outlined, l10n?.staffNoTicketsInProgress ?? 'No tickets being worked on'),
-                    _ => (Icons.history_toggle_off_rounded, l10n?.staffNoDoneTickets ?? 'No finished tickets yet'),
+                    _ => (Icons.task_alt_rounded, l10n?.staffNoDoneTickets ?? 'No finished tickets yet'),
                   };
                   return Padding(
                     padding: const EdgeInsets.only(top: 40),
                     child: EmptyStateView(
                       icon: icon,
-                      iconColor: _filterIndex == 0 ? AppColors.successText : AppColors.icon,
-                      iconBackgroundColor:
-                          _filterIndex == 0 ? AppColors.successLight : AppColors.cardAlt,
+                      iconColor: _filterIndex == 2
+                          ? AppColors.successText
+                          : (_filterIndex == 0 ? AppColors.primary : AppColors.icon),
+                      iconBackgroundColor: _filterIndex == 2
+                          ? AppColors.successLight
+                          : (_filterIndex == 0 ? AppColors.primaryBg : AppColors.cardAlt),
                       title: title,
                       subtitle: l10n?.staffPullToRefresh ?? 'Pull down to refresh',
                     ),
