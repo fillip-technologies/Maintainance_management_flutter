@@ -2137,6 +2137,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Dark Mode'**
   String get themeDark;
+
+  /// No description provided for @statusOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'Online'**
+  String get statusOnline;
+
+  /// No description provided for @statusOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get statusOffline;
+
+  /// No description provided for @statusMaintenance.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintenance'**
+  String get statusMaintenance;
+
+  /// No description provided for @statusActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get statusActive;
+
+  /// No description provided for @statusDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Down'**
+  String get statusDown;
+
+  /// No description provided for @categoryDevices.
+  ///
+  /// In en, this message translates to:
+  /// **'Equipment in Category'**
+  String get categoryDevices;
+
+  /// No description provided for @noEquipmentInCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'No equipment found in this category'**
+  String get noEquipmentInCategory;
+
+  /// No description provided for @searchWithinCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by serial number or location...'**
+  String get searchWithinCategory;
 }
 
 class _AppLocalizationsDelegate

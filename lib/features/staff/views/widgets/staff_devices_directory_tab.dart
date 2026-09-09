@@ -6,6 +6,8 @@ import '../../../../core/widgets/empty_state_view.dart';
 import '../../../../core/widgets/status_badge.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../devices/devices.dart';
+import 'category_devices_sheet.dart';
+import 'equipment_category_card.dart';
 
 class StaffDevicesDirectoryTab extends StatefulWidget {
   final List<DeviceModel> devices;
@@ -30,9 +32,8 @@ class StaffDevicesDirectoryTab extends StatefulWidget {
 class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  DeviceStatus? _filterStatus = DeviceStatus.active;
+  DeviceStatus? _filterStatus;
   bool _isGroupedView = true;
-  final Set<String> _expandedGroups = {};
 
   @override
   void dispose() {
@@ -44,18 +45,7 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
     setState(() {
       _searchController.clear();
       _searchQuery = '';
-      _filterStatus = DeviceStatus.active;
-      _expandedGroups.clear();
-    });
-  }
-
-  void _toggleGroup(String groupName) {
-    setState(() {
-      if (_expandedGroups.contains(groupName)) {
-        _expandedGroups.remove(groupName);
-      } else {
-        _expandedGroups.add(groupName);
-      }
+      _filterStatus = null;
     });
   }
 
@@ -85,8 +75,7 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
     }
 
     final groups = DeviceGroup.fromDevices(list);
-    final hasActiveFilter = _searchQuery.isNotEmpty || _filterStatus != DeviceStatus.active;
-    final isSearching = _searchQuery.trim().isNotEmpty;
+    final hasActiveFilter = _searchQuery.isNotEmpty || _filterStatus != null;
 
     return Column(
       children: [
@@ -130,7 +119,7 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
                   Tooltip(
                     message: _isGroupedView
                         ? (l10n?.viewFlat ?? 'List View')
-                        : (l10n?.viewGrouped ?? 'Grouped View'),
+                        : (l10n?.tabCatalogue ?? 'Catalog Grid'),
                     child: InkWell(
                       onTap: () => setState(() => _isGroupedView = !_isGroupedView),
                       borderRadius: BorderRadius.circular(12),
@@ -148,14 +137,14 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
-                              _isGroupedView ? Icons.category_outlined : Icons.list_alt_rounded,
+                              _isGroupedView ? Icons.grid_view_rounded : Icons.list_alt_rounded,
                               size: 18,
                               color: _isGroupedView ? AppColors.primary : AppColors.textSecondary,
                             ),
                             const SizedBox(width: 4),
                             Text(
                               _isGroupedView
-                                  ? (l10n?.viewGrouped ?? 'Grouped')
+                                  ? (l10n?.tabCatalogue ?? 'Catalog')
                                   : (l10n?.viewFlat ?? 'List'),
                               style: TextStyle(
                                 fontSize: 12,
@@ -225,27 +214,11 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
                       groups.length == 1
                           ? (l10n?.singleCategory ?? '1 Category')
                           : (l10n?.categoriesCount(groups.length) ?? '${groups.length} Categories'),
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.textSecondary),
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
                     ),
-                    InkWell(
-                      onTap: () {
-                        setState(() {
-                          if (_expandedGroups.length == groups.length) {
-                            _expandedGroups.clear();
-                          } else {
-                            _expandedGroups.addAll(groups.map((g) => g.hardwareTypeName));
-                          }
-                        });
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                        child: Text(
-                          _expandedGroups.length == groups.length
-                              ? (l10n?.collapseAll ?? 'Collapse All')
-                              : (l10n?.expandAll ?? 'Expand All'),
-                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary),
-                        ),
-                      ),
+                    Text(
+                      l10n?.unitsCount(list.length) ?? '${list.length} Units',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.textSecondary),
                     ),
                   ],
                 ),
@@ -258,348 +231,168 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
           child: RefreshIndicator(
             color: AppColors.primary,
             onRefresh: widget.onRefresh,
-            child: ListView.builder(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 84),
-              itemCount: (widget.isLoading || widget.hasError || list.isEmpty)
-                  ? 1
-                  : (_isGroupedView ? groups.length : list.length),
-              itemBuilder: (context, index) {
-                if (widget.isLoading) {
-                  return Padding(
-                    padding: EdgeInsets.only(top: 80),
-                    child: Center(
-                      child: CircularProgressIndicator(color: AppColors.primary),
-                    ),
-                  );
-                }
-                if (widget.hasError) {
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 40),
-                    child: ErrorStateView(
-                      title: l10n?.staffDirectoryLoadFailed ?? "Couldn't load the hardware list",
-                      subtitle: l10n?.staffCheckConnectionRetry ??
-                          'Check your connection and tap to retry',
-                      onRetry: widget.onRefresh,
-                    ),
-                  );
-                }
-                if (list.isEmpty) {
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 40),
-                    child: EmptyStateView(
-                      icon: hasActiveFilter ? Icons.search_off_rounded : Icons.devices_other_rounded,
-                      title: l10n?.staffNoMatchingHardware ?? 'No matching hardware',
-                      subtitle: hasActiveFilter
-                          ? (l10n?.staffTryAdjustingFilter ?? 'Try a different search or filter')
-                          : (l10n?.staffNoHardwareRegistered ?? 'No equipment registered here yet'),
-                      actionLabel: hasActiveFilter ? (l10n?.staffClearFilters ?? 'Clear Filters') : null,
-                      actionIcon: Icons.filter_alt_off_rounded,
-                      onAction: hasActiveFilter ? _clearFilters : null,
-                    ),
-                  );
-                }
-
-                // 1. Grouped View Accordion Card
-                if (_isGroupedView) {
-                  final group = groups[index];
-                  final isExpanded = isSearching || _expandedGroups.contains(group.hardwareTypeName);
-
-                  return Container(
-                    key: ValueKey('group_${group.hardwareTypeName}'),
-                    margin: const EdgeInsets.only(bottom: 12),
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: isExpanded ? AppColors.primary.withValues(alpha: 0.3) : AppColors.border,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.cardShadow,
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // Group Accordion Header
-                        Material(
-                          color: AppColors.transparent,
-                          child: InkWell(
-                            onTap: () => _toggleGroup(group.hardwareTypeName),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                              child: Row(
-                                children: [
-                                  Builder(
-                                    builder: (context) {
-                                      final groupImage = group.devices
-                                          .where((d) => d.imageUrl != null && d.imageUrl!.isNotEmpty)
-                                          .firstOrNull
-                                          ?.imageUrl;
-                                      return Container(
-                                        width: 38,
-                                        height: 38,
-                                        decoration: BoxDecoration(
-                                          color: AppColors.primaryBg,
-                                          borderRadius: BorderRadius.circular(10),
-                                        ),
-                                        clipBehavior: Clip.antiAlias,
-                                        child: (groupImage != null && groupImage.isNotEmpty)
-                                            ? Image.network(
-                                                groupImage,
-                                                fit: BoxFit.cover,
-                                                errorBuilder: (_, _, _) => Center(
-                                                  child: Icon(
-                                                    HardwareIconHelper.getIcon(group.hardwareTypeName),
-                                                    color: AppColors.primary,
-                                                    size: 20,
-                                                  ),
-                                                ),
-                                              )
-                                            : Center(
-                                                child: Icon(
-                                                  HardwareIconHelper.getIcon(group.hardwareTypeName),
-                                                  color: AppColors.primary,
-                                                  size: 20,
-                                                ),
-                                              ),
-                                      );
-                                    },
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Expanded(
-                                              child: Text(
-                                                group.hardwareTypeName,
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 14,
-                                                  color: AppColors.textPrimary,
-                                                ),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 8),
-                                            Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                              decoration: BoxDecoration(
-                                                color: AppColors.background,
-                                                borderRadius: BorderRadius.circular(8),
-                                                border: Border.all(color: AppColors.border),
-                                              ),
-                                              child: Text(
-                                                group.totalCount == 1
-                                                    ? (l10n?.singleUnitCount ?? '1 Unit')
-                                                    : (l10n?.unitsCount(group.totalCount) ?? '${group.totalCount} Units'),
-                                                style: TextStyle(
-                                                  fontSize: 11,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: AppColors.textSecondary,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 6),
-                                        // Status mini badges
-                                        Wrap(
-                                          spacing: 6,
-                                          runSpacing: 4,
-                                          children: [
-                                            if (group.activeCount > 0)
-                                              _buildMiniBadge(
-                                                label: '${group.activeCount} ${l10n?.deviceStatusActive ?? "Active"}',
-                                                bg: AppColors.successLight,
-                                                textCol: AppColors.successText,
-                                              ),
-                                            if (group.faultyCount > 0)
-                                              _buildMiniBadge(
-                                                label: '${group.faultyCount} ${l10n?.deviceStatusFaulty ?? "Faulty"}',
-                                                bg: AppColors.errorLight,
-                                                textCol: AppColors.errorText,
-                                              ),
-                                            if (group.maintenanceCount > 0)
-                                              _buildMiniBadge(
-                                                label: '${group.maintenanceCount} ${l10n?.deviceStatusMaintenance ?? "Maint"}',
-                                                bg: AppColors.warningLight,
-                                                textCol: AppColors.warningText,
-                                              ),
-                                            if (group.inStockCount > 0)
-                                              _buildMiniBadge(
-                                                label: '${group.inStockCount} ${l10n?.deviceStatusProvisioned ?? "In Stock"}',
-                                                bg: AppColors.infoLight,
-                                                textCol: AppColors.infoText,
-                                              ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Icon(
-                                    isExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
-                                    color: AppColors.icon,
-                                    size: 22,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        // Expanded Unit List inside Group
-                        if (isExpanded) ...[
-                          Divider(height: 1, color: AppColors.divider),
-                          ListView.separated(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            padding: const EdgeInsets.symmetric(vertical: 4),
-                            itemCount: group.devices.length,
-                            separatorBuilder: (_, _) => Divider(height: 1, color: AppColors.divider, indent: 48),
-                            itemBuilder: (context, devIdx) {
-                              final device = group.devices[devIdx];
-                              return Material(
-                                color: AppColors.transparent,
-                                child: ListTile(
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
-                                  dense: true,
-                                  leading: (device.imageUrl != null && device.imageUrl!.isNotEmpty)
-                                      ? Container(
-                                          width: 24,
-                                          height: 24,
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(6),
-                                          ),
-                                          clipBehavior: Clip.antiAlias,
-                                          child: Image.network(
-                                            device.imageUrl!,
-                                            fit: BoxFit.cover,
-                                            errorBuilder: (_, _, _) => Icon(
-                                              Icons.subdirectory_arrow_right_rounded,
-                                              size: 18,
-                                              color: AppColors.icon,
-                                            ),
-                                          ),
-                                        )
-                                      : Icon(Icons.subdirectory_arrow_right_rounded, size: 18, color: AppColors.icon),
-                                  title: Text(
-                                    device.name,
-                                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: AppColors.textPrimary),
-                                  ),
-                                  subtitle: Text(
-                                    '${device.zoneName} • ${device.serialNumber.isNotEmpty ? device.serialNumber : device.location}',
-                                    style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                                  ),
-                                  trailing: StatusBadge.device(device.status),
-                                  onTap: () {
-                                    if (device.status == DeviceStatus.retired) {
-                                      AppSnackbar.warning(l10n?.errRetiredUnitSelected ?? 'Cannot raise defects on retired equipment');
-                                      return;
-                                    }
-                                    widget.onOpenRaiseIssue(device);
-                                  },
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ],
-                    ),
-                  );
-                }
-
-                // 2. Flat List View
-                final device = list[index];
-                return Container(
-                  key: ValueKey(device.id),
-                  margin: const EdgeInsets.only(bottom: 12),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.border),
-                  ),
-                  child: Material(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(16),
-                    clipBehavior: Clip.antiAlias,
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      leading: Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryBg,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        clipBehavior: Clip.antiAlias,
-                        child: (device.imageUrl != null && device.imageUrl!.isNotEmpty)
-                            ? Image.network(
-                                device.imageUrl!,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, _, _) => Center(
-                                  child: Icon(
-                                    HardwareIconHelper.getIcon(device.hardwareTypeName),
-                                    color: AppColors.primary,
-                                    size: 20,
-                                  ),
-                                ),
-                              )
-                            : Center(
-                                child: Icon(
-                                  HardwareIconHelper.getIcon(device.hardwareTypeName),
-                                  color: AppColors.primary,
-                                  size: 20,
-                                ),
-                              ),
-                      ),
-                      title: Text(
-                        device.name,
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textPrimary),
-                      ),
-                      subtitle: Text(
-                        '${device.hardwareTypeName} • ${device.zoneName} • ${device.location.isNotEmpty ? device.location : "Active"}',
-                        style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                      ),
-                      trailing: StatusBadge.device(device.status),
-                      onTap: () {
-                        if (device.status == DeviceStatus.retired) {
-                          AppSnackbar.warning(l10n?.errRetiredUnitSelected ?? 'Cannot raise defects on retired equipment');
-                          return;
-                        }
-                        widget.onOpenRaiseIssue(device);
-                      },
-                    ),
-                  ),
-                );
-              },
-            ),
+            child: _buildBody(context, list, groups, l10n, hasActiveFilter),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildMiniBadge({required String label, required Color bg, required Color textCol}) {
+  Widget _buildBody(
+    BuildContext context,
+    List<DeviceModel> list,
+    List<DeviceGroup> groups,
+    AppLocalizations? l10n,
+    bool hasActiveFilter,
+  ) {
+    if (widget.isLoading) {
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 80),
+            child: Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            ),
+          ),
+        ],
+      );
+    }
+    if (widget.hasError) {
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 40),
+            child: ErrorStateView(
+              title: l10n?.staffDirectoryLoadFailed ?? "Couldn't load the hardware list",
+              subtitle: l10n?.staffCheckConnectionRetry ??
+                  'Check your connection and tap to retry',
+              onRetry: widget.onRefresh,
+            ),
+          ),
+        ],
+      );
+    }
+    if (list.isEmpty) {
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 40),
+            child: EmptyStateView(
+              icon: hasActiveFilter ? Icons.search_off_rounded : Icons.devices_other_rounded,
+              title: l10n?.staffNoMatchingHardware ?? 'No matching hardware',
+              subtitle: hasActiveFilter
+                  ? (l10n?.staffTryAdjustingFilter ?? 'Try a different search or filter')
+                  : (l10n?.staffNoHardwareRegistered ?? 'No equipment registered here yet'),
+              actionLabel: hasActiveFilter ? (l10n?.staffClearFilters ?? 'Clear Filters') : null,
+              actionIcon: Icons.filter_alt_off_rounded,
+              onAction: hasActiveFilter ? _clearFilters : null,
+            ),
+          ),
+        ],
+      );
+    }
+
+    if (_isGroupedView) {
+      final screenWidth = MediaQuery.of(context).size.width;
+      final crossAxisCount = screenWidth > 900 ? 4 : (screenWidth > 600 ? 3 : 2);
+
+      return GridView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.only(left: 14, right: 14, top: 14, bottom: 84),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: crossAxisCount,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          mainAxisExtent: 148,
+        ),
+        itemCount: groups.length,
+        itemBuilder: (context, index) {
+          final group = groups[index];
+          return EquipmentCategoryCard(
+            key: ValueKey('cat_card_${group.hardwareTypeName}'),
+            group: group,
+            onTap: () {
+              CategoryDevicesSheet.show(
+                context,
+                group: group,
+                onOpenRaiseIssue: widget.onOpenRaiseIssue,
+              );
+            },
+          );
+        },
+      );
+    }
+
+    // Flat List View
+    return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 84),
+      itemCount: list.length,
+      itemBuilder: (context, index) {
+        final device = list[index];
+        return _buildFlatDeviceCard(device, l10n);
+      },
+    );
+  }
+
+  Widget _buildFlatDeviceCard(DeviceModel device, AppLocalizations? l10n) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      key: ValueKey(device.id),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(6),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.cardShadow,
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      child: Text(
-        label,
-        style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: textCol),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        clipBehavior: Clip.antiAlias,
+        child: ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          leading: Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: AppColors.background,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Center(
+              child: EquipmentGraphic(
+                hardwareTypeName: device.hardwareTypeName,
+                imageUrl: device.imageUrl,
+                size: 26,
+              ),
+            ),
+          ),
+          title: Text(
+            device.name,
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textPrimary),
+          ),
+          subtitle: Text(
+            '${device.hardwareTypeName} • ${device.zoneName} • ${device.location.isNotEmpty ? device.location : "Active"}',
+            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+          ),
+          trailing: StatusBadge.device(device.status),
+          onTap: () {
+            if (device.status == DeviceStatus.retired) {
+              AppSnackbar.warning(l10n?.errRetiredUnitSelected ?? 'Cannot raise defects on retired equipment');
+              return;
+            }
+            widget.onOpenRaiseIssue(device);
+          },
+        ),
       ),
     );
   }

@@ -1130,4 +1130,28 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get themeDark => 'डार्क मोड';
+
+  @override
+  String get statusOnline => 'चालू';
+
+  @override
+  String get statusOffline => 'बंद';
+
+  @override
+  String get statusMaintenance => 'मरम्मत';
+
+  @override
+  String get statusActive => 'सक्रिय';
+
+  @override
+  String get statusDown => 'डाउन';
+
+  @override
+  String get categoryDevices => 'श्रेणी के उपकरण';
+
+  @override
+  String get noEquipmentInCategory => 'इस श्रेणी में कोई उपकरण नहीं मिला';
+
+  @override
+  String get searchWithinCategory => 'सीरियल नंबर या स्थान से खोजें...';
 }

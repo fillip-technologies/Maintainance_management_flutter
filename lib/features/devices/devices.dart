@@ -7,3 +7,4 @@ export 'repositories/device_repository.dart';
 export 'repositories/zone_repository.dart';
 export 'viewmodels/device_viewmodel.dart';
 export 'views/helpers/hardware_icon_helper.dart';
+export 'views/helpers/equipment_graphic.dart';

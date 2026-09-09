@@ -452,5 +452,13 @@
   "pressBackAgainToExit": "ऐप बंद करने के लिए दोबारा बैक दबाएं",
   "themeTitle": "थीम",
   "themeLight": "लाइट मोड",
-  "themeDark": "डार्क मोड"
+  "themeDark": "डार्क मोड",
+  "statusOnline": "चालू",
+  "statusOffline": "बंद",
+  "statusMaintenance": "मरम्मत",
+  "statusActive": "सक्रिय",
+  "statusDown": "डाउन",
+  "categoryDevices": "श्रेणी के उपकरण",
+  "noEquipmentInCategory": "इस श्रेणी में कोई उपकरण नहीं मिला",
+  "searchWithinCategory": "सीरियल नंबर या स्थान से खोजें..."
 }

@@ -39,10 +39,6 @@ class ZoneHealthHeroCard extends StatelessWidget {
       totalNeedsFix += z.unresolvedUnitsCount;
     }
 
-    final operationalRate = totalDevices > 0
-        ? ((totalWorking / totalDevices) * 100).round().clamp(0, 100)
-        : 100;
-
     final statusColor = _statusColor(totalWorking, totalDevices);
 
     return Container(
@@ -64,79 +60,41 @@ class ZoneHealthHeroCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        Icons.radar_rounded,
-                        size: 20,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            l10n.techCoverageOverview,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          Text(
-                            l10n.techZonesDevicesSummary(rootZones.length, totalDevices),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.radar_rounded,
+                  size: 20,
+                  color: AppColors.primary,
                 ),
               ),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: statusColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: statusColor.withValues(alpha: 0.3)),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 7,
-                      height: 7,
-                      decoration: BoxDecoration(
-                        color: statusColor,
-                        shape: BoxShape.circle,
+                    Text(
+                      l10n.techCoverageOverview,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
                       ),
                     ),
-                    const SizedBox(width: 5),
                     Text(
-                      l10n.techPercentOnline(operationalRate),
+                      l10n.techZonesDevicesSummary(rootZones.length, totalDevices),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: statusColor,
+                        color: AppColors.textSecondary,
                       ),
                     ),
                   ],
@@ -144,19 +102,7 @@ class ZoneHealthHeroCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
-
-          // Visual health progress bar
-          ClipRRect(
-            borderRadius: BorderRadius.circular(6),
-            child: LinearProgressIndicator(
-              value: totalDevices > 0 ? (totalWorking / totalDevices).clamp(0.0, 1.0) : 1.0,
-              minHeight: 8,
-              backgroundColor: AppColors.border.withValues(alpha: 0.4),
-              valueColor: AlwaysStoppedAnimation<Color>(statusColor),
-            ),
-          ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
 
           // Headline: total units, active units, units with an unresolved issue.
           HardwareStatRow(
@@ -187,7 +133,6 @@ class ZoneHealthHeroCard extends StatelessWidget {
     }
 
     final statusColor = _statusColor(zone.workingCount, zone.deviceCount);
-    final operationalRate = zone.operationalPercentage;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -266,38 +211,9 @@ class ZoneHealthHeroCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: statusColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: statusColor.withValues(alpha: 0.3)),
-                ),
-                child: Text(
-                  l10n.techPercentHealth(operationalRate),
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: statusColor,
-                  ),
-                ),
-              ),
             ],
           ),
-          const SizedBox(height: 12),
-
-          // Operational progress bar
-          ClipRRect(
-            borderRadius: BorderRadius.circular(6),
-            child: LinearProgressIndicator(
-              value: operationalRate / 100.0,
-              minHeight: 8,
-              backgroundColor: AppColors.border.withValues(alpha: 0.4),
-              valueColor: AlwaysStoppedAnimation<Color>(statusColor),
-            ),
-          ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
 
           // Headline: total units, active units, units with an unresolved issue.
           HardwareStatRow(

@@ -544,5 +544,13 @@
   "pressBackAgainToExit": "Press back again to exit",
   "themeTitle": "Theme",
   "themeLight": "Light Mode",
-  "themeDark": "Dark Mode"
+  "themeDark": "Dark Mode",
+  "statusOnline": "Online",
+  "statusOffline": "Offline",
+  "statusMaintenance": "Maintenance",
+  "statusActive": "Active",
+  "statusDown": "Down",
+  "categoryDevices": "Equipment in Category",
+  "noEquipmentInCategory": "No equipment found in this category",
+  "searchWithinCategory": "Search by serial number or location..."
 }

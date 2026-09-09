@@ -1135,4 +1135,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get themeDark => 'Dark Mode';
+
+  @override
+  String get statusOnline => 'Online';
+
+  @override
+  String get statusOffline => 'Offline';
+
+  @override
+  String get statusMaintenance => 'Maintenance';
+
+  @override
+  String get statusActive => 'Active';
+
+  @override
+  String get statusDown => 'Down';
+
+  @override
+  String get categoryDevices => 'Equipment in Category';
+
+  @override
+  String get noEquipmentInCategory => 'No equipment found in this category';
+
+  @override
+  String get searchWithinCategory => 'Search by serial number or location...';
 }
