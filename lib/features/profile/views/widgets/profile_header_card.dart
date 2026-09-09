@@ -5,13 +5,21 @@ import '../../../auth/auth.dart';
 
 class ProfileHeaderCard extends StatelessWidget {
   final UserModel user;
+  final String? zoneLogoUrl;
 
-  const ProfileHeaderCard({super.key, required this.user});
+  const ProfileHeaderCard({
+    super.key,
+    required this.user,
+    this.zoneLogoUrl,
+  });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final isTech = user.role.isTechnician;
+    final effectiveLogo = (zoneLogoUrl != null && zoneLogoUrl!.isNotEmpty)
+        ? zoneLogoUrl
+        : user.zoneLogoUrl;
 
     return Container(
       width: double.infinity,
@@ -44,10 +52,32 @@ class ProfileHeaderCard extends StatelessWidget {
                 width: 2,
               ),
             ),
-            child: Icon(
-              isTech ? Icons.engineering_outlined : Icons.shield_outlined,
-              size: 38,
-              color: isTech ? AppColors.primary : AppColors.purpleText,
+            child: ClipOval(
+              child: (!isTech && effectiveLogo != null && effectiveLogo.isNotEmpty)
+                  ? Image.network(
+                      effectiveLogo,
+                      fit: BoxFit.cover,
+                      width: 76,
+                      height: 76,
+                      errorBuilder: (_, _, _) => Center(
+                        child: Icon(
+                          Icons.shield_outlined,
+                          size: 38,
+                          color: AppColors.purpleText,
+                        ),
+                      ),
+                    )
+                  : Center(
+                      child: Icon(
+                        isTech
+                            ? Icons.engineering_outlined
+                            : Icons.shield_outlined,
+                        size: 38,
+                        color: isTech
+                            ? AppColors.primary
+                            : AppColors.purpleText,
+                      ),
+                    ),
             ),
           ),
           const SizedBox(height: 14),

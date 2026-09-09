@@ -45,6 +45,7 @@ class UserModel {
   final String? clientId;
   final String? assignedZoneId;
   final String? assignedZoneName;
+  final String? zoneLogoUrl;
   final String? technicianId;
   final String accountStatus;
 
@@ -56,6 +57,7 @@ class UserModel {
     this.clientId,
     this.assignedZoneId,
     this.assignedZoneName,
+    this.zoneLogoUrl,
     this.technicianId,
     this.accountStatus = 'active',
   });
@@ -78,6 +80,8 @@ class UserModel {
               as String?,
       assignedZoneName:
           (json['assigned_zone_name'] ?? json['zone_name']) as String?,
+      zoneLogoUrl:
+          (json['zoneLogoUrl'] ?? json['zone_logo_url']) as String?,
       technicianId: (json['technicianId'] ?? json['technician_id']) as String?,
       accountStatus:
           (json['accountStatus'] ?? json['account_status']) as String? ??
@@ -94,6 +98,7 @@ class UserModel {
       'client_id': clientId,
       'assigned_zone_id': assignedZoneId,
       'assigned_zone_name': assignedZoneName,
+      'zone_logo_url': zoneLogoUrl,
       'technician_id': technicianId,
       'account_status': accountStatus,
     };
@@ -107,6 +112,7 @@ class UserModel {
     String? clientId,
     String? assignedZoneId,
     String? assignedZoneName,
+    String? zoneLogoUrl,
     String? technicianId,
     String? accountStatus,
   }) {
@@ -118,6 +124,7 @@ class UserModel {
       clientId: clientId ?? this.clientId,
       assignedZoneId: assignedZoneId ?? this.assignedZoneId,
       assignedZoneName: assignedZoneName ?? this.assignedZoneName,
+      zoneLogoUrl: zoneLogoUrl ?? this.zoneLogoUrl,
       technicianId: technicianId ?? this.technicianId,
       accountStatus: accountStatus ?? this.accountStatus,
     );

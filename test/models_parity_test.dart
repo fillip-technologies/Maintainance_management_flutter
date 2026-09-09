@@ -7,6 +7,7 @@ import 'package:equipment_management_system/features/devices/devices.dart';
 import 'package:equipment_management_system/features/issues/issues.dart';
 import 'package:equipment_management_system/features/daily_logs/daily_logs.dart';
 import 'package:equipment_management_system/features/realtime/realtime.dart';
+import 'package:equipment_management_system/features/profile/profile.dart';
 import 'package:equipment_management_system/core/config/app_config.dart';
 import 'package:equipment_management_system/core/utils/jwt_helper.dart';
 
@@ -817,6 +818,123 @@ void main() {
 
       final exported = zone.toJson();
       expect(exported['image_url'], 'https://res.cloudinary.com/dxf54lmgf/image/upload/v1788870271/fixly/zones/md2gmq0cti2oqmkxours.jpg');
+    });
+
+    test('26. DeviceModel parses zoneLogoUrl and serializes correctly', () {
+      final json = {
+        'id': 'dev-uuid-01',
+        'name': 'Samsung Camera',
+        'zoneId': 'z-uuid-01',
+        'zoneName': 'ELEPHANT ZONE',
+        'zoneLogoUrl': 'https://res.cloudinary.com/dxf54lmgf/image/upload/v1788870382/fixly/zones/v5dkkjnx8b39d8f4fq6x.jpg',
+        'imageUrl': 'https://res.cloudinary.com/dxf54lmgf/image/upload/v1788870382/fixly/devices/camera.jpg',
+      };
+
+      final device = DeviceModel.fromJson(json);
+      expect(device.zoneLogoUrl, 'https://res.cloudinary.com/dxf54lmgf/image/upload/v1788870382/fixly/zones/v5dkkjnx8b39d8f4fq6x.jpg');
+      expect(device.imageUrl, 'https://res.cloudinary.com/dxf54lmgf/image/upload/v1788870382/fixly/devices/camera.jpg');
+
+      final exported = device.toJson();
+      expect(exported['zone_logo_url'], 'https://res.cloudinary.com/dxf54lmgf/image/upload/v1788870382/fixly/zones/v5dkkjnx8b39d8f4fq6x.jpg');
+    });
+
+    test('27. IssueModel parses deviceImageUrl and zoneLogoUrl, and primaryImageUrl falls back to device photo', () {
+      final issueJson = {
+        'id': 'iss-uuid-01',
+        'description': 'Display flickering',
+        'device': {
+          'id': 'dev-uuid-01',
+          'name': 'LED TV',
+          'imageUrl': 'https://res.cloudinary.com/dxf54lmgf/image/upload/v1788870382/fixly/devices/led_tv.jpg',
+          'zone': {
+            'id': 'z-uuid-01',
+            'name': 'ELEPHANT ZONE',
+            'logoUrl': 'https://res.cloudinary.com/dxf54lmgf/image/upload/v1788870382/fixly/zones/elephant.jpg',
+          },
+        },
+        'attachments': <dynamic>[],
+      };
+
+      final issue = IssueModel.fromJson(issueJson);
+      expect(issue.deviceImageUrl, 'https://res.cloudinary.com/dxf54lmgf/image/upload/v1788870382/fixly/devices/led_tv.jpg');
+      expect(issue.zoneLogoUrl, 'https://res.cloudinary.com/dxf54lmgf/image/upload/v1788870382/fixly/zones/elephant.jpg');
+      // No ticket photo attachment -> primaryImageUrl falls back to device image
+      expect(issue.primaryImageUrl, 'https://res.cloudinary.com/dxf54lmgf/image/upload/v1788870382/fixly/devices/led_tv.jpg');
+    });
+
+    test('28. UserModel parses zoneLogoUrl and serializes correctly', () {
+      final userJson = {
+        'id': 'user-uuid-01',
+        'email': 'staff@client.com',
+        'name': 'Staff Member',
+        'role': 'zone_staff',
+        'zoneLogoUrl': 'https://res.cloudinary.com/dxf54lmgf/image/upload/v1788870015/fixly/zones/tbiki3uqmkk9wv6add0r.jpg',
+      };
+
+      final user = UserModel.fromJson(userJson);
+      expect(user.zoneLogoUrl, 'https://res.cloudinary.com/dxf54lmgf/image/upload/v1788870015/fixly/zones/tbiki3uqmkk9wv6add0r.jpg');
+      expect(user.toJson()['zone_logo_url'], 'https://res.cloudinary.com/dxf54lmgf/image/upload/v1788870015/fixly/zones/tbiki3uqmkk9wv6add0r.jpg');
+    });
+
+    testWidgets('29. ProfileHeaderCard renders zone logo when available and falls back to shield icon', (tester) async {
+      // 1. User with zoneLogoUrl: should render Image.network
+      final userWithLogo = const UserModel(
+        id: 'u-1',
+        email: 'staff@client.com',
+        name: 'Staff Tiger',
+        role: UserRole.zoneStaff,
+        zoneLogoUrl: 'https://res.cloudinary.com/demo/image/upload/sample.jpg',
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: ProfileHeaderCard(user: userWithLogo),
+          ),
+        ),
+      );
+
+      expect(find.byType(Image), findsOneWidget);
+
+      // 2. User without zoneLogoUrl: falls back to shield icon
+      final userWithoutLogo = const UserModel(
+        id: 'u-2',
+        email: 'staff2@client.com',
+        name: 'Staff No Logo',
+        role: UserRole.zoneStaff,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: ProfileHeaderCard(user: userWithoutLogo),
+          ),
+        ),
+      );
+
+      expect(find.byIcon(Icons.shield_outlined), findsOneWidget);
+    });
+
+    testWidgets('30. ProfileInfoTile renders thumbnail image when imageUrl is provided', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: ProfileInfoTile(
+              icon: Icons.place_outlined,
+              label: 'Assigned Location',
+              value: 'TIGER ZONE',
+              imageUrl: 'https://res.cloudinary.com/demo/image/upload/sample.jpg',
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(Image), findsOneWidget);
+      expect(find.text('TIGER ZONE'), findsOneWidget);
     });
   });
 }

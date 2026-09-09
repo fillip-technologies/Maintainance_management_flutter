@@ -33,6 +33,7 @@ class DeviceModel {
   final DateTime? lastCheckedAt;
   final int consecutiveFailures;
   final String? imageUrl;
+  final String? zoneLogoUrl;
 
   String get code => serialNumber;
   String get categoryName => hardwareTypeName;
@@ -53,6 +54,7 @@ class DeviceModel {
     this.lastCheckedAt,
     this.consecutiveFailures = 0,
     this.imageUrl,
+    this.zoneLogoUrl,
   });
 
   factory DeviceModel.fromJson(Map<String, dynamic> json) {
@@ -83,6 +85,10 @@ class DeviceModel {
               : null,
       consecutiveFailures: (json['consecutiveFailures'] ?? json['consecutive_failures'] as num?)?.toInt() ?? 0,
       imageUrl: (json['imageUrl'] ?? json['image_url']) as String?,
+      zoneLogoUrl: (json['zoneLogoUrl'] ??
+              json['zone_logo_url'] ??
+              zoneObj?['logoUrl'] ??
+              zoneObj?['logo_url']) as String?,
     );
   }
 
@@ -103,6 +109,7 @@ class DeviceModel {
       'last_checked_at': lastCheckedAt?.toIso8601String(),
       'consecutive_failures': consecutiveFailures,
       'image_url': imageUrl,
+      'zone_logo_url': zoneLogoUrl,
     };
   }
 
@@ -122,6 +129,7 @@ class DeviceModel {
     DateTime? lastCheckedAt,
     int? consecutiveFailures,
     String? imageUrl,
+    String? zoneLogoUrl,
   }) {
     return DeviceModel(
       id: id ?? this.id,
@@ -139,6 +147,7 @@ class DeviceModel {
       lastCheckedAt: lastCheckedAt ?? this.lastCheckedAt,
       consecutiveFailures: consecutiveFailures ?? this.consecutiveFailures,
       imageUrl: imageUrl ?? this.imageUrl,
+      zoneLogoUrl: zoneLogoUrl ?? this.zoneLogoUrl,
     );
   }
 

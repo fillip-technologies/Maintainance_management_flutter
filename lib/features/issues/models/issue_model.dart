@@ -202,6 +202,8 @@ class IssueModel {
   final String createdByUserId;
   final String createdByUserName;
   final String? imagePath;
+  final String? deviceImageUrl;
+  final String? zoneLogoUrl;
   final List<IssueAttachmentModel> attachments;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -230,6 +232,8 @@ class IssueModel {
     required this.createdByUserId,
     required this.createdByUserName,
     this.imagePath,
+    this.deviceImageUrl,
+    this.zoneLogoUrl,
     this.attachments = const [],
     required this.createdAt,
     required this.updatedAt,
@@ -262,9 +266,19 @@ class IssueModel {
             .toList() ??
         const <IssueAttachmentModel>[];
 
+    final devImageUrl = (json['deviceImageUrl'] ??
+            json['device_image_url'] ??
+            deviceObj?['imageUrl'] ??
+            deviceObj?['image_url']) as String?;
+    final devZoneLogoUrl = (json['zoneLogoUrl'] ??
+            json['zone_logo_url'] ??
+            zoneObj?['logoUrl'] ??
+            zoneObj?['logo_url']) as String?;
+    final categoryImageUrl = (categoryObj?['imageUrl'] ?? categoryObj?['image_url']) as String?;
     final rawImagePath = (json['imagePath'] ?? json['image_path']) as String?;
     final firstAttachmentUrl = parsedAttachments.isNotEmpty ? parsedAttachments.first.url : null;
     final defaultTitle = (json['title'] as String?) ?? '$devName - $catName';
+    final resolvedImagePath = rawImagePath ?? firstAttachmentUrl ?? devImageUrl ?? categoryImageUrl;
 
     return IssueModel(
       id: (json['id'] as String?) ?? '',
@@ -284,7 +298,9 @@ class IssueModel {
       assignedTechnicianName: (json['assignedTechnicianName'] ?? json['assigned_technician_name'] ?? techUserObj?['name']) as String?,
       createdByUserId: (json['raisedByUserId'] ?? json['raised_by_user_id'] ?? json['createdByUserId'] ?? raisedByObj?['id']) as String? ?? '',
       createdByUserName: (json['raisedByUserName'] ?? json['raised_by_user_name'] ?? json['createdByUserName'] ?? raisedByObj?['name']) as String? ?? 'Staff',
-      imagePath: rawImagePath ?? firstAttachmentUrl,
+      imagePath: resolvedImagePath,
+      deviceImageUrl: devImageUrl,
+      zoneLogoUrl: devZoneLogoUrl,
       attachments: parsedAttachments,
       createdAt: createdDateStr != null ? (DateTime.tryParse(createdDateStr) ?? DateTime.now()) : DateTime.now(),
       updatedAt: updatedDateStr != null ? (DateTime.tryParse(updatedDateStr) ?? DateTime.now()) : DateTime.now(),
@@ -317,6 +333,8 @@ class IssueModel {
       'raised_by_user_id': createdByUserId,
       'raised_by_user_name': createdByUserName,
       'image_path': imagePath,
+      'device_image_url': deviceImageUrl,
+      'zone_logo_url': zoneLogoUrl,
       'attachments': attachments.map((a) => a.toJson()).toList(),
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
@@ -345,6 +363,8 @@ class IssueModel {
     String? createdByUserId,
     String? createdByUserName,
     String? imagePath,
+    String? deviceImageUrl,
+    String? zoneLogoUrl,
     List<IssueAttachmentModel>? attachments,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -372,6 +392,8 @@ class IssueModel {
       createdByUserId: createdByUserId ?? this.createdByUserId,
       createdByUserName: createdByUserName ?? this.createdByUserName,
       imagePath: imagePath ?? this.imagePath,
+      deviceImageUrl: deviceImageUrl ?? this.deviceImageUrl,
+      zoneLogoUrl: zoneLogoUrl ?? this.zoneLogoUrl,
       attachments: attachments ?? this.attachments,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -385,10 +407,11 @@ class IssueModel {
   List<IssueAttachmentModel> get photoAttachments =>
       attachments.where((a) => a.type == 'image' || a.url.isNotEmpty).toList();
 
-  /// Primary image url for thumbnails and headers (falls back to legacy imagePath).
+  /// Primary image url for thumbnails and headers (falls back to legacy imagePath or device photo).
   String? get primaryImageUrl {
     if (photoAttachments.isNotEmpty) return photoAttachments.first.url;
     if (imagePath != null && imagePath!.isNotEmpty) return imagePath;
+    if (deviceImageUrl != null && deviceImageUrl!.isNotEmpty) return deviceImageUrl;
     return null;
   }
 

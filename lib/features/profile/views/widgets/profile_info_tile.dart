@@ -9,6 +9,7 @@ class ProfileInfoTile extends StatelessWidget {
   final String label;
   final String value;
   final String? copyableValue;
+  final String? imageUrl;
 
   const ProfileInfoTile({
     super.key,
@@ -16,6 +17,7 @@ class ProfileInfoTile extends StatelessWidget {
     required this.label,
     required this.value,
     this.copyableValue,
+    this.imageUrl,
   });
 
   @override
@@ -30,12 +32,28 @@ class ProfileInfoTile extends StatelessWidget {
           Container(
             width: 36,
             height: 36,
+            clipBehavior: Clip.antiAlias,
             decoration: BoxDecoration(
               color: AppColors.background,
               borderRadius: BorderRadius.circular(10),
               border: Border.all(color: AppColors.border),
             ),
-            child: Icon(icon, size: 18, color: AppColors.primary),
+            child: (imageUrl != null && imageUrl!.isNotEmpty)
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(9),
+                    child: Image.network(
+                      imageUrl!,
+                      fit: BoxFit.cover,
+                      width: 36,
+                      height: 36,
+                      errorBuilder: (_, _, _) => Center(
+                        child: Icon(icon, size: 18, color: AppColors.primary),
+                      ),
+                    ),
+                  )
+                : Center(
+                    child: Icon(icon, size: 18, color: AppColors.primary),
+                  ),
           ),
           const SizedBox(width: 14),
 

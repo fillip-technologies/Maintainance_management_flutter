@@ -5,6 +5,7 @@ import '../../../../core/theme/colors.dart';
 import '../../../../core/widgets/language_switcher_button.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../auth/auth.dart';
+import '../../devices/devices.dart';
 import '../viewmodels/profile_viewmodel.dart';
 import 'widgets/widgets.dart';
 
@@ -78,6 +79,42 @@ class ProfilePage extends ConsumerWidget {
 
     final isTech = user.role.isTechnician;
 
+    final staffDevices = !isTech ? ref.watch(staffDevicesProvider).value : null;
+    final fallbackZoneLogo = staffDevices
+        ?.where((d) => d.zoneLogoUrl != null && d.zoneLogoUrl!.isNotEmpty)
+        .firstOrNull
+        ?.zoneLogoUrl;
+
+    final effectiveZoneLogoUrl =
+        (user.zoneLogoUrl != null && user.zoneLogoUrl!.isNotEmpty)
+            ? user.zoneLogoUrl
+            : fallbackZoneLogo;
+
+    // Auto-heal local user session if zoneLogoUrl was missing at login time
+    if (!isTech) {
+      ref.listen<AsyncValue<List<DeviceModel>>>(staffDevicesProvider, (prev, next) {
+        final devs = next.value;
+        if (devs != null && (user.zoneLogoUrl == null || user.zoneLogoUrl!.isEmpty)) {
+          final foundLogo = devs
+                  .where((d) =>
+                      (user.assignedZoneId == null || d.zoneId == user.assignedZoneId) &&
+                      d.zoneLogoUrl != null &&
+                      d.zoneLogoUrl!.isNotEmpty)
+                  .firstOrNull
+                  ?.zoneLogoUrl ??
+              devs.where((d) => d.zoneLogoUrl != null && d.zoneLogoUrl!.isNotEmpty).firstOrNull?.zoneLogoUrl;
+          if (foundLogo != null) {
+            final updatedUser = user.copyWith(
+              zoneLogoUrl: foundLogo,
+              assignedZoneName: user.assignedZoneName ?? devs.firstOrNull?.zoneName,
+            );
+            ref.read(authStateProvider.notifier).setUser(updatedUser);
+            ref.read(storageServiceProvider).saveUser(updatedUser);
+          }
+        }
+      });
+    }
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -102,7 +139,10 @@ class ProfilePage extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header Profile Card
-            ProfileHeaderCard(user: user),
+            ProfileHeaderCard(
+              user: user,
+              zoneLogoUrl: effectiveZoneLogoUrl,
+            ),
 
             const SizedBox(height: 24),
 
@@ -127,6 +167,7 @@ class ProfilePage extends ConsumerWidget {
                               user.assignedZoneName!.isNotEmpty
                           ? user.assignedZoneName!
                           : l10n.unassignedScope),
+                imageUrl: !isTech ? effectiveZoneLogoUrl : null,
               ),
               if (user.clientId != null && user.clientId!.isNotEmpty) ...[
                 const Divider(color: AppColors.divider, height: 1),

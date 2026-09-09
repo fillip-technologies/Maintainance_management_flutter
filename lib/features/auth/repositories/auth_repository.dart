@@ -74,13 +74,18 @@ class AuthRepository {
             .map((e) => ZoneModel.fromJson(e as Map<String, dynamic>))
             .toList();
 
-        // If zone name is not in user object, resolve it from zone tree
+        // If zone name or logo is not in user object, resolve it from zone tree
         final zoneId = (userJson['zoneId'] ?? userJson['assigned_zone_id']) as String?;
-        if (zoneId != null && !userJson.containsKey('assigned_zone_name')) {
+        if (zoneId != null) {
           final matchedZone = descendants.where((z) => z.id == zoneId).firstOrNull ??
               ancestors.where((z) => z.id == zoneId).firstOrNull;
           if (matchedZone != null) {
-            userJson['assigned_zone_name'] = matchedZone.name;
+            if (!userJson.containsKey('assigned_zone_name') || userJson['assigned_zone_name'] == null) {
+              userJson['assigned_zone_name'] = matchedZone.name;
+            }
+            if (!userJson.containsKey('zoneLogoUrl') || userJson['zoneLogoUrl'] == null) {
+              userJson['zoneLogoUrl'] = matchedZone.imageUrl;
+            }
           }
         }
 
@@ -152,7 +157,26 @@ class AuthRepository {
     AppLogger.i('🧹 [AuthRepository] Session cleared from local storage');
   }
 
-  UserModel? getCurrentUser() => storage.getUser();
+  UserModel? getCurrentUser() {
+    var user = storage.getUser();
+    if (user != null && (user.zoneLogoUrl == null || user.zoneLogoUrl!.isEmpty)) {
+      final descendants = storage.getZoneDescendants();
+      final ancestors = storage.getZoneAncestors();
+      final zoneId = user.assignedZoneId;
+      if (zoneId != null) {
+        final matched = descendants.where((z) => z.id == zoneId).firstOrNull ??
+            ancestors.where((z) => z.id == zoneId).firstOrNull;
+        if (matched != null && matched.imageUrl != null && matched.imageUrl!.isNotEmpty) {
+          user = user.copyWith(
+            zoneLogoUrl: matched.imageUrl,
+            assignedZoneName: user.assignedZoneName ?? matched.name,
+          );
+          storage.saveUser(user);
+        }
+      }
+    }
+    return user;
+  }
 
   bool get isAuthenticated => storage.hasSession;
 }

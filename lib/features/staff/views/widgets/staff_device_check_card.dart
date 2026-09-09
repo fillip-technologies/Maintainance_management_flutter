@@ -71,16 +71,32 @@ class StaffDeviceCheckCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  width: 38,
+                  height: 38,
                   decoration: BoxDecoration(
                     color: AppColors.primaryBg,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Icon(
-                    HardwareIconHelper.getIcon(device.hardwareTypeName),
-                    color: AppColors.primary,
-                    size: 20,
-                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: (device.imageUrl != null && device.imageUrl!.isNotEmpty)
+                      ? Image.network(
+                          device.imageUrl!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, _, _) => Center(
+                            child: Icon(
+                              HardwareIconHelper.getIcon(device.hardwareTypeName),
+                              color: AppColors.primary,
+                              size: 20,
+                            ),
+                          ),
+                        )
+                      : Center(
+                          child: Icon(
+                            HardwareIconHelper.getIcon(device.hardwareTypeName),
+                            color: AppColors.primary,
+                            size: 20,
+                          ),
+                        ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(

@@ -4,6 +4,7 @@ import '../../../core/theme/colors.dart';
 import '../../../core/widgets/language_switcher_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/auth.dart';
+import '../../devices/devices.dart';
 import '../../issues/issues.dart';
 import '../../profile/profile.dart';
 import '../../realtime/realtime.dart';
@@ -21,6 +22,55 @@ class GlobalHomePage extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final user = ref.watch(authStateProvider).value;
     final isTechnician = user?.role == UserRole.technician;
+
+    // Resolve zone logo: from user profile, or fallback to live loaded devices in zone
+    final staffDevices = !isTechnician ? ref.watch(staffDevicesProvider).value : null;
+    final fallbackZoneLogo = staffDevices
+            ?.where((d) =>
+                (user?.assignedZoneId == null || d.zoneId == user?.assignedZoneId) &&
+                d.zoneLogoUrl != null &&
+                d.zoneLogoUrl!.isNotEmpty)
+            .firstOrNull
+            ?.zoneLogoUrl ??
+        staffDevices
+            ?.where((d) => d.zoneLogoUrl != null && d.zoneLogoUrl!.isNotEmpty)
+            .firstOrNull
+            ?.zoneLogoUrl;
+
+    final effectiveZoneLogoUrl =
+        (user?.zoneLogoUrl != null && user!.zoneLogoUrl!.isNotEmpty)
+            ? user.zoneLogoUrl
+            : fallbackZoneLogo;
+
+    final effectiveZoneName =
+        (user?.assignedZoneName != null && user!.assignedZoneName!.isNotEmpty)
+            ? user.assignedZoneName!
+            : (staffDevices?.firstOrNull?.zoneName ?? 'Assigned Zone Scope');
+
+    // Auto-heal local user session if zoneLogoUrl was missing at login time
+    if (!isTechnician) {
+      ref.listen<AsyncValue<List<DeviceModel>>>(staffDevicesProvider, (prev, next) {
+        final devs = next.value;
+        if (devs != null && user != null && (user.zoneLogoUrl == null || user.zoneLogoUrl!.isEmpty)) {
+          final foundLogo = devs
+                  .where((d) =>
+                      (user.assignedZoneId == null || d.zoneId == user.assignedZoneId) &&
+                      d.zoneLogoUrl != null &&
+                      d.zoneLogoUrl!.isNotEmpty)
+                  .firstOrNull
+                  ?.zoneLogoUrl ??
+              devs.where((d) => d.zoneLogoUrl != null && d.zoneLogoUrl!.isNotEmpty).firstOrNull?.zoneLogoUrl;
+          if (foundLogo != null) {
+            final updatedUser = user.copyWith(
+              zoneLogoUrl: foundLogo,
+              assignedZoneName: user.assignedZoneName ?? devs.firstOrNull?.zoneName,
+            );
+            ref.read(authStateProvider.notifier).setUser(updatedUser);
+            ref.read(storageServiceProvider).saveUser(updatedUser);
+          }
+        }
+      });
+    }
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -41,18 +91,36 @@ class GlobalHomePage extends ConsumerWidget {
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  width: 38,
+                  height: 38,
                   decoration: BoxDecoration(
                     color: AppColors.primaryBg,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(
-                    isTechnician
-                        ? Icons.engineering_outlined
-                        : Icons.shield_outlined,
-                    color: AppColors.primary,
-                    size: 20,
-                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: (effectiveZoneLogoUrl != null && effectiveZoneLogoUrl.isNotEmpty)
+                      ? Image.network(
+                          effectiveZoneLogoUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, _, _) => Center(
+                            child: Icon(
+                              isTechnician
+                                  ? Icons.engineering_outlined
+                                  : Icons.shield_outlined,
+                              color: AppColors.primary,
+                              size: 20,
+                            ),
+                          ),
+                        )
+                      : Center(
+                          child: Icon(
+                            isTechnician
+                                ? Icons.engineering_outlined
+                                : Icons.shield_outlined,
+                            color: AppColors.primary,
+                            size: 20,
+                          ),
+                        ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -65,9 +133,9 @@ class GlobalHomePage extends ConsumerWidget {
                           Flexible(
                             child: Text(
                               user?.name ??
-                                  (isTechnician
-                                      ? 'Field Technician'
-                                      : 'Staff Member'),
+                                   (isTechnician
+                                       ? 'Field Technician'
+                                       : 'Staff Member'),
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -99,8 +167,7 @@ class GlobalHomePage extends ConsumerWidget {
                             child: Text(
                               isTechnician
                                   ? 'Hardware Technician • Assigned Queue'
-                                  : (user?.assignedZoneName ??
-                                      'Assigned Zone Scope'),
+                                  : effectiveZoneName,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
                                 fontSize: 12,

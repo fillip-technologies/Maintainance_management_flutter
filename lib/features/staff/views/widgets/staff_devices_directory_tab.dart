@@ -335,18 +335,41 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
                               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                               child: Row(
                                 children: [
-                                  Container(
-                                    width: 38,
-                                    height: 38,
-                                    decoration: BoxDecoration(
-                                      color: AppColors.primaryBg,
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Icon(
-                                      HardwareIconHelper.getIcon(group.hardwareTypeName),
-                                      color: AppColors.primary,
-                                      size: 20,
-                                    ),
+                                  Builder(
+                                    builder: (context) {
+                                      final groupImage = group.devices
+                                          .where((d) => d.imageUrl != null && d.imageUrl!.isNotEmpty)
+                                          .firstOrNull
+                                          ?.imageUrl;
+                                      return Container(
+                                        width: 38,
+                                        height: 38,
+                                        decoration: BoxDecoration(
+                                          color: AppColors.primaryBg,
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        clipBehavior: Clip.antiAlias,
+                                        child: (groupImage != null && groupImage.isNotEmpty)
+                                            ? Image.network(
+                                                groupImage,
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (_, _, _) => Center(
+                                                  child: Icon(
+                                                    HardwareIconHelper.getIcon(group.hardwareTypeName),
+                                                    color: AppColors.primary,
+                                                    size: 20,
+                                                  ),
+                                                ),
+                                              )
+                                            : Center(
+                                                child: Icon(
+                                                  HardwareIconHelper.getIcon(group.hardwareTypeName),
+                                                  color: AppColors.primary,
+                                                  size: 20,
+                                                ),
+                                              ),
+                                      );
+                                    },
                                   ),
                                   const SizedBox(width: 12),
                                   Expanded(
@@ -451,7 +474,25 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
                                 child: ListTile(
                                   contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
                                   dense: true,
-                                  leading: const Icon(Icons.subdirectory_arrow_right_rounded, size: 18, color: AppColors.icon),
+                                  leading: (device.imageUrl != null && device.imageUrl!.isNotEmpty)
+                                      ? Container(
+                                          width: 24,
+                                          height: 24,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(6),
+                                          ),
+                                          clipBehavior: Clip.antiAlias,
+                                          child: Image.network(
+                                            device.imageUrl!,
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (_, _, _) => const Icon(
+                                              Icons.subdirectory_arrow_right_rounded,
+                                              size: 18,
+                                              color: AppColors.icon,
+                                            ),
+                                          ),
+                                        )
+                                      : const Icon(Icons.subdirectory_arrow_right_rounded, size: 18, color: AppColors.icon),
                                   title: Text(
                                     device.name,
                                     style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: AppColors.textPrimary),
@@ -501,11 +542,26 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
                           color: AppColors.primaryBg,
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Icon(
-                          HardwareIconHelper.getIcon(device.hardwareTypeName),
-                          color: AppColors.primary,
-                          size: 20,
-                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: (device.imageUrl != null && device.imageUrl!.isNotEmpty)
+                            ? Image.network(
+                                device.imageUrl!,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, _, _) => Center(
+                                  child: Icon(
+                                    HardwareIconHelper.getIcon(device.hardwareTypeName),
+                                    color: AppColors.primary,
+                                    size: 20,
+                                  ),
+                                ),
+                              )
+                            : Center(
+                                child: Icon(
+                                  HardwareIconHelper.getIcon(device.hardwareTypeName),
+                                  color: AppColors.primary,
+                                  size: 20,
+                                ),
+                              ),
                       ),
                       title: Text(
                         device.name,
