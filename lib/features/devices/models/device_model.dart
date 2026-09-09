@@ -23,6 +23,7 @@ class DeviceModel {
   final String zoneName;
   final String? hardwareTypeId;
   final String hardwareTypeName;
+  final String? productTypeId;
   final String name;
   final String serialNumber;
   final String location;
@@ -44,6 +45,7 @@ class DeviceModel {
     required this.zoneName,
     this.hardwareTypeId,
     required this.hardwareTypeName,
+    this.productTypeId,
     required this.name,
     this.serialNumber = '',
     this.location = '',
@@ -59,14 +61,44 @@ class DeviceModel {
 
   factory DeviceModel.fromJson(Map<String, dynamic> json) {
     final zoneObj = json['zone'] as Map<String, dynamic>?;
-    final hwTypeObj = (json['hardwareType'] ?? json['hardware_type'] ?? json['category']) as Map<String, dynamic>?;
+    final categoryObj = json['category'] as Map<String, dynamic>?;
+    final productTypeObj = json['productType'] as Map<String, dynamic>?;
+    final hwTypeObj = (json['hardwareType'] ?? json['hardware_type'] ?? categoryObj) as Map<String, dynamic>?;
+
+    final rawImageUrl = (json['imageUrl'] ?? json['image_url']) as String?;
+    final ptImageUrl = (productTypeObj?['imageUrl'] ?? productTypeObj?['image_url']) as String?;
+    final catImageUrl = (categoryObj?['imageUrl'] ??
+            categoryObj?['image_url'] ??
+            json['categoryImageUrl'] ??
+            json['category_image_url'] ??
+            hwTypeObj?['imageUrl'] ??
+            hwTypeObj?['image_url']) as String?;
+
+    final resolvedImageUrl = (rawImageUrl != null && rawImageUrl.trim().isNotEmpty)
+        ? rawImageUrl.trim()
+        : (ptImageUrl != null && ptImageUrl.trim().isNotEmpty)
+            ? ptImageUrl.trim()
+            : (catImageUrl != null && catImageUrl.trim().isNotEmpty)
+                ? catImageUrl.trim()
+                : null;
 
     return DeviceModel(
       id: (json['id'] as String?) ?? '',
       zoneId: (json['zoneId'] ?? json['zone_id'] ?? zoneObj?['id']) as String? ?? '',
       zoneName: (json['zoneName'] ?? json['zone_name'] ?? zoneObj?['name']) as String? ?? 'Unknown Zone',
-      hardwareTypeId: (json['hardwareTypeId'] ?? json['hardware_type_id'] ?? hwTypeObj?['id']) as String?,
-      hardwareTypeName: (json['hardwareTypeName'] ?? json['hardware_type_name'] ?? json['categoryName'] ?? hwTypeObj?['name']) as String? ?? 'CCTV Camera',
+      hardwareTypeId: (json['hardwareTypeId'] ??
+              json['hardware_type_id'] ??
+              json['categoryId'] ??
+              json['category_id'] ??
+              categoryObj?['id'] ??
+              hwTypeObj?['id']) as String?,
+      hardwareTypeName: (json['hardwareTypeName'] ??
+              json['hardware_type_name'] ??
+              json['categoryName'] ??
+              categoryObj?['name'] ??
+              hwTypeObj?['name']) as String? ??
+          'CCTV Camera',
+      productTypeId: (json['productTypeId'] ?? json['product_type_id'] ?? productTypeObj?['id']) as String?,
       name: (json['name'] as String?) ?? 'Unknown Device',
       serialNumber: (json['serialNumber'] ?? json['serial_number'] ?? json['code']) as String? ?? '',
       location: (json['location'] as String?) ?? '',
@@ -84,7 +116,7 @@ class DeviceModel {
               ? DateTime.tryParse(json['last_checked_at'] as String)
               : null,
       consecutiveFailures: (json['consecutiveFailures'] ?? json['consecutive_failures'] as num?)?.toInt() ?? 0,
-      imageUrl: (json['imageUrl'] ?? json['image_url']) as String?,
+      imageUrl: resolvedImageUrl,
       zoneLogoUrl: (json['zoneLogoUrl'] ??
               json['zone_logo_url'] ??
               zoneObj?['logoUrl'] ??
@@ -99,6 +131,7 @@ class DeviceModel {
       'zone_name': zoneName,
       'hardware_type_id': hardwareTypeId,
       'hardware_type_name': hardwareTypeName,
+      'product_type_id': productTypeId,
       'name': name,
       'serial_number': serialNumber,
       'location': location,
@@ -119,6 +152,7 @@ class DeviceModel {
     String? zoneName,
     String? hardwareTypeId,
     String? hardwareTypeName,
+    String? productTypeId,
     String? name,
     String? serialNumber,
     String? location,
@@ -137,6 +171,7 @@ class DeviceModel {
       zoneName: zoneName ?? this.zoneName,
       hardwareTypeId: hardwareTypeId ?? this.hardwareTypeId,
       hardwareTypeName: hardwareTypeName ?? this.hardwareTypeName,
+      productTypeId: productTypeId ?? this.productTypeId,
       name: name ?? this.name,
       serialNumber: serialNumber ?? this.serialNumber,
       location: location ?? this.location,

@@ -20,6 +20,7 @@ class DailyStatusLogModel {
   final String id;
   final String deviceId;
   final String deviceName;
+  final String? deviceImageUrl;
   final String zoneId;
   final String zoneName;
   final String loggedByUserId;
@@ -33,6 +34,7 @@ class DailyStatusLogModel {
     required this.id,
     required this.deviceId,
     required this.deviceName,
+    this.deviceImageUrl,
     this.zoneId = '',
     this.zoneName = '',
     required this.loggedByUserId,
@@ -54,6 +56,7 @@ class DailyStatusLogModel {
       id: (json['id'] as String?) ?? '',
       deviceId: (json['deviceId'] ?? json['device_id'] ?? devObj?['id']) as String? ?? '',
       deviceName: (json['deviceName'] ?? json['device_name'] ?? devObj?['name']) as String? ?? 'Device',
+      deviceImageUrl: (json['deviceImageUrl'] ?? json['device_image_url'] ?? devObj?['imageUrl'] ?? devObj?['image_url']) as String?,
       zoneId: (json['zoneId'] ?? json['zone_id'] ?? devObj?['zoneId']) as String? ?? '',
       zoneName: (json['zoneName'] ?? json['zone_name']) as String? ?? 'Zone',
       loggedByUserId: (json['loggedByUserId'] ?? json['logged_by_user_id'] ?? loggedByObj?['id']) as String? ?? '',
@@ -70,6 +73,7 @@ class DailyStatusLogModel {
       'id': id,
       'device_id': deviceId,
       'device_name': deviceName,
+      'device_image_url': deviceImageUrl,
       'zone_id': zoneId,
       'zone_name': zoneName,
       'logged_by_user_id': loggedByUserId,

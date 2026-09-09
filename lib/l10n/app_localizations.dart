@@ -1220,6 +1220,12 @@ abstract class AppLocalizations {
   /// **'Grouped'**
   String get viewGrouped;
 
+  /// No description provided for @viewGrid.
+  ///
+  /// In en, this message translates to:
+  /// **'Grid'**
+  String get viewGrid;
+
   /// No description provided for @viewFlat.
   ///
   /// In en, this message translates to:

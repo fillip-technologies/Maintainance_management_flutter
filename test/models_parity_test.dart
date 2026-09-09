@@ -101,6 +101,7 @@ void main() {
           'id': 'hw-ptz-01',
           'name': 'CCTV camera',
         },
+        'productTypeId': 'pt-ptz-4mp',
         'zoneName': 'North Wing',
       };
 
@@ -111,10 +112,47 @@ void main() {
       expect(device.zoneId, '1a1b8786-ce7b-4708-b340-47d8e98c3412');
       expect(device.zoneName, 'North Wing');
       expect(device.hardwareTypeName, 'CCTV camera');
+      expect(device.productTypeId, 'pt-ptz-4mp');
       expect(device.location, 'north gate pillar');
       expect(device.status, DeviceStatus.active);
       expect(device.specFields['ip'], '192.168.1.101');
       expect(device.installDate, isNotNull);
+    });
+
+    test('3b. DeviceModel resolves category imageUrl and name when device imageUrl is null', () {
+      final backendDeviceJson = {
+        'id': 'd29fab1d-0ada-44f6-a03b-0d4c3479a622',
+        'companyId': 'de46e438-88b0-47f6-a7bb-69be3b7ebc72',
+        'zoneId': '5360128f-d36e-4dd0-989c-ab62991d9e4a',
+        'categoryId': '8b0caa39-a032-4d96-90cd-198761833f90',
+        'productTypeId': null,
+        'hardwareTypeId': null,
+        'code': 'TV-000015',
+        'name': 'DRONE CAMERA',
+        'imageUrl': null,
+        'status': 'active',
+        'zone': {
+          'id': '5360128f-d36e-4dd0-989c-ab62991d9e4a',
+          'name': 'LION ZONE',
+          'logoUrl': 'https://res.cloudinary.com/dxf54lmgf/image/upload/v1788950360/fixly/zones/xekgflkagnw7aoqshlvu.jpg',
+        },
+        'hardwareType': null,
+        'category': {
+          'id': '8b0caa39-a032-4d96-90cd-198761833f90',
+          'name': 'LED TV',
+          'code': 'TV',
+          'imageUrl': 'https://res.cloudinary.com/dxf54lmgf/image/upload/v1788953758/fixly/categories/h4h.jpg',
+        },
+      };
+
+      final device = DeviceModel.fromJson(backendDeviceJson);
+
+      expect(device.id, 'd29fab1d-0ada-44f6-a03b-0d4c3479a622');
+      expect(device.name, 'DRONE CAMERA');
+      expect(device.hardwareTypeName, 'LED TV');
+      expect(device.hardwareTypeId, '8b0caa39-a032-4d96-90cd-198761833f90');
+      expect(device.imageUrl, 'https://res.cloudinary.com/dxf54lmgf/image/upload/v1788953758/fixly/categories/h4h.jpg');
+      expect(device.zoneLogoUrl, 'https://res.cloudinary.com/dxf54lmgf/image/upload/v1788950360/fixly/zones/xekgflkagnw7aoqshlvu.jpg');
     });
 
     test('4. HardwareTypeModel & IssueCategoryModel parse catalogue data correctly', () {
@@ -227,6 +265,7 @@ void main() {
         'notes': 'Lens cleaned and verified',
         'createdAt': '2026-08-31T14:00:00.000Z',
         'deviceName': 'Cam - North Wing Gate',
+        'deviceImageUrl': 'https://res.cloudinary.com/demo/image/upload/cam.jpg',
         'loggedByName': 'Ravi Kumar',
       };
 
@@ -236,6 +275,7 @@ void main() {
       expect(log.deviceId, 'e23fdc61-4365-4a33-9d22-82412878e8fc');
       expect(log.status, DailyLogStatus.working);
       expect(log.deviceName, 'Cam - North Wing Gate');
+      expect(log.deviceImageUrl, 'https://res.cloudinary.com/demo/image/upload/cam.jpg');
       expect(log.loggedByUserName, 'Ravi Kumar');
       expect(log.notes, 'Lens cleaned and verified');
     });

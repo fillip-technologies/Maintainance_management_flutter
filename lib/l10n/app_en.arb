@@ -236,6 +236,7 @@
   "errFailedToRaiseBulk": "Failed to raise bulk issues",
   "errFailedToLoadCategories": "Failed to load defect categories",
   "viewGrouped": "Grouped",
+  "viewGrid": "Grid",
   "viewFlat": "List",
   "unitsCount": "{count} Units",
   "@unitsCount": {

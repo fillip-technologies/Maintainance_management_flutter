@@ -590,6 +590,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get viewGrouped => 'समूहबद्ध';
 
   @override
+  String get viewGrid => 'ग्रिड';
+
+  @override
   String get viewFlat => 'सूची';
 
   @override

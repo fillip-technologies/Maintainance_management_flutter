@@ -119,7 +119,7 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
                   Tooltip(
                     message: _isGroupedView
                         ? (l10n?.viewFlat ?? 'List View')
-                        : (l10n?.tabCatalogue ?? 'Catalog Grid'),
+                        : (l10n?.viewGrid ?? 'Grid View'),
                     child: InkWell(
                       onTap: () => setState(() => _isGroupedView = !_isGroupedView),
                       borderRadius: BorderRadius.circular(12),
@@ -144,7 +144,7 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
                             const SizedBox(width: 4),
                             Text(
                               _isGroupedView
-                                  ? (l10n?.tabCatalogue ?? 'Catalog')
+                                  ? (l10n?.viewGrid ?? 'Grid')
                                   : (l10n?.viewFlat ?? 'List'),
                               style: TextStyle(
                                 fontSize: 12,
@@ -306,7 +306,7 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
           crossAxisCount: crossAxisCount,
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
-          mainAxisExtent: 148,
+          mainAxisExtent: 126,
         ),
         itemCount: groups.length,
         itemBuilder: (context, index) {
@@ -378,11 +378,15 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
           ),
           title: Text(
             device.name,
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textPrimary),
+            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: AppColors.textPrimary),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
           subtitle: Text(
             '${device.hardwareTypeName} • ${device.zoneName} • ${device.location.isNotEmpty ? device.location : "Active"}',
             style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
           trailing: StatusBadge.device(device.status),
           onTap: () {

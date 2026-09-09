@@ -595,6 +595,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get viewGrouped => 'Grouped';
 
   @override
+  String get viewGrid => 'Grid';
+
+  @override
   String get viewFlat => 'List';
 
   @override

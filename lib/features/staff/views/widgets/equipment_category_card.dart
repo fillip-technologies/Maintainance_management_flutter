@@ -62,7 +62,7 @@ class EquipmentCategoryCard extends StatelessWidget {
               ),
             ],
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          padding: const EdgeInsets.fromLTRB(10, 10, 8, 10),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -72,10 +72,10 @@ class EquipmentCategoryCard extends StatelessWidget {
                 child: EquipmentGraphic(
                   hardwareTypeName: group.hardwareTypeName,
                   imageUrl: sampleImageUrl,
-                  size: 40,
+                  size: 38,
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
 
               // Other side: Column with total quantity, name, and status rows
               Expanded(
@@ -87,7 +87,7 @@ class EquipmentCategoryCard extends StatelessWidget {
                     Text(
                       '${group.totalCount}',
                       style: TextStyle(
-                        fontSize: 22,
+                        fontSize: 20,
                         fontWeight: FontWeight.w800,
                         color: AppColors.textPrimary,
                         height: 1.1,
@@ -97,19 +97,19 @@ class EquipmentCategoryCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 1),
 
-                    // Category name
+                    // Category / Device name
                     Text(
                       group.hardwareTypeName,
                       style: TextStyle(
                         fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textPrimary,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
 
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 5),
 
                     // Status rows: colored dot + count + label
                     _StatusDotRow(
@@ -117,13 +117,13 @@ class EquipmentCategoryCard extends StatelessWidget {
                       count: group.activeCount,
                       label: onlineLabel,
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2.5),
                     _StatusDotRow(
                       dotColor: AppColors.error,
                       count: group.faultyCount,
                       label: offlineLabel,
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2.5),
                     _StatusDotRow(
                       dotColor: AppColors.warning,
                       count: group.maintenanceCount,

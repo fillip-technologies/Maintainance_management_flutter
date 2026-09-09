@@ -202,6 +202,7 @@
   "errFailedToRaiseBulk": "थोक समस्या टिकट दर्ज करने में विफल",
   "errFailedToLoadCategories": "दोष श्रेणियां लोड करने में विफल",
   "viewGrouped": "समूहबद्ध",
+  "viewGrid": "ग्रिड",
   "viewFlat": "सूची",
   "unitsCount": "{count} उपकरण",
   "singleUnitCount": "1 उपकरण",

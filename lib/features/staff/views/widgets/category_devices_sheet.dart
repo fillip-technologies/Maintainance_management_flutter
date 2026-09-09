@@ -314,7 +314,7 @@ class _CategoryDevicesSheetState extends State<CategoryDevicesSheet> {
                                         Text(
                                           device.name,
                                           style: TextStyle(
-                                            fontWeight: FontWeight.w600,
+                                            fontWeight: FontWeight.w800,
                                             fontSize: 13.5,
                                             color: AppColors.textPrimary,
                                           ),
