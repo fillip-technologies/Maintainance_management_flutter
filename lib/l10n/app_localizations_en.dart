@@ -1087,4 +1087,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String staffTicketResolvedToast(String device) {
     return '$device was fixed by a technician. Tap for details.';
   }
+
+  @override
+  String get techViewStatus => 'Zone Status';
+
+  @override
+  String get zoneStatusTitle => 'Zone Status';
+
+  @override
+  String get zoneStatusColZone => 'Zone / Area';
+
+  @override
+  String get zoneStatusColHardware => 'Hardware';
+
+  @override
+  String get zoneStatusColOnline => 'Online';
+
+  @override
+  String get zoneStatusColOffline => 'Offline';
+
+  @override
+  String get zoneStatusColMaint => 'Maint.';
+
+  @override
+  String get zoneStatusColStatus => 'Status';
+
+  @override
+  String get zoneStatusOnline => 'Online';
+
+  @override
+  String get zoneStatusOffline => 'Offline';
+
+  @override
+  String get zoneStatusEmpty => 'No zones assigned';
+
+  @override
+  String get zoneStatusLoadFailed => 'Couldn\'t load zone status';
 }

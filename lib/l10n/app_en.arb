@@ -527,5 +527,18 @@
   "raiseSuccess": "Ticket sent for {device}",
   "@raiseSuccess": { "placeholders": { "device": { "type": "String" } } },
   "staffTicketResolvedToast": "{device} was fixed by a technician. Tap for details.",
-  "@staffTicketResolvedToast": { "placeholders": { "device": { "type": "String" } } }
+  "@staffTicketResolvedToast": { "placeholders": { "device": { "type": "String" } } },
+
+  "techViewStatus": "Zone Status",
+  "zoneStatusTitle": "Zone Status",
+  "zoneStatusColZone": "Zone / Area",
+  "zoneStatusColHardware": "Hardware",
+  "zoneStatusColOnline": "Online",
+  "zoneStatusColOffline": "Offline",
+  "zoneStatusColMaint": "Maint.",
+  "zoneStatusColStatus": "Status",
+  "zoneStatusOnline": "Online",
+  "zoneStatusOffline": "Offline",
+  "zoneStatusEmpty": "No zones assigned",
+  "zoneStatusLoadFailed": "Couldn't load zone status"
 }

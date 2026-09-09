@@ -185,8 +185,7 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage> {
     final l10n = AppLocalizations.of(context)!;
     final queueState = ref.watch(technicianQueueStateProvider);
     final filterNotifier = ref.read(technicianQueueFilterProvider.notifier);
-    final isSpatialMode =
-        ref.watch(technicianViewModeProvider) == TechnicianViewMode.spatialExplorer;
+    final activeMode = ref.watch(technicianViewModeProvider);
     final viewModeNotifier = ref.read(technicianViewModeProvider.notifier);
 
     final currentList = switch (queueState.filter.tabIndex) {
@@ -198,7 +197,7 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage> {
 
     return Column(
       children: [
-        // Dual-Mode View Switcher (Spatial Explorer vs My Work Queue)
+        // 3-Mode View Switcher (Zone Map vs Zone Status vs My Tickets)
         Container(
           margin: const EdgeInsets.fromLTRB(16, 10, 16, 6),
           padding: const EdgeInsets.all(3),
@@ -213,15 +212,23 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage> {
                 child: _ModeSwitchButton(
                   icon: Icons.account_tree_rounded,
                   label: l10n.techViewSpatial,
-                  isActive: isSpatialMode,
+                  isActive: activeMode == TechnicianViewMode.spatialExplorer,
                   onTap: () => viewModeNotifier.setMode(TechnicianViewMode.spatialExplorer),
                 ),
               ),
               Expanded(
                 child: _ModeSwitchButton(
+                  icon: Icons.grid_view_rounded,
+                  label: l10n.techViewStatus,
+                  isActive: activeMode == TechnicianViewMode.zoneStatusTable,
+                  onTap: () => viewModeNotifier.setMode(TechnicianViewMode.zoneStatusTable),
+                ),
+              ),
+              Expanded(
+                child: _ModeSwitchButton(
                   icon: Icons.list_alt_rounded,
-                  label: '${l10n.techViewQueue} (${queueState.kpiStats.open})',
-                  isActive: !isSpatialMode,
+                  label: l10n.techViewQueue,
+                  isActive: activeMode == TechnicianViewMode.workQueue,
                   onTap: () => viewModeNotifier.setMode(TechnicianViewMode.workQueue),
                 ),
               ),
@@ -229,8 +236,10 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage> {
           ),
         ),
 
-        if (isSpatialMode)
+        if (activeMode == TechnicianViewMode.spatialExplorer)
           const Expanded(child: ZoneTreeExplorerView())
+        else if (activeMode == TechnicianViewMode.zoneStatusTable)
+          const Expanded(child: TechnicianZoneStatusView())
         else
           Expanded(
             child: Column(
@@ -479,7 +488,7 @@ class _ModeSwitchButton extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(10),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
         decoration: BoxDecoration(
           color: isActive ? AppColors.surface : Colors.transparent,
           borderRadius: BorderRadius.circular(10),
@@ -495,19 +504,24 @@ class _ModeSwitchButton extends StatelessWidget {
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               icon,
-              size: 15,
+              size: 14,
               color: isActive ? AppColors.primary : AppColors.textSecondary,
             ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: isActive ? FontWeight.bold : FontWeight.w600,
-                color: isActive ? AppColors.primary : AppColors.textSecondary,
+            const SizedBox(width: 4),
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: isActive ? FontWeight.bold : FontWeight.w600,
+                  color: isActive ? AppColors.primary : AppColors.textSecondary,
+                ),
               ),
             ),
           ],

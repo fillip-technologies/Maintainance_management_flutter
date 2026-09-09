@@ -6,4 +6,5 @@ export 'technician_kpi_bar.dart';
 export 'technician_search_filter_bar.dart';
 export 'zone_device_card.dart';
 export 'zone_health_hero_card.dart';
+export 'zone_status_table_view.dart';
 export 'zone_tree_explorer_view.dart';

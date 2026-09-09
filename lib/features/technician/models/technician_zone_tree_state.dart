@@ -8,6 +8,7 @@ import '../../issues/models/issue_model.dart';
 /// [TechnicianZoneTreeState], so it survives the tree's async reloads.
 enum TechnicianViewMode {
   spatialExplorer, // 🗺️ Zone-tree and spatial drill-down view
+  zoneStatusTable, // 📊 Tabular zone hardware health overview
   workQueue;       // 📋 Flat ticket list (Active, On-Hold, Resolved)
 }
 

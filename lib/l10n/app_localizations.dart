@@ -2041,6 +2041,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{device} was fixed by a technician. Tap for details.'**
   String staffTicketResolvedToast(String device);
+
+  /// No description provided for @techViewStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Zone Status'**
+  String get techViewStatus;
+
+  /// No description provided for @zoneStatusTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Zone Status'**
+  String get zoneStatusTitle;
+
+  /// No description provided for @zoneStatusColZone.
+  ///
+  /// In en, this message translates to:
+  /// **'Zone / Area'**
+  String get zoneStatusColZone;
+
+  /// No description provided for @zoneStatusColHardware.
+  ///
+  /// In en, this message translates to:
+  /// **'Hardware'**
+  String get zoneStatusColHardware;
+
+  /// No description provided for @zoneStatusColOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'Online'**
+  String get zoneStatusColOnline;
+
+  /// No description provided for @zoneStatusColOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get zoneStatusColOffline;
+
+  /// No description provided for @zoneStatusColMaint.
+  ///
+  /// In en, this message translates to:
+  /// **'Maint.'**
+  String get zoneStatusColMaint;
+
+  /// No description provided for @zoneStatusColStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get zoneStatusColStatus;
+
+  /// No description provided for @zoneStatusOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'Online'**
+  String get zoneStatusOnline;
+
+  /// No description provided for @zoneStatusOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get zoneStatusOffline;
+
+  /// No description provided for @zoneStatusEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No zones assigned'**
+  String get zoneStatusEmpty;
+
+  /// No description provided for @zoneStatusLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load zone status'**
+  String get zoneStatusLoadFailed;
 }
 
 class _AppLocalizationsDelegate

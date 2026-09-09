@@ -1082,4 +1082,40 @@ class AppLocalizationsHi extends AppLocalizations {
   String staffTicketResolvedToast(String device) {
     return '$device को तकनीशियन ने ठीक किया। विवरण के लिए टैप करें।';
   }
+
+  @override
+  String get techViewStatus => 'ज़ोन स्थिति';
+
+  @override
+  String get zoneStatusTitle => 'ज़ोन स्थिति';
+
+  @override
+  String get zoneStatusColZone => 'ज़ोन / क्षेत्र';
+
+  @override
+  String get zoneStatusColHardware => 'हार्डवेयर';
+
+  @override
+  String get zoneStatusColOnline => 'चालू';
+
+  @override
+  String get zoneStatusColOffline => 'बंद';
+
+  @override
+  String get zoneStatusColMaint => 'मरम्मत';
+
+  @override
+  String get zoneStatusColStatus => 'स्थिति';
+
+  @override
+  String get zoneStatusOnline => 'चालू';
+
+  @override
+  String get zoneStatusOffline => 'बंद';
+
+  @override
+  String get zoneStatusEmpty => 'कोई ज़ोन असाइन नहीं';
+
+  @override
+  String get zoneStatusLoadFailed => 'ज़ोन स्थिति लोड नहीं हो सकी';
 }

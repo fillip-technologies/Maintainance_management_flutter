@@ -435,5 +435,18 @@
   "raiseSuccess": "{device} के लिए टिकट भेजा गया",
   "@raiseSuccess": { "placeholders": { "device": { "type": "String" } } },
   "staffTicketResolvedToast": "{device} को तकनीशियन ने ठीक किया। विवरण के लिए टैप करें।",
-  "@staffTicketResolvedToast": { "placeholders": { "device": { "type": "String" } } }
+  "@staffTicketResolvedToast": { "placeholders": { "device": { "type": "String" } } },
+
+  "techViewStatus": "ज़ोन स्थिति",
+  "zoneStatusTitle": "ज़ोन स्थिति",
+  "zoneStatusColZone": "ज़ोन / क्षेत्र",
+  "zoneStatusColHardware": "हार्डवेयर",
+  "zoneStatusColOnline": "चालू",
+  "zoneStatusColOffline": "बंद",
+  "zoneStatusColMaint": "मरम्मत",
+  "zoneStatusColStatus": "स्थिति",
+  "zoneStatusOnline": "चालू",
+  "zoneStatusOffline": "बंद",
+  "zoneStatusEmpty": "कोई ज़ोन असाइन नहीं",
+  "zoneStatusLoadFailed": "ज़ोन स्थिति लोड नहीं हो सकी"
 }
