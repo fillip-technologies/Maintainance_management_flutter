@@ -112,8 +112,8 @@ void main() {
       expect(en.zoneStatusColZone, 'Zone / Area');
       expect(hi.zoneStatusColZone, 'ज़ोन / क्षेत्र');
 
-      expect(en.zoneStatusColHardware, 'Hardware');
-      expect(hi.zoneStatusColHardware, 'हार्डवेयर');
+      expect(en.zoneStatusColHardware, 'Total');
+      expect(hi.zoneStatusColHardware, 'कुल');
 
       expect(en.zoneStatusColOnline, 'Online');
       expect(hi.zoneStatusColOnline, 'चालू');
@@ -194,7 +194,7 @@ void main() {
       // Check table column headers
       expect(find.text('#'), findsOneWidget);
       expect(find.text('Zone / Area'), findsOneWidget);
-      expect(find.text('Hardware'), findsOneWidget);
+      expect(find.text('Total'), findsOneWidget);
       expect(find.text('Maint.'), findsOneWidget);
       expect(find.text('Status'), findsOneWidget);
 
@@ -213,6 +213,48 @@ void main() {
       expect(find.text('Online'), findsNWidgets(3));
       // 'Offline' appears 2 times: 1 header + 1 row status indicator
       expect(find.text('Offline'), findsNWidgets(2));
+    });
+
+    testWidgets('5. TechnicianZoneStatusView renders without overflow on compact mobile viewport (360x640)', (tester) async {
+      tester.view.physicalSize = const Size(360, 640);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      final testRows = [
+        const ZoneStatusRow(
+          id: 'z-1',
+          name: 'Entry / Exit',
+          hardwareCount: 36,
+          onlineCount: 33,
+          offlineCount: 2,
+          maintenanceCount: 1,
+        ),
+      ];
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            technicianZoneStatusViewModelProvider.overrideWith(
+              () => _FakeZoneStatusViewModel(testRows),
+            ),
+          ],
+          child: const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: TechnicianZoneStatusView(),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('Entry / Exit'), findsOneWidget);
     });
   });
 }

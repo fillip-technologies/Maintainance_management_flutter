@@ -1093,7 +1093,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get zoneStatusColZone => 'ज़ोन / क्षेत्र';
 
   @override
-  String get zoneStatusColHardware => 'हार्डवेयर';
+  String get zoneStatusColHardware => 'कुल';
 
   @override
   String get zoneStatusColOnline => 'चालू';

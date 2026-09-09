@@ -1098,7 +1098,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get zoneStatusColZone => 'Zone / Area';
 
   @override
-  String get zoneStatusColHardware => 'Hardware';
+  String get zoneStatusColHardware => 'Total';
 
   @override
   String get zoneStatusColOnline => 'Online';

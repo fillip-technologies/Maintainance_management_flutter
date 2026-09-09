@@ -2063,7 +2063,7 @@ abstract class AppLocalizations {
   /// No description provided for @zoneStatusColHardware.
   ///
   /// In en, this message translates to:
-  /// **'Hardware'**
+  /// **'Total'**
   String get zoneStatusColHardware;
 
   /// No description provided for @zoneStatusColOnline.

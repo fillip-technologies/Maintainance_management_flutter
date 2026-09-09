@@ -532,7 +532,7 @@
   "techViewStatus": "Zone Status",
   "zoneStatusTitle": "Zone Status",
   "zoneStatusColZone": "Zone / Area",
-  "zoneStatusColHardware": "Hardware",
+  "zoneStatusColHardware": "Total",
   "zoneStatusColOnline": "Online",
   "zoneStatusColOffline": "Offline",
   "zoneStatusColMaint": "Maint.",

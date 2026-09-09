@@ -6,6 +6,67 @@ import '../../../../l10n/app_localizations.dart';
 import '../../models/zone_status_row.dart';
 import '../../viewmodels/technician_zone_status_viewmodel.dart';
 
+const double _indexColWidth = 22.0;
+const double _totalColWidth = 44.0;
+const double _onlineColWidth = 42.0;
+const double _offlineColWidth = 42.0;
+const double _maintColWidth = 40.0;
+const double _statusColWidth = 60.0;
+const double _rowHorizontalPadding = 6.0;
+const double _fixedColumnsWidth = _indexColWidth +
+    _totalColWidth +
+    _onlineColWidth +
+    _offlineColWidth +
+    _maintColWidth +
+    _statusColWidth; // 250.0
+
+/// Calculates the exact width needed for the Zone / Area column based on the longest
+/// zone name in the list, allowing the table to remain as compact as possible on mobile.
+double _calculateMaxZoneWidth({
+  required BuildContext context,
+  required List<ZoneStatusRow> rows,
+  required String headerText,
+}) {
+  final textScaler = MediaQuery.textScalerOf(context);
+
+  // Measure header text width
+  final headerPainter = TextPainter(
+    text: TextSpan(
+      text: headerText,
+      style: const TextStyle(
+        fontSize: 10.5,
+        fontWeight: FontWeight.bold,
+      ),
+    ),
+    textDirection: TextDirection.ltr,
+    textScaler: textScaler,
+  )..layout();
+  double maxContentWidth = headerPainter.width;
+
+  // Measure each row's zone name + icon (20px) + gap (6px)
+  for (final row in rows) {
+    final painter = TextPainter(
+      text: TextSpan(
+        text: row.displayName,
+        style: const TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+      textScaler: textScaler,
+    )..layout();
+
+    final rowWidth = 26.0 + painter.width;
+    if (rowWidth > maxContentWidth) {
+      maxContentWidth = rowWidth;
+    }
+  }
+
+  // 6px extra padding buffer for comfortable spacing
+  return maxContentWidth + 6.0;
+}
+
 /// Tabular overview of every assigned zone/area and its hardware health metrics.
 ///
 /// Designed to be faithful to the compact dashboard mockup:
@@ -38,7 +99,7 @@ class TechnicianZoneStatusView extends ConsumerWidget {
         }
 
         return Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -101,10 +162,23 @@ class TechnicianZoneStatusView extends ConsumerWidget {
                   clipBehavior: Clip.antiAlias,
                   child: LayoutBuilder(
                     builder: (context, constraints) {
-                      const double minTableWidth = 450.0;
-                      final double tableWidth = constraints.maxWidth > minTableWidth
+                      final double calculatedZoneWidth = _calculateMaxZoneWidth(
+                        context: context,
+                        rows: rows,
+                        headerText: l10n.zoneStatusColZone,
+                      );
+
+                      final double minNeededWidth = _fixedColumnsWidth +
+                          (_rowHorizontalPadding * 2) +
+                          calculatedZoneWidth;
+
+                      final double tableWidth = constraints.maxWidth > minNeededWidth
                           ? constraints.maxWidth
-                          : minTableWidth;
+                          : minNeededWidth;
+
+                      final double zoneColWidth = constraints.maxWidth > minNeededWidth
+                          ? calculatedZoneWidth + (constraints.maxWidth - minNeededWidth)
+                          : calculatedZoneWidth;
 
                       return SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
@@ -113,7 +187,10 @@ class TechnicianZoneStatusView extends ConsumerWidget {
                           child: Column(
                             children: [
                               // Sticky Table Header
-                              _TableHeader(l10n: l10n),
+                              _TableHeader(
+                                zoneColWidth: zoneColWidth,
+                                l10n: l10n,
+                              ),
                               const Divider(height: 1, thickness: 1, color: AppColors.border),
 
                               // Table Rows with Pull-to-refresh
@@ -134,6 +211,7 @@ class TechnicianZoneStatusView extends ConsumerWidget {
                                       return _ZoneRow(
                                         row: rows[index],
                                         index: index,
+                                        zoneColWidth: zoneColWidth,
                                         l10n: l10n,
                                       );
                                     },
@@ -158,20 +236,24 @@ class TechnicianZoneStatusView extends ConsumerWidget {
 
 /// Sticky table header with fixed column proportions.
 class _TableHeader extends StatelessWidget {
+  final double zoneColWidth;
   final AppLocalizations l10n;
 
-  const _TableHeader({required this.l10n});
+  const _TableHeader({
+    required this.zoneColWidth,
+    required this.l10n,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       height: 34,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.symmetric(horizontal: _rowHorizontalPadding),
       color: AppColors.cardAlt,
       child: Row(
         children: [
           const SizedBox(
-            width: 26,
+            width: _indexColWidth,
             child: Text(
               '#',
               style: TextStyle(
@@ -181,7 +263,8 @@ class _TableHeader extends StatelessWidget {
               ),
             ),
           ),
-          Expanded(
+          SizedBox(
+            width: zoneColWidth,
             child: Text(
               l10n.zoneStatusColZone,
               style: const TextStyle(
@@ -192,7 +275,7 @@ class _TableHeader extends StatelessWidget {
             ),
           ),
           SizedBox(
-            width: 52,
+            width: _totalColWidth,
             child: Text(
               l10n.zoneStatusColHardware,
               textAlign: TextAlign.center,
@@ -204,7 +287,7 @@ class _TableHeader extends StatelessWidget {
             ),
           ),
           SizedBox(
-            width: 48,
+            width: _onlineColWidth,
             child: Text(
               l10n.zoneStatusColOnline,
               style: const TextStyle(
@@ -215,7 +298,7 @@ class _TableHeader extends StatelessWidget {
             ),
           ),
           SizedBox(
-            width: 48,
+            width: _offlineColWidth,
             child: Text(
               l10n.zoneStatusColOffline,
               style: const TextStyle(
@@ -226,7 +309,7 @@ class _TableHeader extends StatelessWidget {
             ),
           ),
           SizedBox(
-            width: 46,
+            width: _maintColWidth,
             child: Text(
               l10n.zoneStatusColMaint,
               style: const TextStyle(
@@ -237,7 +320,7 @@ class _TableHeader extends StatelessWidget {
             ),
           ),
           SizedBox(
-            width: 68,
+            width: _statusColWidth,
             child: Text(
               l10n.zoneStatusColStatus,
               style: const TextStyle(
@@ -257,11 +340,13 @@ class _TableHeader extends StatelessWidget {
 class _ZoneRow extends StatelessWidget {
   final ZoneStatusRow row;
   final int index;
+  final double zoneColWidth;
   final AppLocalizations l10n;
 
   const _ZoneRow({
     required this.row,
     required this.index,
+    required this.zoneColWidth,
     required this.l10n,
   });
 
@@ -269,13 +354,13 @@ class _ZoneRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 42,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.symmetric(horizontal: _rowHorizontalPadding),
       color: AppColors.surface,
       child: Row(
         children: [
           // # Index
           SizedBox(
-            width: 26,
+            width: _indexColWidth,
             child: Text(
               '${index + 1}',
               style: const TextStyle(
@@ -286,17 +371,18 @@ class _ZoneRow extends StatelessWidget {
             ),
           ),
 
-          // Zone / Area Cell
-          Expanded(
+          // Zone / Area Cell (sized to max name width)
+          SizedBox(
+            width: zoneColWidth,
             child: _ZoneCell(
               name: row.displayName,
               imageUrl: row.imageUrl,
             ),
           ),
 
-          // Hardware Count (Cameras column in mock)
+          // Total Count (Total column, centered)
           SizedBox(
-            width: 52,
+            width: _totalColWidth,
             child: Text(
               row.dataLoadFailed ? '—' : '${row.hardwareCount}',
               textAlign: TextAlign.center,
@@ -310,7 +396,7 @@ class _ZoneRow extends StatelessWidget {
 
           // Online Count
           SizedBox(
-            width: 48,
+            width: _onlineColWidth,
             child: _CountCell(
               value: row.onlineCount,
               dotColor: AppColors.success,
@@ -320,7 +406,7 @@ class _ZoneRow extends StatelessWidget {
 
           // Offline Count
           SizedBox(
-            width: 48,
+            width: _offlineColWidth,
             child: _CountCell(
               value: row.offlineCount,
               dotColor: AppColors.error,
@@ -330,7 +416,7 @@ class _ZoneRow extends StatelessWidget {
 
           // Maint. Count
           SizedBox(
-            width: 46,
+            width: _maintColWidth,
             child: _CountCell(
               value: row.maintenanceCount,
               dotColor: AppColors.warning,
@@ -340,7 +426,7 @@ class _ZoneRow extends StatelessWidget {
 
           // Overall Status (colored circle + text, no background pill)
           SizedBox(
-            width: 68,
+            width: _statusColWidth,
             child: _StatusIndicator(
               status: row.overallStatus,
               dataLoadFailed: row.dataLoadFailed,
@@ -511,7 +597,7 @@ class _StatusIndicator extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-              fontSize: 12,
+              fontSize: 11.5,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
             ),

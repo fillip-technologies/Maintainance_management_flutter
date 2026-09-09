@@ -440,7 +440,7 @@
   "techViewStatus": "ज़ोन स्थिति",
   "zoneStatusTitle": "ज़ोन स्थिति",
   "zoneStatusColZone": "ज़ोन / क्षेत्र",
-  "zoneStatusColHardware": "हार्डवेयर",
+  "zoneStatusColHardware": "कुल",
   "zoneStatusColOnline": "चालू",
   "zoneStatusColOffline": "बंद",
   "zoneStatusColMaint": "मरम्मत",
