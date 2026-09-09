@@ -150,25 +150,28 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Initially in Catalog Grid view
+      // Initially in Grid view: filter chips are hidden
       expect(find.byType(EquipmentCategoryCard), findsNWidgets(3));
+      expect(find.text('All Hardware'), findsNothing);
 
-      // Tap toggle button (grid icon)
+      // Tap toggle button (grid icon) to switch to List view
       await tester.tap(find.byIcon(Icons.grid_view_rounded));
       await tester.pumpAndSettle();
 
-      // Now in Flat List view: category cards gone, individual device cards shown
+      // Now in Flat List view: filter chips are shown, individual device cards shown
       expect(find.byType(EquipmentCategoryCard), findsNothing);
+      expect(find.text('All Hardware'), findsOneWidget);
       expect(find.text('Fixed Cam 1'), findsOneWidget);
       expect(find.text('Fixed Cam 2'), findsOneWidget);
       expect(find.text('PTZ Cam 1'), findsOneWidget);
       expect(find.text('Switch Core 1'), findsOneWidget);
 
-      // Tap toggle button again to switch back to Catalog Grid
+      // Tap toggle button again to switch back to Grid view
       await tester.tap(find.byIcon(Icons.list_alt_rounded));
       await tester.pumpAndSettle();
 
       expect(find.byType(EquipmentCategoryCard), findsNWidgets(3));
+      expect(find.text('All Hardware'), findsNothing);
     });
 
     testWidgets('renders properly in dark mode without overflow', (tester) async {

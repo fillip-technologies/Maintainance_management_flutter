@@ -60,7 +60,7 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
 
     var list = widget.devices;
 
-    if (_filterStatus != null) {
+    if (!_isGroupedView && _filterStatus != null) {
       list = list.where((d) => d.status == _filterStatus).toList();
     }
 
@@ -75,7 +75,7 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
     }
 
     final groups = DeviceGroup.fromDevices(list);
-    final hasActiveFilter = _searchQuery.isNotEmpty || _filterStatus != null;
+    final hasActiveFilter = _searchQuery.isNotEmpty || (!_isGroupedView && _filterStatus != null);
 
     return Column(
       children: [
@@ -159,52 +159,54 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    AppFilterChip(
-                      label: l10n?.allHardware ?? 'All Hardware',
-                      badgeText: '$totalCount',
-                      isSelected: _filterStatus == null,
-                      onTap: () => setState(() => _filterStatus = null),
-                    ),
-                    const SizedBox(width: 6),
-                    AppFilterChip(
-                      label: l10n?.deviceStatusActive ?? 'Active',
-                      badgeText: '$activeCount',
-                      isSelected: _filterStatus == DeviceStatus.active,
-                      activeColor: AppColors.success,
-                      onTap: () => setState(() => _filterStatus = DeviceStatus.active),
-                    ),
-                    const SizedBox(width: 6),
-                    AppFilterChip(
-                      label: l10n?.deviceStatusMaintenance ?? 'Maintenance',
-                      badgeText: maintCount > 0 ? '$maintCount' : null,
-                      isSelected: _filterStatus == DeviceStatus.underMaintenance,
-                      activeColor: AppColors.warning,
-                      onTap: () => setState(() => _filterStatus = DeviceStatus.underMaintenance),
-                    ),
-                    const SizedBox(width: 6),
-                    AppFilterChip(
-                      label: l10n?.deviceStatusFaulty ?? 'Faulty',
-                      badgeText: faultyCount > 0 ? '$faultyCount' : null,
-                      isSelected: _filterStatus == DeviceStatus.faulty,
-                      activeColor: AppColors.error,
-                      onTap: () => setState(() => _filterStatus = DeviceStatus.faulty),
-                    ),
-                    const SizedBox(width: 6),
-                    AppFilterChip(
-                      label: l10n?.deviceStatusProvisioned ?? 'In Stock',
-                      badgeText: provCount > 0 ? '$provCount' : null,
-                      isSelected: _filterStatus == DeviceStatus.provisioned,
-                      activeColor: AppColors.info,
-                      onTap: () => setState(() => _filterStatus = DeviceStatus.provisioned),
-                    ),
-                  ],
+              if (!_isGroupedView) ...[
+                const SizedBox(height: 8),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      AppFilterChip(
+                        label: l10n?.allHardware ?? 'All Hardware',
+                        badgeText: '$totalCount',
+                        isSelected: _filterStatus == null,
+                        onTap: () => setState(() => _filterStatus = null),
+                      ),
+                      const SizedBox(width: 6),
+                      AppFilterChip(
+                        label: l10n?.deviceStatusActive ?? 'Active',
+                        badgeText: '$activeCount',
+                        isSelected: _filterStatus == DeviceStatus.active,
+                        activeColor: AppColors.success,
+                        onTap: () => setState(() => _filterStatus = DeviceStatus.active),
+                      ),
+                      const SizedBox(width: 6),
+                      AppFilterChip(
+                        label: l10n?.deviceStatusMaintenance ?? 'Maintenance',
+                        badgeText: maintCount > 0 ? '$maintCount' : null,
+                        isSelected: _filterStatus == DeviceStatus.underMaintenance,
+                        activeColor: AppColors.warning,
+                        onTap: () => setState(() => _filterStatus = DeviceStatus.underMaintenance),
+                      ),
+                      const SizedBox(width: 6),
+                      AppFilterChip(
+                        label: l10n?.deviceStatusFaulty ?? 'Faulty',
+                        badgeText: faultyCount > 0 ? '$faultyCount' : null,
+                        isSelected: _filterStatus == DeviceStatus.faulty,
+                        activeColor: AppColors.error,
+                        onTap: () => setState(() => _filterStatus = DeviceStatus.faulty),
+                      ),
+                      const SizedBox(width: 6),
+                      AppFilterChip(
+                        label: l10n?.deviceStatusProvisioned ?? 'In Stock',
+                        badgeText: provCount > 0 ? '$provCount' : null,
+                        isSelected: _filterStatus == DeviceStatus.provisioned,
+                        activeColor: AppColors.info,
+                        onTap: () => setState(() => _filterStatus = DeviceStatus.provisioned),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+              ],
               if (_isGroupedView && list.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Row(
