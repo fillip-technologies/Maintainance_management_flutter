@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../viewmodels/auth_viewmodel.dart';
 import '../../../core/theme/colors.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../core/widgets/double_back_exit_scope.dart';
 import '../../../core/widgets/language_segmented_control.dart';
 import '../../../l10n/app_localizations.dart';
 import 'widgets/custom_password_field.dart';
@@ -67,8 +68,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       errorMessage = raw.isNotEmpty ? raw : l10n.authError;
     }
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
+    return DoubleBackExitScope(
+      child: Scaffold(
+        backgroundColor: AppColors.background,
       body: SafeArea(
         child: Stack(
           children: [
@@ -356,6 +358,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

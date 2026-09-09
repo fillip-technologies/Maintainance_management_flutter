@@ -448,5 +448,6 @@
   "zoneStatusOnline": "चालू",
   "zoneStatusOffline": "बंद",
   "zoneStatusEmpty": "कोई ज़ोन असाइन नहीं",
-  "zoneStatusLoadFailed": "ज़ोन स्थिति लोड नहीं हो सकी"
+  "zoneStatusLoadFailed": "ज़ोन स्थिति लोड नहीं हो सकी",
+  "pressBackAgainToExit": "ऐप बंद करने के लिए दोबारा बैक दबाएं"
 }

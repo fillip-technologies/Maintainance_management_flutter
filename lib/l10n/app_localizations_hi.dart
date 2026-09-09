@@ -1118,4 +1118,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get zoneStatusLoadFailed => 'ज़ोन स्थिति लोड नहीं हो सकी';
+
+  @override
+  String get pressBackAgainToExit => 'ऐप बंद करने के लिए दोबारा बैक दबाएं';
 }

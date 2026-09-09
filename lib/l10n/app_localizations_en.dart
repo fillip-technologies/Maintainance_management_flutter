@@ -1123,4 +1123,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get zoneStatusLoadFailed => 'Couldn\'t load zone status';
+
+  @override
+  String get pressBackAgainToExit => 'Press back again to exit';
 }

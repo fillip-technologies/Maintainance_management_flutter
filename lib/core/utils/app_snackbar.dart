@@ -129,4 +129,37 @@ class AppSnackbar {
         messengerKey.currentState;
     state?.clearSnackBars();
   }
+
+  /// Compact, centered pill toast (e.g. for "Press back again to exit")
+  static void toast(
+    String message, {
+    BuildContext? context,
+    Duration duration = const Duration(seconds: 2),
+  }) {
+    final state = (context != null ? ScaffoldMessenger.maybeOf(context) : null) ??
+        messengerKey.currentState;
+    if (state == null) return;
+
+    state.clearSnackBars();
+    state.showSnackBar(
+      SnackBar(
+        elevation: 6,
+        behavior: SnackBarBehavior.floating,
+        width: 240,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        backgroundColor: const Color(0xE61E293B),
+        duration: duration,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        content: Text(
+          message,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 12.5,
+            fontWeight: FontWeight.w500,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
 }

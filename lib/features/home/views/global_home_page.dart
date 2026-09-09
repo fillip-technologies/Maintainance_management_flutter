@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/colors.dart';
+import '../../../core/widgets/double_back_exit_scope.dart';
 import '../../../core/widgets/language_switcher_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/auth.dart';
@@ -72,7 +73,22 @@ class GlobalHomePage extends ConsumerWidget {
       });
     }
 
-    return Scaffold(
+    final treeState = isTechnician
+        ? ref.watch(technicianZoneTreeViewModelProvider).value
+        : null;
+    final treeViewModel = isTechnician
+        ? ref.read(technicianZoneTreeViewModelProvider.notifier)
+        : null;
+
+    return DoubleBackExitScope(
+      onWillPop: () async {
+        if (isTechnician && treeState != null && treeState.currentPath.isNotEmpty) {
+          await treeViewModel?.navigateUp();
+          return false;
+        }
+        return true;
+      },
+      child: Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.surface,
@@ -221,6 +237,7 @@ class GlobalHomePage extends ConsumerWidget {
                 ),
               ),
             ),
+      ),
     );
   }
 }
