@@ -4,6 +4,7 @@ import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/widgets/app_filter_chip.dart';
 import '../../../../core/widgets/empty_state_view.dart';
 import '../../../../core/widgets/status_badge.dart';
+import '../../../../core/widgets/app_shimmer.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../devices/devices.dart';
 import 'category_devices_sheet.dart';
@@ -248,17 +249,9 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
     bool hasActiveFilter,
   ) {
     if (widget.isLoading) {
-      return ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 80),
-            child: Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            ),
-          ),
-        ],
-      );
+      return _isGroupedView
+          ? const EquipmentCategoryGridSkeleton()
+          : const EquipmentListSkeleton();
     }
     if (widget.hasError) {
       return ListView(

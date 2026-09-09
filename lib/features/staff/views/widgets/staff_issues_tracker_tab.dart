@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/widgets/app_filter_chip.dart';
 import '../../../../core/widgets/empty_state_view.dart';
+import '../../../../core/widgets/app_shimmer.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../issues/issues.dart';
 
@@ -102,23 +103,19 @@ class _StaffIssuesTrackerTabState extends State<StaffIssuesTrackerTab> {
         Divider(height: 1, color: AppColors.divider),
 
         Expanded(
-          child: RefreshIndicator(
-            color: AppColors.primary,
-            onRefresh: widget.onRefresh,
-            child: ListView.builder(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 84),
-              itemCount: (widget.isLoading || widget.hasError || displayedIssues.isEmpty)
-                  ? 1
-                  : displayedIssues.length,
-              itemBuilder: (context, index) {
-                if (widget.isLoading) {
-                  return Padding(
-                    padding: EdgeInsets.only(top: 80),
-                    child: Center(child: CircularProgressIndicator(color: AppColors.primary)),
-                  );
-                }
-                if (widget.hasError) {
+          child: widget.isLoading
+              ? const IssuesListSkeleton()
+              : RefreshIndicator(
+                  color: AppColors.primary,
+                  onRefresh: widget.onRefresh,
+                  child: ListView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 84),
+                    itemCount: (widget.hasError || displayedIssues.isEmpty)
+                        ? 1
+                        : displayedIssues.length,
+                    itemBuilder: (context, index) {
+                      if (widget.hasError) {
                   return Padding(
                     padding: const EdgeInsets.only(top: 40),
                     child: ErrorStateView(

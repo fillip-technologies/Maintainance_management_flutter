@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/widgets/empty_state_view.dart';
+import '../../../../core/widgets/app_shimmer.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../models/technician_zone_tree_state.dart';
 import '../../models/zone_status_row.dart';
@@ -83,9 +84,7 @@ class TechnicianZoneStatusView extends ConsumerWidget {
     final statusAsync = ref.watch(technicianZoneStatusViewModelProvider);
 
     return statusAsync.when(
-      loading: () => Center(
-        child: CircularProgressIndicator(color: AppColors.primary),
-      ),
+      loading: () => const ZoneStatusTableSkeleton(),
       error: (error, _) => ErrorStateView(
         title: l10n.zoneStatusLoadFailed,
         subtitle: error.toString(),

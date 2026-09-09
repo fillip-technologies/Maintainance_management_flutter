@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/config/app_config.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../core/widgets/language_switcher_button.dart';
+import '../../../../core/widgets/app_shimmer.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../auth/auth.dart';
 import '../../devices/devices.dart';
@@ -75,7 +76,7 @@ class ProfilePage extends ConsumerWidget {
     if (user == null) {
       return Scaffold(
         appBar: AppBar(title: Text(l10n.profile)),
-        body: const Center(child: CircularProgressIndicator()),
+        body: const ProfileSkeleton(),
       );
     }
 

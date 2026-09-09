@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/widgets/empty_state_view.dart';
+import '../../../../core/widgets/app_shimmer.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../issues/issues.dart';
 import 'technician_issue_card.dart';
@@ -34,6 +35,10 @@ class TechnicianIssueList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const IssuesListSkeleton();
+    }
+
     final l10n = AppLocalizations.of(context)!;
     return RefreshIndicator(
       color: AppColors.primary,
@@ -41,17 +46,8 @@ class TechnicianIssueList extends StatelessWidget {
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(16),
-        itemCount: (isLoading || hasError || issues.isEmpty) ? 1 : issues.length,
+        itemCount: (hasError || issues.isEmpty) ? 1 : issues.length,
         itemBuilder: (context, index) {
-          if (isLoading) {
-            return Padding(
-              padding: EdgeInsets.only(top: 80),
-              child: Center(
-                child: CircularProgressIndicator(color: AppColors.primary),
-              ),
-            );
-          }
-
           if (hasError) {
             return Padding(
               padding: const EdgeInsets.only(top: 40),

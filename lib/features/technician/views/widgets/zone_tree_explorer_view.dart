@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/widgets/empty_state_view.dart';
+import '../../../../core/widgets/app_shimmer.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../issues/issues.dart';
 import '../../viewmodels/technician_action_viewmodel.dart';
@@ -32,9 +33,7 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
     final actionNotifier = ref.read(technicianActionViewModelProvider);
 
     return treeAsync.when(
-      loading: () => Center(
-        child: CircularProgressIndicator(color: AppColors.primary),
-      ),
+      loading: () => const ZoneTreeSkeleton(),
       error: (err, _) => Center(
         child: Padding(
           padding: const EdgeInsets.all(24),

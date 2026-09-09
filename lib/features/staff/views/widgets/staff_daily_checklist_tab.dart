@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/widgets/app_filter_chip.dart';
 import '../../../../core/widgets/empty_state_view.dart';
+import '../../../../core/widgets/app_shimmer.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../daily_logs/daily_logs.dart';
 import '../../../devices/devices.dart';
@@ -140,34 +141,27 @@ class StaffDailyChecklistTab extends StatelessWidget {
 
         // Device Check List
         Expanded(
-          child: RefreshIndicator(
-            color: AppColors.primary,
-            onRefresh: onRefresh,
-            child: ListView.builder(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 84),
-              itemCount: (isLoading || hasError || displayedDevices.isEmpty) ? 1 : displayedDevices.length,
-              itemBuilder: (context, index) {
-                if (isLoading) {
-                  return Padding(
-                    padding: EdgeInsets.only(top: 80),
-                    child: Center(
-                      child: CircularProgressIndicator(color: AppColors.primary),
-                    ),
-                  );
-                }
-
-                if (hasError) {
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 40),
-                    child: ErrorStateView(
-                      title: l10n?.staffChecklistLoadFailed ?? "Couldn't load the checklist",
-                      subtitle: l10n?.staffCheckConnectionRetry ??
-                          'Check your connection and tap to retry',
-                      onRetry: onRefresh,
-                    ),
-                  );
-                }
+          child: isLoading
+              ? const StaffChecklistSkeleton()
+              : RefreshIndicator(
+                  color: AppColors.primary,
+                  onRefresh: onRefresh,
+                  child: ListView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 84),
+                    itemCount: (hasError || displayedDevices.isEmpty) ? 1 : displayedDevices.length,
+                    itemBuilder: (context, index) {
+                      if (hasError) {
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 40),
+                          child: ErrorStateView(
+                            title: l10n?.staffChecklistLoadFailed ?? "Couldn't load the checklist",
+                            subtitle: l10n?.staffCheckConnectionRetry ??
+                                'Check your connection and tap to retry',
+                            onRetry: onRefresh,
+                          ),
+                        );
+                      }
 
                 if (displayedDevices.isEmpty) {
                   final isPendingFilter = checklistState.filterIndex == 1;
