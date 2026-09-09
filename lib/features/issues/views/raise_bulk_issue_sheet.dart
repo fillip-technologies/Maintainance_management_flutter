@@ -32,7 +32,7 @@ class RaiseBulkIssueSheet extends ConsumerStatefulWidget {
       context: context,
       isScrollControlled: true,
       enableDrag: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.transparent,
       builder: (_) => RaiseBulkIssueSheet(
         devices: devices,
         onIssuesCreated: onIssuesCreated,
@@ -304,7 +304,7 @@ class _RaiseBulkIssueSheetState extends ConsumerState<RaiseBulkIssueSheet> {
 
     return Container(
       constraints: BoxConstraints(maxHeight: maxHeight),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -349,7 +349,7 @@ class _RaiseBulkIssueSheetState extends ConsumerState<RaiseBulkIssueSheet> {
                               color: AppColors.errorLight,
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.playlist_add_rounded,
                               color: AppColors.errorText,
                               size: 22,
@@ -361,7 +361,7 @@ class _RaiseBulkIssueSheetState extends ConsumerState<RaiseBulkIssueSheet> {
                             children: [
                               Text(
                                 l10n?.raiseBulkDefectTitle ?? 'Raise Bulk Defect',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                   color: AppColors.textPrimary,
@@ -370,7 +370,7 @@ class _RaiseBulkIssueSheetState extends ConsumerState<RaiseBulkIssueSheet> {
                               const SizedBox(height: 2),
                               Text(
                                 l10n?.raiseBulkDefectSubtitle ?? 'Report identical issue on multiple units (1–50)',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 12,
                                   color: AppColors.textSecondary,
                                 ),
@@ -381,11 +381,11 @@ class _RaiseBulkIssueSheetState extends ConsumerState<RaiseBulkIssueSheet> {
                       ),
                       IconButton(
                         onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.close, color: AppColors.icon),
+                        icon: Icon(Icons.close, color: AppColors.icon),
                       ),
                     ],
                   ),
-                  const Divider(color: AppColors.divider),
+                  Divider(color: AppColors.divider),
                   const SizedBox(height: 10),
 
                   // Error Banner
@@ -399,12 +399,12 @@ class _RaiseBulkIssueSheetState extends ConsumerState<RaiseBulkIssueSheet> {
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.error_outline, color: AppColors.errorText, size: 18),
+                          Icon(Icons.error_outline, color: AppColors.errorText, size: 18),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               _errorMessage!,
-                              style: const TextStyle(fontSize: 13, color: AppColors.errorText),
+                              style: TextStyle(fontSize: 13, color: AppColors.errorText),
                             ),
                           ),
                         ],
@@ -420,7 +420,7 @@ class _RaiseBulkIssueSheetState extends ConsumerState<RaiseBulkIssueSheet> {
                       Text(
                         l10n?.selectEquipmentUnits(_selectedDeviceIds.length) ??
                             'Select Equipment (${_selectedDeviceIds.length}/50)',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textSecondary,
@@ -468,8 +468,8 @@ class _RaiseBulkIssueSheetState extends ConsumerState<RaiseBulkIssueSheet> {
                     onChanged: (val) => setState(() => _searchQuery = val.trim()),
                     decoration: InputDecoration(
                       hintText: l10n?.searchUnitsHint ?? 'Search unit by name, serial number or type...',
-                      hintStyle: const TextStyle(fontSize: 13, color: AppColors.textMuted),
-                      prefixIcon: const Icon(Icons.search, size: 20, color: AppColors.icon),
+                      hintStyle: TextStyle(fontSize: 13, color: AppColors.textMuted),
+                      prefixIcon: Icon(Icons.search, size: 20, color: AppColors.icon),
                       suffixIcon: _searchQuery.isNotEmpty
                           ? IconButton(
                               icon: const Icon(Icons.clear, size: 18),
@@ -484,11 +484,11 @@ class _RaiseBulkIssueSheetState extends ConsumerState<RaiseBulkIssueSheet> {
                       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: AppColors.border),
+                        borderSide: BorderSide(color: AppColors.border),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: AppColors.border),
+                        borderSide: BorderSide(color: AppColors.border),
                       ),
                     ),
                   ),
@@ -543,7 +543,7 @@ class _RaiseBulkIssueSheetState extends ConsumerState<RaiseBulkIssueSheet> {
                         ? Center(
                             child: Text(
                               l10n?.noMatchingUnits ?? 'No matching equipment units found',
-                              style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                             ),
                           )
                         : ListView.builder(
@@ -590,7 +590,7 @@ class _RaiseBulkIssueSheetState extends ConsumerState<RaiseBulkIssueSheet> {
                                                   Flexible(
                                                     child: Text(
                                                       group.hardwareTypeName,
-                                                      style: const TextStyle(
+                                                      style: TextStyle(
                                                         fontSize: 13,
                                                         fontWeight: FontWeight.bold,
                                                         color: AppColors.textPrimary,
@@ -690,13 +690,13 @@ class _RaiseBulkIssueSheetState extends ConsumerState<RaiseBulkIssueSheet> {
 
                                     // Units inside group
                                     if (isExpanded) ...[
-                                      const Divider(height: 1, color: AppColors.divider),
+                                      Divider(height: 1, color: AppColors.divider),
                                       ...group.devices.map((device) {
                                         final isSelected = _selectedDeviceIds.contains(device.id);
                                         final isRetired = device.status == DeviceStatus.retired;
 
                                         return Material(
-                                          color: isSelected ? AppColors.primaryBg.withValues(alpha: 0.25) : Colors.transparent,
+                                          color: isSelected ? AppColors.primaryBg.withValues(alpha: 0.25) : AppColors.transparent,
                                           child: InkWell(
                                             onTap: isRetired ? null : () => _toggleDevice(device),
                                             child: Padding(
@@ -729,7 +729,7 @@ class _RaiseBulkIssueSheetState extends ConsumerState<RaiseBulkIssueSheet> {
                                                           device.serialNumber.isNotEmpty
                                                               ? '${device.serialNumber} • ${device.location}'
                                                               : device.location,
-                                                          style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
+                                                          style: TextStyle(fontSize: 10, color: AppColors.textSecondary),
                                                           maxLines: 1,
                                                           overflow: TextOverflow.ellipsis,
                                                         ),
@@ -756,7 +756,7 @@ class _RaiseBulkIssueSheetState extends ConsumerState<RaiseBulkIssueSheet> {
                   // 2. Defect Category Selection
                   Text(
                     l10n?.defectCategory ?? 'Defect Category',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textSecondary,
@@ -773,7 +773,7 @@ class _RaiseBulkIssueSheetState extends ConsumerState<RaiseBulkIssueSheet> {
                       ),
                       child: Row(
                         children: [
-                          const SizedBox(
+                          SizedBox(
                             width: 16,
                             height: 16,
                             child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
@@ -781,7 +781,7 @@ class _RaiseBulkIssueSheetState extends ConsumerState<RaiseBulkIssueSheet> {
                           const SizedBox(width: 10),
                           Text(
                             l10n?.loadingCategories ?? 'Loading defect categories...',
-                            style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                           ),
                         ],
                       ),
@@ -795,7 +795,7 @@ class _RaiseBulkIssueSheetState extends ConsumerState<RaiseBulkIssueSheet> {
                       ),
                       child: Text(
                         l10n?.noCategoriesFound ?? 'No defect categories found. Please contact an administrator.',
-                        style: const TextStyle(fontSize: 12, color: AppColors.warningText),
+                        style: TextStyle(fontSize: 12, color: AppColors.warningText),
                       ),
                     )
                   else
@@ -816,7 +816,7 @@ class _RaiseBulkIssueSheetState extends ConsumerState<RaiseBulkIssueSheet> {
                               value: cat,
                               child: Text(
                                 cat.name,
-                                style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
+                                style: TextStyle(fontSize: 14, color: AppColors.textPrimary),
                               ),
                             );
                           }).toList(),
@@ -833,7 +833,7 @@ class _RaiseBulkIssueSheetState extends ConsumerState<RaiseBulkIssueSheet> {
                   // 3. Priority Selector
                   Text(
                     l10n?.severityPriority ?? 'Severity / Priority',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textSecondary,
@@ -893,7 +893,7 @@ class _RaiseBulkIssueSheetState extends ConsumerState<RaiseBulkIssueSheet> {
                   // 4. Shared Description Field
                   Text(
                     l10n?.bulkDefectDescriptionLabel ?? 'Defect Description & Shared Symptoms',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textSecondary,
@@ -903,10 +903,10 @@ class _RaiseBulkIssueSheetState extends ConsumerState<RaiseBulkIssueSheet> {
                   TextField(
                     controller: _descriptionController,
                     maxLines: 3,
-                    style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
+                    style: TextStyle(color: AppColors.textPrimary, fontSize: 14),
                     decoration: InputDecoration(
                       hintText: l10n?.bulkDefectDescriptionHint ?? 'Describe common symptoms, power failure, batch damage, network outage...',
-                      hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+                      hintStyle: TextStyle(color: AppColors.textMuted, fontSize: 13),
                       fillColor: AppColors.background,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
@@ -935,7 +935,7 @@ class _RaiseBulkIssueSheetState extends ConsumerState<RaiseBulkIssueSheet> {
                           ? Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const SizedBox(
+                                SizedBox(
                                   height: 18,
                                   width: 18,
                                   child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.textWhite),

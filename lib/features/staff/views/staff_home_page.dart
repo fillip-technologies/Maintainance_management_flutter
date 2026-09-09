@@ -120,7 +120,7 @@ class _StaffHomePageState extends ConsumerState<StaffHomePage>
         ),
         content: Text(
           body,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
             color: AppColors.textPrimary,
             height: 1.4,
@@ -131,7 +131,7 @@ class _StaffHomePageState extends ConsumerState<StaffHomePage>
             onPressed: () => Navigator.of(ctx).pop(),
             child: Text(
               l10n?.staffLater ?? 'Later',
-              style: const TextStyle(color: AppColors.textSecondary),
+              style: TextStyle(color: AppColors.textSecondary),
             ),
           ),
           ElevatedButton(
@@ -273,7 +273,7 @@ class _StaffHomePageState extends ConsumerState<StaffHomePage>
           issues: staffIssuesAsync.value ?? const [],
         ),
 
-        const Divider(height: 1, color: AppColors.divider),
+        Divider(height: 1, color: AppColors.divider),
 
         // Active Tab View Content
         Expanded(

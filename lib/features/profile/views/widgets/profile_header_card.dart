@@ -87,7 +87,7 @@ class ProfileHeaderCard extends StatelessWidget {
             user.name.isNotEmpty
                 ? user.name
                 : (isTech ? 'Hardware Technician' : 'Zone Staff Member'),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
@@ -99,7 +99,7 @@ class ProfileHeaderCard extends StatelessWidget {
           // Email
           Text(
             user.email,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               color: AppColors.textSecondary,
             ),

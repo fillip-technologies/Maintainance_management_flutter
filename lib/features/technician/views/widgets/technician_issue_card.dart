@@ -46,13 +46,13 @@ class TechnicianIssueCard extends StatelessWidget {
     final cardBg = isSelected
         ? AppColors.primaryBg.withValues(alpha: 0.25)
         : (isResolved
-            ? const Color(0xFFF0FDF4)
+            ? AppColors.statusSuccessBg
             : (isRaisedOrCritical
-                ? const Color(0xFFFEF2F2)
+                ? AppColors.statusErrorBg
                 : (issue.status == IssueStatus.inProgress
-                    ? const Color(0xFFFFFBEB)
+                    ? AppColors.statusWarningBg
                     : (issue.status == IssueStatus.onHold
-                        ? const Color(0xFFFAF5FF)
+                        ? AppColors.statusPurpleBg
                         : AppColors.surface))));
 
     final borderColor = isSelected
@@ -113,7 +113,7 @@ class TechnicianIssueCard extends StatelessWidget {
                   ],
                   Text(
                     issue.id.length > 8 ? '#${issue.id.substring(0, 8)}' : issue.id,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                       color: AppColors.primary,
@@ -131,11 +131,11 @@ class TechnicianIssueCard extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.layers_outlined, size: 11, color: AppColors.purpleText),
+                          Icon(Icons.layers_outlined, size: 11, color: AppColors.purpleText),
                           const SizedBox(width: 3),
                           Text(
                             l10n?.unitsAffectedBadge(unitsCount) ?? '$unitsCount Units Affected',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
                               color: AppColors.purpleText,
@@ -163,7 +163,7 @@ class TechnicianIssueCard extends StatelessWidget {
                 issue.title.isNotEmpty
                     ? issue.title
                     : (issue.displayDescription.isNotEmpty ? issue.displayDescription : 'Maintenance Issue'),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
@@ -179,9 +179,9 @@ class TechnicianIssueCard extends StatelessWidget {
                     height: 36,
                     decoration: BoxDecoration(
                       color: isResolved
-                          ? const Color(0xFFDCFCE7)
+                          ? AppColors.statusSuccessTagBg
                           : (isRaisedOrCritical
-                              ? const Color(0xFFFEE2E2)
+                              ? AppColors.statusErrorTagBg
                               : AppColors.primaryBg),
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -218,7 +218,7 @@ class TechnicianIssueCard extends StatelessWidget {
                         Text(
                           '${issue.deviceName}${issue.deviceCode != null ? " (${issue.deviceCode})" : ""}',
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,
@@ -227,7 +227,7 @@ class TechnicianIssueCard extends StatelessWidget {
                         Text(
                           '${issue.zoneName}${issue.categoryName.isNotEmpty ? " • ${issue.categoryName}" : ""}',
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
                             color: AppColors.textSecondary,
                           ),
@@ -248,7 +248,7 @@ class TechnicianIssueCard extends StatelessWidget {
                   issue.displayDescription,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     color: AppColors.textSecondary,
                     height: 1.3,
@@ -307,7 +307,7 @@ class TechnicianIssueCard extends StatelessWidget {
               onPressed: () => onUpdateStatus(IssueStatus.onHold),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.textSecondary,
-                side: const BorderSide(color: AppColors.border),
+                side: BorderSide(color: AppColors.border),
                 minimumSize: const Size(0, 46),
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -333,7 +333,7 @@ class TechnicianIssueCard extends StatelessWidget {
             label: Text(timelineLabel, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.textSecondary,
-              side: const BorderSide(color: AppColors.border),
+              side: BorderSide(color: AppColors.border),
               minimumSize: const Size(0, 46),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),

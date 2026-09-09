@@ -1121,4 +1121,13 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get pressBackAgainToExit => 'ऐप बंद करने के लिए दोबारा बैक दबाएं';
+
+  @override
+  String get themeTitle => 'थीम';
+
+  @override
+  String get themeLight => 'लाइट मोड';
+
+  @override
+  String get themeDark => 'डार्क मोड';
 }

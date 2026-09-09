@@ -66,7 +66,7 @@ class ReplaceDeviceSheet extends ConsumerStatefulWidget {
       context: context,
       isScrollControlled: true,
       enableDrag: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.transparent,
       builder: (_) => ReplaceDeviceSheet(
         issue: issue,
         onConfirm: onConfirm,
@@ -177,7 +177,7 @@ class _ReplaceDeviceSheetState extends ConsumerState<ReplaceDeviceSheet> {
     final sparesAsync = ref.watch(availableSparesProvider);
 
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -211,7 +211,7 @@ class _ReplaceDeviceSheetState extends ConsumerState<ReplaceDeviceSheet> {
                       color: AppColors.errorLight,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Icons.broken_image_rounded, color: AppColors.errorText, size: 24),
+                    child: Icon(Icons.broken_image_rounded, color: AppColors.errorText, size: 24),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
@@ -220,11 +220,11 @@ class _ReplaceDeviceSheetState extends ConsumerState<ReplaceDeviceSheet> {
                       children: [
                         Text(
                           l10n.decommissionHeading,
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                         ),
                         Text(
                           '${widget.issue.deviceName} • ${widget.issue.zoneName}',
-                          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ],
@@ -232,12 +232,12 @@ class _ReplaceDeviceSheetState extends ConsumerState<ReplaceDeviceSheet> {
                   ),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close, color: AppColors.icon),
+                    icon: Icon(Icons.close, color: AppColors.icon),
                   ),
                 ],
               ),
             ),
-            const Divider(height: 18, color: AppColors.divider),
+            Divider(height: 18, color: AppColors.divider),
 
             // Scrollable Content Area
             Flexible(
@@ -251,17 +251,17 @@ class _ReplaceDeviceSheetState extends ConsumerState<ReplaceDeviceSheet> {
                       children: [
                         Container(
                           padding: const EdgeInsets.all(6),
-                          decoration: const BoxDecoration(
+                          decoration: BoxDecoration(
                             color: AppColors.primaryBg,
                             shape: BoxShape.circle,
                           ),
-                          child: const Text('1', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 13)),
+                          child: Text('1', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 13)),
                         ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             l10n.stepWhatHappened,
-                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                           ),
                         ),
                       ],
@@ -275,8 +275,8 @@ class _ReplaceDeviceSheetState extends ConsumerState<ReplaceDeviceSheet> {
                           child: _buildPictorialTile(
                             reason: DecommissionReason.physicalDamage,
                             icon: Icons.hardware_rounded,
-                            iconColor: Colors.deepOrange,
-                            iconBgColor: Colors.deepOrange.withValues(alpha: 0.12),
+                            iconColor: AppColors.deepOrange,
+                            iconBgColor: AppColors.deepOrange.withValues(alpha: 0.12),
                             label: l10n.reasonPhysicalDamage,
                           ),
                         ),
@@ -285,8 +285,8 @@ class _ReplaceDeviceSheetState extends ConsumerState<ReplaceDeviceSheet> {
                           child: _buildPictorialTile(
                             reason: DecommissionReason.burntWater,
                             icon: Icons.water_drop_rounded,
-                            iconColor: Colors.blueAccent,
-                            iconBgColor: Colors.blueAccent.withValues(alpha: 0.12),
+                            iconColor: AppColors.blueAccent,
+                            iconBgColor: AppColors.blueAccent.withValues(alpha: 0.12),
                             label: l10n.reasonBurntWater,
                           ),
                         ),
@@ -309,8 +309,8 @@ class _ReplaceDeviceSheetState extends ConsumerState<ReplaceDeviceSheet> {
                           child: _buildPictorialTile(
                             reason: DecommissionReason.obsolete,
                             icon: Icons.delete_sweep_rounded,
-                            iconColor: Colors.brown,
-                            iconBgColor: Colors.brown.withValues(alpha: 0.12),
+                            iconColor: AppColors.brown,
+                            iconBgColor: AppColors.brown.withValues(alpha: 0.12),
                             label: l10n.reasonObsolete,
                           ),
                         ),
@@ -323,17 +323,17 @@ class _ReplaceDeviceSheetState extends ConsumerState<ReplaceDeviceSheet> {
                       children: [
                         Container(
                           padding: const EdgeInsets.all(6),
-                          decoration: const BoxDecoration(
+                          decoration: BoxDecoration(
                             color: AppColors.primaryBg,
                             shape: BoxShape.circle,
                           ),
-                          child: const Text('2', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 13)),
+                          child: Text('2', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 13)),
                         ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             l10n.stepWhatDidYouDo,
-                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                           ),
                         ),
                       ],
@@ -390,7 +390,7 @@ class _ReplaceDeviceSheetState extends ConsumerState<ReplaceDeviceSheet> {
                                 padding: const EdgeInsets.all(12),
                                 child: Text(
                                   '$err',
-                                  style: const TextStyle(fontSize: 12, color: AppColors.errorText),
+                                  style: TextStyle(fontSize: 12, color: AppColors.errorText),
                                 ),
                               ),
                               data: (spares) {
@@ -404,12 +404,12 @@ class _ReplaceDeviceSheetState extends ConsumerState<ReplaceDeviceSheet> {
                                     ),
                                     child: Row(
                                       children: [
-                                        const Icon(Icons.info_outline, size: 20, color: AppColors.icon),
+                                        Icon(Icons.info_outline, size: 20, color: AppColors.icon),
                                         const SizedBox(width: 10),
                                         Expanded(
                                           child: Text(
                                             l10n.noSparesAvailable,
-                                            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                                            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                                           ),
                                         ),
                                       ],
@@ -431,12 +431,12 @@ class _ReplaceDeviceSheetState extends ConsumerState<ReplaceDeviceSheet> {
                                   children: [
                                     Row(
                                       children: [
-                                        const Icon(Icons.shelves, size: 18, color: AppColors.primary),
+                                        Icon(Icons.shelves, size: 18, color: AppColors.primary),
                                         const SizedBox(width: 8),
                                         Expanded(
                                           child: Text(
                                             '${l10n.availableSparesHeading} (${spares.length})',
-                                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                                           ),
                                         ),
                                       ],
@@ -444,7 +444,7 @@ class _ReplaceDeviceSheetState extends ConsumerState<ReplaceDeviceSheet> {
                                     const SizedBox(height: 6),
                                     Text(
                                       l10n.selectSparePrompt,
-                                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                                      style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
                                     ),
                                     const SizedBox(height: 10),
 
@@ -453,11 +453,11 @@ class _ReplaceDeviceSheetState extends ConsumerState<ReplaceDeviceSheet> {
                                       TextField(
                                         controller: _searchController,
                                         onChanged: (val) => setState(() => _searchQuery = val.trim()),
-                                        style: const TextStyle(fontSize: 13, color: AppColors.textPrimary),
+                                        style: TextStyle(fontSize: 13, color: AppColors.textPrimary),
                                         decoration: InputDecoration(
                                           hintText: l10n.searchSparesHint,
-                                          hintStyle: const TextStyle(fontSize: 12, color: AppColors.textMuted),
-                                          prefixIcon: const Icon(Icons.search, size: 18, color: AppColors.icon),
+                                          hintStyle: TextStyle(fontSize: 12, color: AppColors.textMuted),
+                                          prefixIcon: Icon(Icons.search, size: 18, color: AppColors.icon),
                                           suffixIcon: _searchQuery.isNotEmpty
                                               ? IconButton(
                                                   icon: const Icon(Icons.clear, size: 16),
@@ -473,11 +473,11 @@ class _ReplaceDeviceSheetState extends ConsumerState<ReplaceDeviceSheet> {
                                           contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                                           border: OutlineInputBorder(
                                             borderRadius: BorderRadius.circular(10),
-                                            borderSide: const BorderSide(color: AppColors.border),
+                                            borderSide: BorderSide(color: AppColors.border),
                                           ),
                                           enabledBorder: OutlineInputBorder(
                                             borderRadius: BorderRadius.circular(10),
-                                            borderSide: const BorderSide(color: AppColors.border),
+                                            borderSide: BorderSide(color: AppColors.border),
                                           ),
                                         ),
                                       ),
@@ -542,7 +542,7 @@ class _ReplaceDeviceSheetState extends ConsumerState<ReplaceDeviceSheet> {
                                                           const SizedBox(height: 2),
                                                           Text(
                                                             '${l10n.hardwareCode}: ${spare.code.isNotEmpty ? spare.code : "N/A"}',
-                                                            style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                                                            style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
                                                           ),
                                                         ],
                                                       ),
@@ -556,7 +556,7 @@ class _ReplaceDeviceSheetState extends ConsumerState<ReplaceDeviceSheet> {
                                                         ),
                                                         child: Text(
                                                           l10n.selectedSpareBadge,
-                                                          style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
+                                                          style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.white),
                                                         ),
                                                       ),
                                                   ],
@@ -581,21 +581,21 @@ class _ReplaceDeviceSheetState extends ConsumerState<ReplaceDeviceSheet> {
                     // Optional technician notes field
                     TextField(
                       controller: _optionalNotesController,
-                      style: const TextStyle(fontSize: 13, color: AppColors.textPrimary),
+                      style: TextStyle(fontSize: 13, color: AppColors.textPrimary),
                       decoration: InputDecoration(
                         hintText: l10n.optionalNoteHint,
-                        hintStyle: const TextStyle(fontSize: 12, color: AppColors.textMuted),
-                        prefixIcon: const Icon(Icons.edit_note_rounded, size: 20, color: AppColors.icon),
+                        hintStyle: TextStyle(fontSize: 12, color: AppColors.textMuted),
+                        prefixIcon: Icon(Icons.edit_note_rounded, size: 20, color: AppColors.icon),
                         filled: true,
                         fillColor: AppColors.cardAlt,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: AppColors.border),
+                          borderSide: BorderSide(color: AppColors.border),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: AppColors.border),
+                          borderSide: BorderSide(color: AppColors.border),
                         ),
                       ),
                     ),
@@ -615,10 +615,10 @@ class _ReplaceDeviceSheetState extends ConsumerState<ReplaceDeviceSheet> {
               ),
               decoration: BoxDecoration(
                 color: AppColors.surface,
-                border: const Border(top: BorderSide(color: AppColors.divider)),
+                border: Border(top: BorderSide(color: AppColors.divider)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
+                    color: AppColors.cardShadow,
                     offset: const Offset(0, -3),
                     blurRadius: 8,
                   ),
@@ -630,10 +630,10 @@ class _ReplaceDeviceSheetState extends ConsumerState<ReplaceDeviceSheet> {
                 child: ElevatedButton.icon(
                   onPressed: _isSubmitting ? null : () => _handleSubmit(l10n),
                   icon: _isSubmitting
-                      ? const SizedBox(
+                      ? SizedBox(
                           width: 20,
                           height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.white),
                         )
                       : const Icon(Icons.check_circle_rounded, size: 22),
                   label: Text(
@@ -642,7 +642,7 @@ class _ReplaceDeviceSheetState extends ConsumerState<ReplaceDeviceSheet> {
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.success,
-                    foregroundColor: Colors.white,
+                    foregroundColor: AppColors.white,
                     elevation: 2,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
@@ -765,14 +765,14 @@ class _ReplaceDeviceSheetState extends ConsumerState<ReplaceDeviceSheet> {
               height: 22,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: isSelected ? AppColors.primary : Colors.transparent,
+                color: isSelected ? AppColors.primary : AppColors.transparent,
                 border: Border.all(
                   color: isSelected ? AppColors.primary : AppColors.border,
                   width: 1.5,
                 ),
               ),
               child: isSelected
-                  ? const Icon(Icons.check, size: 14, color: Colors.white)
+                  ? Icon(Icons.check, size: 14, color: AppColors.white)
                   : null,
             ),
           ],

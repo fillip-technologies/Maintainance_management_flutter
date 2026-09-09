@@ -53,8 +53,8 @@ class ZoneDeviceCard extends StatelessWidget {
     final isDefective = topIssue != null;
 
     final borderColor = isDefective ? AppColors.error : AppColors.success;
-    final cardBg = isDefective ? const Color(0xFFFEF2F2) : const Color(0xFFF0FDF4);
-    final iconBoxBg = isDefective ? const Color(0xFFFEE2E2) : const Color(0xFFDCFCE7);
+    final cardBg = isDefective ? AppColors.statusErrorBg : AppColors.statusSuccessBg;
+    final iconBoxBg = isDefective ? AppColors.statusErrorTagBg : AppColors.statusSuccessTagBg;
 
     return InkWell(
       onTap: onTap ??
@@ -128,21 +128,21 @@ class ZoneDeviceCard extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: borderColor,
                           borderRadius: BorderRadius.circular(9),
-                          border: Border.all(color: Colors.white, width: 1.5),
+                          border: Border.all(color: AppColors.white, width: 1.5),
                         ),
                         child: topIssue != null
                             ? Text(
                                 // How many units this issue affects (bulk defects
                                 // hit several); a normal issue is just 1.
                                 '${topIssue.unitsAffected ?? 1}',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w900,
-                                  color: Colors.white,
+                                  color: AppColors.white,
                                   height: 1,
                                 ),
                               )
-                            : const Icon(Icons.check, size: 10, color: Colors.white),
+                            : Icon(Icons.check, size: 10, color: AppColors.white),
                       ),
                     ),
                   ],
@@ -156,7 +156,7 @@ class ZoneDeviceCard extends StatelessWidget {
             // Device name
             Text(
               device.name,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w800,
                 color: AppColors.textPrimary,
@@ -176,7 +176,7 @@ class ZoneDeviceCard extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: AppColors.white,
                           borderRadius: BorderRadius.circular(5),
                           border: Border.all(color: AppColors.border),
                         ),
@@ -184,7 +184,7 @@ class ZoneDeviceCard extends StatelessWidget {
                           device.code,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
                             fontFamily: 'monospace',
@@ -201,7 +201,7 @@ class ZoneDeviceCard extends StatelessWidget {
                         device.hardwareTypeName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                        style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
                       ),
                     ),
                 ],
@@ -256,17 +256,17 @@ class _DefectCallout extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Icon(Icons.warning_amber_rounded, size: 15, color: Colors.white),
+                Icon(Icons.warning_amber_rounded, size: 15, color: AppColors.white),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
                     issue.title.isNotEmpty ? issue.title : issue.categoryName,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: AppColors.white,
                       height: 1.1,
                     ),
                   ),
@@ -279,10 +279,10 @@ class _DefectCallout extends StatelessWidget {
                     width: 28,
                     height: 28,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.white,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(Icons.build_rounded, size: 15, color: AppColors.error),
+                    child: Icon(Icons.build_rounded, size: 15, color: AppColors.error),
                   ),
                 ),
               ],
@@ -316,11 +316,11 @@ class _OkStrip extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.check_circle_rounded, size: 15, color: AppColors.successText),
+          Icon(Icons.check_circle_rounded, size: 15, color: AppColors.successText),
           const SizedBox(width: 6),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w900,
               color: AppColors.successText,

@@ -255,7 +255,7 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage> {
                   onPriorityChanged: filterNotifier.setPriority,
                 ),
 
-                const Divider(height: 1, color: AppColors.divider),
+                Divider(height: 1, color: AppColors.divider),
 
         // Selection mode toggle & select-all row
         if (currentList.isNotEmpty) ...[
@@ -286,7 +286,7 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage> {
                                     currentList.every((i) => _selectedIssueIds.contains(i.id))
                                 ? l10n.clearSelection
                                 : l10n.selectAll,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
                               color: AppColors.primary,
@@ -321,7 +321,7 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage> {
               ],
             ),
           ),
-          const Divider(height: 1, color: AppColors.divider),
+          Divider(height: 1, color: AppColors.divider),
         ],
 
         // Bulk Action Bar (matches TicketList.jsx in web frontend)
@@ -331,11 +331,11 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage> {
             color: AppColors.primaryBg.withValues(alpha: 0.5),
             child: Row(
               children: [
-                const Icon(Icons.check_circle, size: 18, color: AppColors.primary),
+                Icon(Icons.check_circle, size: 18, color: AppColors.primary),
                 const SizedBox(width: 8),
                 Text(
                   '${_selectedIssueIds.length} Selected',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
                     color: AppColors.primary,
@@ -346,7 +346,7 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage> {
                   value: _bulkStatus,
                   underline: const SizedBox.shrink(),
                   isDense: true,
-                  items: const [
+                  items: [
                     DropdownMenuItem(
                       value: IssueStatus.resolved,
                       child: Text(
@@ -397,12 +397,12 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                   child: _isApplying
-                      ? const SizedBox(
+                      ? SizedBox(
                           width: 14,
                           height: 14,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: Colors.white,
+                            color: AppColors.white,
                           ),
                         )
                       : Text(
@@ -412,7 +412,7 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage> {
                 ),
                 const SizedBox(width: 6),
                 IconButton(
-                  icon: const Icon(Icons.close, size: 18, color: AppColors.icon),
+                  icon: Icon(Icons.close, size: 18, color: AppColors.icon),
                   onPressed: () => setState(() {
                     _selectedIssueIds.clear();
                     _isSelectionMode = false;
@@ -423,7 +423,7 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage> {
               ],
             ),
           ),
-          const Divider(height: 1, color: AppColors.divider),
+          Divider(height: 1, color: AppColors.divider),
         ],
 
         // Active Tab View Content
@@ -490,12 +490,12 @@ class _ModeSwitchButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
         decoration: BoxDecoration(
-          color: isActive ? AppColors.surface : Colors.transparent,
+          color: isActive ? AppColors.surface : AppColors.transparent,
           borderRadius: BorderRadius.circular(10),
           boxShadow: isActive
               ? [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.06),
+                    color: AppColors.cardShadow,
                     blurRadius: 4,
                     offset: const Offset(0, 1),
                   ),

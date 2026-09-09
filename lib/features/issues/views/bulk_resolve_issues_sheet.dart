@@ -16,7 +16,7 @@ class BulkResolveIssuesSheet extends ConsumerStatefulWidget {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.transparent,
       builder: (context) => const BulkResolveIssuesSheet(),
     );
   }
@@ -201,7 +201,7 @@ class _BulkResolveIssuesSheetState extends ConsumerState<BulkResolveIssuesSheet>
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.90,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.background,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -231,7 +231,7 @@ class _BulkResolveIssuesSheetState extends ConsumerState<BulkResolveIssuesSheet>
                     color: AppColors.successLight,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.task_alt_rounded,
                     color: AppColors.success,
                     size: 24,
@@ -244,7 +244,7 @@ class _BulkResolveIssuesSheetState extends ConsumerState<BulkResolveIssuesSheet>
                     children: [
                       Text(
                         l10n?.bulkResolveTitle ?? 'Bulk Resolve Issues',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textPrimary,
@@ -253,7 +253,7 @@ class _BulkResolveIssuesSheetState extends ConsumerState<BulkResolveIssuesSheet>
                       const SizedBox(height: 2),
                       Text(
                         l10n?.bulkResolveSubtitle ?? 'Batch update status for multiple tickets (1–50)',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
                           color: AppColors.textSecondary,
                         ),
@@ -284,14 +284,14 @@ class _BulkResolveIssuesSheetState extends ConsumerState<BulkResolveIssuesSheet>
                 const SizedBox(width: 8),
                 IconButton(
                   onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.close, color: AppColors.icon),
+                  icon: Icon(Icons.close, color: AppColors.icon),
                   visualDensity: VisualDensity.compact,
                 ),
               ],
             ),
           ),
 
-          const Divider(height: 1, color: AppColors.divider),
+          Divider(height: 1, color: AppColors.divider),
 
           // Scrollable Content
           Expanded(
@@ -301,7 +301,7 @@ class _BulkResolveIssuesSheetState extends ConsumerState<BulkResolveIssuesSheet>
                 // Target Status Choice Chips
                 Text(
                   l10n?.applyToSelected ?? 'Apply to Selected',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
@@ -341,7 +341,7 @@ class _BulkResolveIssuesSheetState extends ConsumerState<BulkResolveIssuesSheet>
                 // Resolution Notes & Quick Fill Chips
                 Text(
                   l10n?.resolutionNotesLabel ?? 'Technician Resolution / Work Notes',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
@@ -351,25 +351,25 @@ class _BulkResolveIssuesSheetState extends ConsumerState<BulkResolveIssuesSheet>
                 TextField(
                   controller: _notesController,
                   maxLines: 2,
-                  style: const TextStyle(fontSize: 13, color: AppColors.textPrimary),
+                  style: TextStyle(fontSize: 13, color: AppColors.textPrimary),
                   decoration: InputDecoration(
                     hintText: l10n?.resolutionNotesHint ??
                         'Explain steps taken, repairs made, or reason for status update...',
-                    hintStyle: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                    hintStyle: TextStyle(fontSize: 12, color: AppColors.textMuted),
                     filled: true,
                     fillColor: AppColors.surface,
                     contentPadding: const EdgeInsets.all(12),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.border),
+                      borderSide: BorderSide(color: AppColors.border),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.border),
+                      borderSide: BorderSide(color: AppColors.border),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                      borderSide: BorderSide(color: AppColors.primary, width: 1.5),
                     ),
                   ),
                 ),
@@ -391,7 +391,7 @@ class _BulkResolveIssuesSheetState extends ConsumerState<BulkResolveIssuesSheet>
                 ),
 
                 const SizedBox(height: 16),
-                const Divider(height: 1, color: AppColors.divider),
+                Divider(height: 1, color: AppColors.divider),
                 const SizedBox(height: 12),
 
                 // Search & Filter Bar
@@ -404,8 +404,8 @@ class _BulkResolveIssuesSheetState extends ConsumerState<BulkResolveIssuesSheet>
                         style: const TextStyle(fontSize: 13),
                         decoration: InputDecoration(
                           hintText: l10n?.searchTicketsHint ?? 'Search ticket by ID, device, category...',
-                          hintStyle: const TextStyle(fontSize: 12, color: AppColors.textMuted),
-                          prefixIcon: const Icon(Icons.search, size: 18, color: AppColors.icon),
+                          hintStyle: TextStyle(fontSize: 12, color: AppColors.textMuted),
+                          prefixIcon: Icon(Icons.search, size: 18, color: AppColors.icon),
                           suffixIcon: _searchController.text.isNotEmpty
                               ? IconButton(
                                   icon: const Icon(Icons.clear, size: 16),
@@ -421,11 +421,11 @@ class _BulkResolveIssuesSheetState extends ConsumerState<BulkResolveIssuesSheet>
                           contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
-                            borderSide: const BorderSide(color: AppColors.border),
+                            borderSide: BorderSide(color: AppColors.border),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
-                            borderSide: const BorderSide(color: AppColors.border),
+                            borderSide: BorderSide(color: AppColors.border),
                           ),
                         ),
                       ),
@@ -487,7 +487,7 @@ class _BulkResolveIssuesSheetState extends ConsumerState<BulkResolveIssuesSheet>
                   children: [
                     Text(
                       l10n?.selectTickets(filtered.length) ?? 'Select Tickets (${filtered.length})',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textSecondary,
@@ -506,7 +506,7 @@ class _BulkResolveIssuesSheetState extends ConsumerState<BulkResolveIssuesSheet>
                           ),
                           label: Text(
                             l10n?.selectAll ?? 'Select All',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
                               color: AppColors.primary,
@@ -527,7 +527,7 @@ class _BulkResolveIssuesSheetState extends ConsumerState<BulkResolveIssuesSheet>
                             ),
                             child: Text(
                               l10n?.clearSelection ?? 'Clear',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 12,
                                 color: AppColors.error,
                               ),
@@ -554,7 +554,7 @@ class _BulkResolveIssuesSheetState extends ConsumerState<BulkResolveIssuesSheet>
                             candidateIssues.isEmpty
                                 ? (l10n?.bulkNoPendingIssues ?? 'No pending issues to resolve')
                                 : (l10n?.bulkNoMatchingTickets ?? 'No matching tickets found'),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 14,
                               color: AppColors.textSecondary,
                             ),
@@ -583,7 +583,7 @@ class _BulkResolveIssuesSheetState extends ConsumerState<BulkResolveIssuesSheet>
                         ),
                       ),
                       child: Theme(
-                        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                        data: Theme.of(context).copyWith(dividerColor: AppColors.transparent),
                         child: ExpansionTile(
                           initiallyExpanded: true,
                           tilePadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
@@ -605,7 +605,7 @@ class _BulkResolveIssuesSheetState extends ConsumerState<BulkResolveIssuesSheet>
                               Expanded(
                                 child: Text(
                                   groupName,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.bold,
                                     color: AppColors.textPrimary,
@@ -620,7 +620,7 @@ class _BulkResolveIssuesSheetState extends ConsumerState<BulkResolveIssuesSheet>
                                 ),
                                 child: Text(
                                   '$groupSelectedCount/${groupIssues.length}',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.bold,
                                     color: AppColors.textSecondary,
@@ -657,8 +657,8 @@ class _BulkResolveIssuesSheetState extends ConsumerState<BulkResolveIssuesSheet>
                                 decoration: BoxDecoration(
                                   color: isSelected
                                       ? AppColors.primaryBg.withValues(alpha: 0.2)
-                                      : Colors.transparent,
-                                  border: const Border(
+                                      : AppColors.transparent,
+                                  border: Border(
                                     top: BorderSide(color: AppColors.divider, width: 0.5),
                                   ),
                                 ),
@@ -688,7 +688,7 @@ class _BulkResolveIssuesSheetState extends ConsumerState<BulkResolveIssuesSheet>
                                                 issue.id.length > 8
                                                     ? '#${issue.id.substring(0, 8)}'
                                                     : '#${issue.id}',
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                   fontSize: 12,
                                                   fontWeight: FontWeight.bold,
                                                   color: AppColors.primary,
@@ -705,7 +705,7 @@ class _BulkResolveIssuesSheetState extends ConsumerState<BulkResolveIssuesSheet>
                                                   ),
                                                   child: Text(
                                                     '$units Units',
-                                                    style: const TextStyle(
+                                                    style: TextStyle(
                                                       fontSize: 10,
                                                       fontWeight: FontWeight.bold,
                                                       color: AppColors.purpleText,
@@ -722,7 +722,7 @@ class _BulkResolveIssuesSheetState extends ConsumerState<BulkResolveIssuesSheet>
                                           const SizedBox(height: 4),
                                           Text(
                                             '${issue.deviceName} • ${issue.zoneName}',
-                                            style: const TextStyle(
+                                            style: TextStyle(
                                               fontSize: 13,
                                               fontWeight: FontWeight.w600,
                                               color: AppColors.textPrimary,
@@ -734,7 +734,7 @@ class _BulkResolveIssuesSheetState extends ConsumerState<BulkResolveIssuesSheet>
                                               issue.displayDescription,
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(
+                                              style: TextStyle(
                                                 fontSize: 12,
                                                 color: AppColors.textSecondary,
                                               ),
@@ -764,7 +764,7 @@ class _BulkResolveIssuesSheetState extends ConsumerState<BulkResolveIssuesSheet>
               color: AppColors.surface,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
+                  color: AppColors.cardShadow,
                   blurRadius: 10,
                   offset: const Offset(0, -4),
                 ),
@@ -791,12 +791,12 @@ class _BulkResolveIssuesSheetState extends ConsumerState<BulkResolveIssuesSheet>
                     elevation: 0,
                   ),
                   child: _isSubmitting
-                      ? const SizedBox(
+                      ? SizedBox(
                           width: 20,
                           height: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: Colors.white,
+                            color: AppColors.white,
                           ),
                         )
                       : Row(
@@ -883,9 +883,9 @@ class _BulkResolveIssuesSheetState extends ConsumerState<BulkResolveIssuesSheet>
   Widget _buildPresetChip(String text) {
     return ActionChip(
       label: Text(text),
-      labelStyle: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+      labelStyle: TextStyle(fontSize: 11, color: AppColors.textSecondary),
       backgroundColor: AppColors.surface,
-      side: const BorderSide(color: AppColors.border),
+      side: BorderSide(color: AppColors.border),
       padding: const EdgeInsets.symmetric(horizontal: 4),
       visualDensity: VisualDensity.compact,
       onPressed: () {

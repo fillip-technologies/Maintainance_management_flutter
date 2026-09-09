@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/theme/colors.dart';
+import '../../../core/theme/theme.dart';
 import '../../../core/widgets/double_back_exit_scope.dart';
 import '../../../core/widgets/language_switcher_button.dart';
 import '../../../l10n/app_localizations.dart';
@@ -20,6 +20,7 @@ class GlobalHomePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(themeModeProvider);
     final l10n = AppLocalizations.of(context);
     final user = ref.watch(authStateProvider).value;
     final isTechnician = user?.role == UserRole.technician;
@@ -152,7 +153,7 @@ class GlobalHomePage extends ConsumerWidget {
                                    (isTechnician
                                        ? 'Field Technician'
                                        : 'Staff Member'),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.textPrimary,
@@ -162,7 +163,7 @@ class GlobalHomePage extends ConsumerWidget {
                             ),
                           ),
                           const SizedBox(width: 4),
-                          const Icon(
+                          Icon(
                             Icons.chevron_right_rounded,
                             size: 16,
                             color: AppColors.iconLight,
@@ -185,7 +186,7 @@ class GlobalHomePage extends ConsumerWidget {
                                   ? 'Hardware Technician • Assigned Queue'
                                   : effectiveZoneName,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 12,
                                 color: AppColors.textSecondary,
                               ),

@@ -22,7 +22,7 @@ class IssueDetailSheet extends ConsumerWidget {
       context: context,
       isScrollControlled: true,
       enableDrag: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.transparent,
       builder: (_) => IssueDetailSheet(issue: issue),
     );
   }
@@ -38,7 +38,7 @@ class IssueDetailSheet extends ConsumerWidget {
 
     return Container(
       constraints: BoxConstraints(maxHeight: maxHeight),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -86,7 +86,7 @@ class IssueDetailSheet extends ConsumerWidget {
                                   : '#${currentIssue.id}',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.primary,
@@ -101,7 +101,7 @@ class IssueDetailSheet extends ConsumerWidget {
                                       : 'Maintenance Issue'),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.textPrimary,
@@ -113,7 +113,7 @@ class IssueDetailSheet extends ConsumerWidget {
                       const SizedBox(width: 8),
                       IconButton(
                         onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.close, color: AppColors.icon),
+                        icon: Icon(Icons.close, color: AppColors.icon),
                         visualDensity: VisualDensity.compact,
                       ),
                     ],
@@ -139,7 +139,7 @@ class IssueDetailSheet extends ConsumerWidget {
                         ),
                         child: Text(
                           currentIssue.categoryName,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                             color: AppColors.infoText,
@@ -150,7 +150,7 @@ class IssueDetailSheet extends ConsumerWidget {
                   ),
 
                   const SizedBox(height: 16),
-                  const Divider(color: AppColors.divider),
+                  Divider(color: AppColors.divider),
                   const SizedBox(height: 12),
 
                   // Equipment & Location Metadata
@@ -198,7 +198,7 @@ class IssueDetailSheet extends ConsumerWidget {
                   if (currentIssue.description.isNotEmpty) ...[
                     Text(
                       l10n.defectDescription,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textSecondary,
@@ -215,7 +215,7 @@ class IssueDetailSheet extends ConsumerWidget {
                       ),
                       child: Text(
                         currentIssue.description,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
                           color: AppColors.textPrimary,
                           height: 1.4,
@@ -237,7 +237,7 @@ class IssueDetailSheet extends ConsumerWidget {
                     children: [
                       Text(
                         l10n.timelineHistory,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textPrimary,
@@ -251,11 +251,11 @@ class IssueDetailSheet extends ConsumerWidget {
                           padding: const EdgeInsets.all(4),
                           child: Row(
                             children: [
-                              const Icon(Icons.refresh, size: 14, color: AppColors.primary),
+                              Icon(Icons.refresh, size: 14, color: AppColors.primary),
                               const SizedBox(width: 4),
                               Text(
                                 l10n.refresh,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 11,
                                   color: AppColors.primary,
                                   fontWeight: FontWeight.w600,
@@ -366,10 +366,10 @@ class IssueDetailSheet extends ConsumerWidget {
                             },
                           );
                         },
-                        icon: const Icon(Icons.broken_image_outlined, size: 18, color: AppColors.error),
-                        label: Text(l10n.btnDecommissionReplace, style: const TextStyle(color: AppColors.errorText)),
+                        icon: Icon(Icons.broken_image_outlined, size: 18, color: AppColors.error),
+                        label: Text(l10n.btnDecommissionReplace, style: TextStyle(color: AppColors.errorText)),
                         style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: AppColors.error),
+                          side: BorderSide(color: AppColors.error),
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -395,7 +395,7 @@ class IssueDetailSheet extends ConsumerWidget {
   //       const SizedBox(width: 8),
   //       Text(
   //         '$label: ',
-  //         style: const TextStyle(
+  //         style: TextStyle(
   //           fontSize: 13,
   //           color: AppColors.textSecondary,
   //           fontWeight: FontWeight.w500,
@@ -414,7 +414,7 @@ class IssueDetailSheet extends ConsumerWidget {
         const SizedBox(width: 8),
         Text(
           '$label: ',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 13,
             color: AppColors.textSecondary,
             fontWeight: FontWeight.w500,
@@ -426,7 +426,7 @@ class IssueDetailSheet extends ConsumerWidget {
             textAlign: TextAlign.end,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               color: AppColors.textPrimary,
               fontWeight: FontWeight.w600,
@@ -461,7 +461,7 @@ class IssueDetailSheet extends ConsumerWidget {
       children: [
         Row(
           children: [
-            const Icon(
+            Icon(
               Icons.photo_library_outlined,
               size: 16,
               color: AppColors.primary,
@@ -469,7 +469,7 @@ class IssueDetailSheet extends ConsumerWidget {
             const SizedBox(width: 6),
             Text(
               l10n.evidencePhotos,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textSecondary,
@@ -484,7 +484,7 @@ class IssueDetailSheet extends ConsumerWidget {
               ),
               child: Text(
                 '${items.length}',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
                   color: AppColors.primary,
@@ -530,7 +530,7 @@ class IssueDetailSheet extends ConsumerWidget {
               fit: BoxFit.cover,
               loadingBuilder: (context, child, progress) {
                 if (progress == null) return child;
-                return const Center(
+                return Center(
                   child: SizedBox(
                     width: 24,
                     height: 24,
@@ -541,7 +541,7 @@ class IssueDetailSheet extends ConsumerWidget {
                   ),
                 );
               },
-              errorBuilder: (_, _, _) => const Center(
+              errorBuilder: (_, _, _) => Center(
                 child: Icon(
                   Icons.broken_image_outlined,
                   size: 28,
@@ -555,13 +555,13 @@ class IssueDetailSheet extends ConsumerWidget {
               child: Container(
                 padding: const EdgeInsets.all(3),
                 decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.6),
+                  color: AppColors.overlayScrimLight,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.zoom_in,
                   size: 14,
-                  color: Colors.white,
+                  color: AppColors.white,
                 ),
               ),
             ),
@@ -578,10 +578,10 @@ class IssueDetailSheet extends ConsumerWidget {
   ) {
     showDialog(
       context: context,
-      barrierColor: Colors.black87,
+      barrierColor: AppColors.black87,
       builder: (ctx) {
         return Dialog(
-          backgroundColor: Colors.transparent,
+          backgroundColor: AppColors.transparent,
           insetPadding: const EdgeInsets.all(12),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -590,7 +590,7 @@ class IssueDetailSheet extends ConsumerWidget {
                 alignment: Alignment.topRight,
                 child: IconButton(
                   onPressed: () => Navigator.of(ctx).pop(),
-                  icon: const Icon(Icons.close, color: Colors.white, size: 28),
+                  icon: Icon(Icons.close, color: AppColors.white, size: 28),
                 ),
               ),
               Flexible(
@@ -604,23 +604,23 @@ class IssueDetailSheet extends ConsumerWidget {
                       fit: BoxFit.contain,
                       loadingBuilder: (context, child, progress) {
                         if (progress == null) return child;
-                        return const Center(
+                        return Center(
                           child: CircularProgressIndicator(
-                            color: Colors.white,
+                            color: AppColors.white,
                           ),
                         );
                       },
                       errorBuilder: (_, _, _) => Container(
                         padding: const EdgeInsets.all(24),
                         color: AppColors.card,
-                        child: const Column(
+                        child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.broken_image, size: 48, color: Colors.grey),
+                            Icon(Icons.broken_image, size: 48, color: AppColors.grey),
                             SizedBox(height: 8),
                             Text(
                               'Failed to load image',
-                              style: TextStyle(color: Colors.white70),
+                              style: TextStyle(color: AppColors.white70),
                             ),
                           ],
                         ),
@@ -633,8 +633,8 @@ class IssueDetailSheet extends ConsumerWidget {
                 const SizedBox(height: 10),
                 Text(
                   title,
-                  style: const TextStyle(
-                    color: Colors.white70,
+                  style: TextStyle(
+                    color: AppColors.white70,
                     fontSize: 12,
                   ),
                   maxLines: 1,

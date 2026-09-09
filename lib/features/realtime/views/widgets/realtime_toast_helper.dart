@@ -22,7 +22,7 @@ class RealtimeToastHelper {
         elevation: 6,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
-          side: const BorderSide(color: AppColors.error, width: 1.5),
+          side: BorderSide(color: AppColors.error, width: 1.5),
         ),
         content: Row(
           children: [
@@ -32,7 +32,7 @@ class RealtimeToastHelper {
                 color: AppColors.errorLight,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(Icons.warning_amber_rounded, color: AppColors.errorText, size: 20),
+              child: Icon(Icons.warning_amber_rounded, color: AppColors.errorText, size: 20),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -42,7 +42,7 @@ class RealtimeToastHelper {
                 children: [
                   Row(
                     children: [
-                      const Text(
+                      Text(
                         'New Defect Ticket',
                         style: TextStyle(
                           fontSize: 13,
@@ -57,7 +57,7 @@ class RealtimeToastHelper {
                   const SizedBox(height: 2),
                   Text(
                     '${issue.deviceName} • ${issue.zoneName}',
-                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
@@ -89,11 +89,13 @@ class RealtimeToastHelper {
     required String title,
     required String message,
     IconData icon = Icons.info_outline,
-    Color iconColor = AppColors.primary,
+    Color? iconColor,
     VoidCallback? onTap,
   }) {
     final messenger = ScaffoldMessenger.maybeOf(context);
     if (messenger == null) return;
+
+    final effectiveIconColor = iconColor ?? AppColors.primary;
 
     messenger.clearSnackBars();
     messenger.showSnackBar(
@@ -105,11 +107,11 @@ class RealtimeToastHelper {
         elevation: 6,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
-          side: const BorderSide(color: AppColors.border),
+          side: BorderSide(color: AppColors.border),
         ),
         content: Row(
           children: [
-            Icon(icon, color: iconColor, size: 20),
+            Icon(icon, color: effectiveIconColor, size: 20),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -118,11 +120,11 @@ class RealtimeToastHelper {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                   ),
                   Text(
                     message,
-                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],

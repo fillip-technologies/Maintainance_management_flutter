@@ -27,7 +27,7 @@ class UpdateStatusSheet extends StatefulWidget {
       context: context,
       isScrollControlled: true,
       enableDrag: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.transparent,
       builder: (_) => UpdateStatusSheet(
         issue: issue,
         initialTargetStatus: initialTargetStatus,
@@ -139,7 +139,7 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
         child: Wrap(
           children: [
             ListTile(
-              leading: const Icon(Icons.camera_alt, color: AppColors.primary),
+              leading: Icon(Icons.camera_alt, color: AppColors.primary),
               title: const Text('Take Verification Photo'),
               onTap: () {
                 Navigator.pop(ctx);
@@ -147,7 +147,7 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.photo_library, color: AppColors.primary),
+              leading: Icon(Icons.photo_library, color: AppColors.primary),
               title: const Text('Choose from Gallery'),
               onTap: () {
                 Navigator.pop(ctx);
@@ -194,7 +194,7 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
 
     return Container(
       constraints: BoxConstraints(maxHeight: maxHeight),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -236,14 +236,14 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
                         children: [
                           Text(
                             widget.issue.id.length > 8 ? '#${widget.issue.id.substring(0, 8)}' : '#${widget.issue.id}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
                               color: AppColors.primary,
                             ),
                           ),
                           const SizedBox(height: 2),
-                          const Text(
+                          Text(
                             'Update Work Status',
                             style: TextStyle(
                               fontSize: 18,
@@ -255,12 +255,12 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
                       ),
                       IconButton(
                         onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.close, color: AppColors.icon),
+                        icon: Icon(Icons.close, color: AppColors.icon),
                       ),
                     ],
                   ),
 
-                  const Divider(color: AppColors.divider),
+                  Divider(color: AppColors.divider),
                   const SizedBox(height: 12),
 
                   if (_errorMessage != null) ...[
@@ -272,7 +272,7 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
                       ),
                       child: Text(
                         _errorMessage!,
-                        style: const TextStyle(fontSize: 13, color: AppColors.errorText),
+                        style: TextStyle(fontSize: 13, color: AppColors.errorText),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -308,9 +308,9 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.broken_image_outlined, color: AppColors.errorText, size: 20),
+                          Icon(Icons.broken_image_outlined, color: AppColors.errorText, size: 20),
                           const SizedBox(width: 10),
-                          const Expanded(
+                          Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -326,7 +326,7 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
                               ],
                             ),
                           ),
-                          const Icon(Icons.chevron_right, color: AppColors.errorText, size: 18),
+                          Icon(Icons.chevron_right, color: AppColors.errorText, size: 18),
                         ],
                       ),
                     ),
@@ -334,7 +334,7 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
                   const SizedBox(height: 16),
 
                   // 1. Target Status Selection
-                  const Text(
+                  Text(
                     'Select Next Status',
                     style: TextStyle(
                       fontSize: 13,
@@ -406,7 +406,7 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
                   const SizedBox(height: 16),
 
                   // 2. Action Notes / Comments
-                  const Text(
+                  Text(
                     'Work Log / Comments',
                     style: TextStyle(
                       fontSize: 13,
@@ -418,7 +418,7 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
                   TextField(
                     controller: _commentController,
                     maxLines: 3,
-                    style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
+                    style: TextStyle(color: AppColors.textPrimary, fontSize: 14),
                     decoration: const InputDecoration(
                       hintText: 'Enter details of work performed, parts used, or blockers...',
                     ),
@@ -427,7 +427,7 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
                   const SizedBox(height: 14),
 
                   // 3. Verification / Proof Photo (Optional)
-                  const Text(
+                  Text(
                     'Work Proof / Verification Photo (Optional)',
                     style: TextStyle(
                       fontSize: 13,
@@ -455,11 +455,11 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
                             onTap: () => setState(() => _resolutionImage = null),
                             child: Container(
                               padding: const EdgeInsets.all(6),
-                              decoration: const BoxDecoration(
-                                color: Colors.black54,
+                              decoration: BoxDecoration(
+                                color: AppColors.black54,
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(Icons.close, color: Colors.white, size: 18),
+                              child: Icon(Icons.close, color: AppColors.white, size: 18),
                             ),
                           ),
                         ),
@@ -482,15 +482,15 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             if (_isPickingImage)
-                              const SizedBox(
+                              SizedBox(
                                 width: 18,
                                 height: 18,
                                 child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
                               )
                             else ...[
-                              const Icon(Icons.add_a_photo_outlined, size: 20, color: AppColors.primary),
+                              Icon(Icons.add_a_photo_outlined, size: 20, color: AppColors.primary),
                               const SizedBox(width: 8),
-                              const Text(
+                              Text(
                                 'Add Proof Photo',
                                 style: TextStyle(
                                   fontSize: 13,
@@ -517,13 +517,13 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
                     child: _isSubmitting
                         ? Row(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
+                            children: [
                               SizedBox(
                                 width: 18,
                                 height: 18,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  color: Colors.white,
+                                  color: AppColors.white,
                                 ),
                               ),
                               SizedBox(width: 10),
@@ -532,7 +532,7 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.white,
+                                  color: AppColors.white,
                                 ),
                               ),
                             ],

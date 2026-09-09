@@ -77,7 +77,7 @@ class _CameraPageState extends State<CameraPage> {
                 const SizedBox(height: 16),
 
                 // Title
-                const Text(
+                Text(
                   'Select Photo Source',
                   style: TextStyle(
                     fontSize: 17,
@@ -86,7 +86,7 @@ class _CameraPageState extends State<CameraPage> {
                   ),
                 ),
                 const SizedBox(height: 6),
-                const Text(
+                Text(
                   'Choose how you would like to capture or select the image',
                   textAlign: TextAlign.center,
                   style: TextStyle(
@@ -163,7 +163,7 @@ class _CameraPageState extends State<CameraPage> {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
@@ -172,7 +172,7 @@ class _CameraPageState extends State<CameraPage> {
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       color: AppColors.textSecondary,
                     ),
@@ -180,7 +180,7 @@ class _CameraPageState extends State<CameraPage> {
                 ],
               ),
             ),
-            const Icon(
+            Icon(
               Icons.chevron_right_rounded,
               color: AppColors.iconLight,
               size: 20,
@@ -201,7 +201,7 @@ class _CameraPageState extends State<CameraPage> {
         centerTitle: true,
         title: Text(
           widget.initialTitle ?? 'Capture Photo',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: AppColors.textPrimary,
@@ -210,7 +210,7 @@ class _CameraPageState extends State<CameraPage> {
         actions: [
           if (_imageFile != null)
             IconButton(
-              icon: const Icon(Icons.delete_outline, color: AppColors.error),
+              icon: Icon(Icons.delete_outline, color: AppColors.error),
               tooltip: 'Remove Photo',
               onPressed: () {
                 setState(() => _imageFile = null);
@@ -241,7 +241,7 @@ class _CameraPageState extends State<CameraPage> {
                       ),
                     ),
                     child: _isLoading
-                        ? const Center(
+                        ? Center(
                             child: CircularProgressIndicator(color: AppColors.primary),
                           )
                         : _imageFile != null
@@ -271,7 +271,7 @@ class _CameraPageState extends State<CameraPage> {
                                             ],
                                           ),
                                         ),
-                                        child: const Row(
+                                        child: Row(
                                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                           children: [
                                             Row(
@@ -313,14 +313,14 @@ class _CameraPageState extends State<CameraPage> {
                                       shape: BoxShape.circle,
                                       border: Border.all(color: AppColors.borderLight),
                                     ),
-                                    child: const Icon(
+                                    child: Icon(
                                       Icons.add_a_photo_outlined,
                                       size: 34,
                                       color: AppColors.primary,
                                     ),
                                   ),
                                   const SizedBox(height: 16),
-                                  const Text(
+                                  Text(
                                     'No Photo Selected',
                                     style: TextStyle(
                                       fontSize: 17,
@@ -329,7 +329,7 @@ class _CameraPageState extends State<CameraPage> {
                                     ),
                                   ),
                                   const SizedBox(height: 6),
-                                  const Padding(
+                                  Padding(
                                     padding: EdgeInsets.symmetric(horizontal: 32),
                                     child: Text(
                                       'Tap anywhere to take a picture or choose an image from your gallery',
@@ -375,7 +375,7 @@ class _CameraPageState extends State<CameraPage> {
                         style: OutlinedButton.styleFrom(
                           backgroundColor: AppColors.surface,
                           foregroundColor: AppColors.successText,
-                          side: const BorderSide(color: AppColors.success),
+                          side: BorderSide(color: AppColors.success),
                           minimumSize: const Size(double.infinity, 50),
                         ),
                       ),

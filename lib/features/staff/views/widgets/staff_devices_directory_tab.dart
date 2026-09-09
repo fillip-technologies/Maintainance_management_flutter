@@ -102,13 +102,13 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
                   Expanded(
                     child: TextField(
                       controller: _searchController,
-                      style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
+                      style: TextStyle(fontSize: 14, color: AppColors.textPrimary),
                       decoration: InputDecoration(
                         hintText: l10n?.staffSearchHardware ?? 'Search hardware by name, type, or zone',
-                        prefixIcon: const Icon(Icons.search, color: AppColors.icon),
+                        prefixIcon: Icon(Icons.search, color: AppColors.icon),
                         suffixIcon: _searchQuery.isNotEmpty
                             ? IconButton(
-                                icon: const Icon(Icons.clear, size: 18, color: AppColors.icon),
+                                icon: Icon(Icons.clear, size: 18, color: AppColors.icon),
                                 onPressed: () {
                                   _searchController.clear();
                                   setState(() => _searchQuery = '');
@@ -225,7 +225,7 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
                       groups.length == 1
                           ? (l10n?.singleCategory ?? '1 Category')
                           : (l10n?.categoriesCount(groups.length) ?? '${groups.length} Categories'),
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.textSecondary),
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.textSecondary),
                     ),
                     InkWell(
                       onTap: () {
@@ -243,7 +243,7 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
                           _expandedGroups.length == groups.length
                               ? (l10n?.collapseAll ?? 'Collapse All')
                               : (l10n?.expandAll ?? 'Expand All'),
-                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary),
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary),
                         ),
                       ),
                     ),
@@ -253,7 +253,7 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
             ],
           ),
         ),
-        const Divider(height: 1, color: AppColors.divider),
+        Divider(height: 1, color: AppColors.divider),
         Expanded(
           child: RefreshIndicator(
             color: AppColors.primary,
@@ -266,7 +266,7 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
                   : (_isGroupedView ? groups.length : list.length),
               itemBuilder: (context, index) {
                 if (widget.isLoading) {
-                  return const Padding(
+                  return Padding(
                     padding: EdgeInsets.only(top: 80),
                     child: Center(
                       child: CircularProgressIndicator(color: AppColors.primary),
@@ -316,7 +316,7 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.03),
+                          color: AppColors.cardShadow,
                           blurRadius: 6,
                           offset: const Offset(0, 2),
                         ),
@@ -328,7 +328,7 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
                       children: [
                         // Group Accordion Header
                         Material(
-                          color: Colors.transparent,
+                          color: AppColors.transparent,
                           child: InkWell(
                             onTap: () => _toggleGroup(group.hardwareTypeName),
                             child: Padding(
@@ -381,7 +381,7 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
                                             Expanded(
                                               child: Text(
                                                 group.hardwareTypeName,
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                   fontWeight: FontWeight.bold,
                                                   fontSize: 14,
                                                   color: AppColors.textPrimary,
@@ -402,7 +402,7 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
                                                 group.totalCount == 1
                                                     ? (l10n?.singleUnitCount ?? '1 Unit')
                                                     : (l10n?.unitsCount(group.totalCount) ?? '${group.totalCount} Units'),
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                   fontSize: 11,
                                                   fontWeight: FontWeight.bold,
                                                   color: AppColors.textSecondary,
@@ -460,17 +460,17 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
 
                         // Expanded Unit List inside Group
                         if (isExpanded) ...[
-                          const Divider(height: 1, color: AppColors.divider),
+                          Divider(height: 1, color: AppColors.divider),
                           ListView.separated(
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
                             padding: const EdgeInsets.symmetric(vertical: 4),
                             itemCount: group.devices.length,
-                            separatorBuilder: (_, _) => const Divider(height: 1, color: AppColors.divider, indent: 48),
+                            separatorBuilder: (_, _) => Divider(height: 1, color: AppColors.divider, indent: 48),
                             itemBuilder: (context, devIdx) {
                               final device = group.devices[devIdx];
                               return Material(
-                                color: Colors.transparent,
+                                color: AppColors.transparent,
                                 child: ListTile(
                                   contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
                                   dense: true,
@@ -485,21 +485,21 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
                                           child: Image.network(
                                             device.imageUrl!,
                                             fit: BoxFit.cover,
-                                            errorBuilder: (_, _, _) => const Icon(
+                                            errorBuilder: (_, _, _) => Icon(
                                               Icons.subdirectory_arrow_right_rounded,
                                               size: 18,
                                               color: AppColors.icon,
                                             ),
                                           ),
                                         )
-                                      : const Icon(Icons.subdirectory_arrow_right_rounded, size: 18, color: AppColors.icon),
+                                      : Icon(Icons.subdirectory_arrow_right_rounded, size: 18, color: AppColors.icon),
                                   title: Text(
                                     device.name,
-                                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: AppColors.textPrimary),
+                                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: AppColors.textPrimary),
                                   ),
                                   subtitle: Text(
                                     '${device.zoneName} • ${device.serialNumber.isNotEmpty ? device.serialNumber : device.location}',
-                                    style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                                    style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
                                   ),
                                   trailing: StatusBadge.device(device.status),
                                   onTap: () {
@@ -565,11 +565,11 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
                       ),
                       title: Text(
                         device.name,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textPrimary),
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textPrimary),
                       ),
                       subtitle: Text(
                         '${device.hardwareTypeName} • ${device.zoneName} • ${device.location.isNotEmpty ? device.location : "Active"}',
-                        style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                        style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                       ),
                       trailing: StatusBadge.device(device.status),
                       onTap: () {

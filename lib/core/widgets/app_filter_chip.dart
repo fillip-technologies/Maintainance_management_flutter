@@ -36,7 +36,7 @@ class AppFilterChip extends StatelessWidget {
     final effectiveInactiveTextColor = inactiveTextColor ?? AppColors.textSecondary;
 
     return Material(
-      color: Colors.transparent,
+      color: AppColors.transparent,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(20),
@@ -77,7 +77,7 @@ class AppFilterChip extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? Colors.white.withValues(alpha: 0.25)
+                        ? AppColors.white.withValues(alpha: 0.25)
                         : (badgeColor?.withValues(alpha: 0.15) ?? AppColors.border),
                     borderRadius: BorderRadius.circular(10),
                   ),

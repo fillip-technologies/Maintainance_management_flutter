@@ -86,7 +86,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         height: 76,
                         width: 76,
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(
+                          gradient: LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [AppColors.primary, AppColors.primaryDark],
@@ -100,10 +100,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             ),
                           ],
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.precision_manufacturing_rounded,
                           size: 40,
-                          color: Colors.white,
+                          color: AppColors.white,
                         ),
                       ),
                     ),
@@ -114,7 +114,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     Text(
                       l10n.appName,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 30,
                         fontWeight: FontWeight.w800,
                         letterSpacing: -0.5,
@@ -127,7 +127,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     Text(
                       l10n.appTagline,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13.5,
                         fontWeight: FontWeight.w500,
                         color: AppColors.textSecondary,
@@ -145,7 +145,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         border: Border.all(color: AppColors.border),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.04),
+                            color: AppColors.cardShadow,
                             blurRadius: 18,
                             offset: const Offset(0, 6),
                           ),
@@ -159,10 +159,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFFEF2F2),
+                                color: AppColors.statusErrorBg,
                                 borderRadius: BorderRadius.circular(14),
                                 border: Border.all(
-                                  color: const Color(0xFFF87171),
+                                  color: AppColors.statusErrorBorder,
                                   width: 1.2,
                                 ),
                               ),
@@ -171,14 +171,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                 children: [
                                   Container(
                                     padding: const EdgeInsets.all(5),
-                                    decoration: const BoxDecoration(
-                                      color: Color(0xFFEF4444),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.error,
                                       shape: BoxShape.circle,
                                     ),
-                                    child: const Icon(
+                                    child: Icon(
                                       Icons.priority_high_rounded,
                                       size: 13,
-                                      color: Colors.white,
+                                      color: AppColors.white,
                                     ),
                                   ),
                                   const SizedBox(width: 10),
@@ -189,18 +189,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                       children: [
                                         Text(
                                           l10n.authError,
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontSize: 12.5,
                                             fontWeight: FontWeight.bold,
-                                            color: Color(0xFF991B1B),
+                                            color: AppColors.statusErrorTextDark,
                                           ),
                                         ),
                                         const SizedBox(height: 2),
                                         Text(
                                           errorMessage,
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontSize: 12,
-                                            color: Color(0xFFB91C1C),
+                                            color: AppColors.errorText,
                                             fontWeight: FontWeight.w500,
                                             height: 1.3,
                                           ),
@@ -220,12 +220,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                           .clearError();
                                     },
                                     borderRadius: BorderRadius.circular(12),
-                                    child: const Padding(
+                                    child: Padding(
                                       padding: EdgeInsets.all(4),
                                       child: Icon(
                                         Icons.close,
                                         size: 16,
-                                        color: Color(0xFF991B1B),
+                                        color: AppColors.statusErrorTextDark,
                                       ),
                                     ),
                                   ),
@@ -298,7 +298,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                 ),
                               ),
                               child: isLoading
-                                  ? const SizedBox(
+                                  ? SizedBox(
                                       height: 20,
                                       width: 20,
                                       child: CircularProgressIndicator(
@@ -328,7 +328,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.lock_outline_rounded,
                           size: 13,
                           color: AppColors.textMuted,
@@ -336,7 +336,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         const SizedBox(width: 6),
                         Text(
                           l10n.secureConnectionNotice,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                             color: AppColors.textMuted,

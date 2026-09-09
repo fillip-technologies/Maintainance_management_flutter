@@ -86,7 +86,7 @@ class _StaffIssuesTrackerTabState extends State<StaffIssuesTrackerTab> {
             ),
           ),
         ),
-        const Divider(height: 1, color: AppColors.divider),
+        Divider(height: 1, color: AppColors.divider),
 
         Expanded(
           child: RefreshIndicator(
@@ -100,7 +100,7 @@ class _StaffIssuesTrackerTabState extends State<StaffIssuesTrackerTab> {
                   : displayedIssues.length,
               itemBuilder: (context, index) {
                 if (widget.isLoading) {
-                  return const Padding(
+                  return Padding(
                     padding: EdgeInsets.only(top: 80),
                     child: Center(child: CircularProgressIndicator(color: AppColors.primary)),
                   );

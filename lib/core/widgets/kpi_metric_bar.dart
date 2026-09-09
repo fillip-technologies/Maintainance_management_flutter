@@ -61,7 +61,7 @@ class KpiMetricBar extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             item.label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
               color: AppColors.textMuted,
               fontWeight: FontWeight.w500,

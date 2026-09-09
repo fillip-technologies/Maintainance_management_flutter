@@ -105,7 +105,7 @@ class StaffDeviceCheckCard extends StatelessWidget {
                     children: [
                       Text(
                         device.name,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textPrimary,
@@ -116,7 +116,7 @@ class StaffDeviceCheckCard extends StatelessWidget {
                         '${device.hardwareTypeName} • ${device.zoneName}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
                           color: AppColors.textSecondary,
                         ),
@@ -136,7 +136,7 @@ class StaffDeviceCheckCard extends StatelessWidget {
                     ),
                     child: Text(
                       l10n?.staffPendingCheck ?? 'Pending',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                         color: AppColors.warningText,
@@ -150,13 +150,13 @@ class StaffDeviceCheckCard extends StatelessWidget {
               const SizedBox(height: 10),
               Row(
                 children: [
-                  const Icon(Icons.report_gmailerrorred_rounded, size: 15, color: AppColors.warningText),
+                  Icon(Icons.report_gmailerrorred_rounded, size: 15, color: AppColors.warningText),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
                       l10n?.staffRepeatedlyDown(device.consecutiveFailures) ??
                           'Reported down ${device.consecutiveFailures} times — may be marked faulty',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
                         color: AppColors.warningText,
@@ -168,11 +168,11 @@ class StaffDeviceCheckCard extends StatelessWidget {
             ],
 
             const SizedBox(height: 12),
-            const Divider(height: 1, color: AppColors.divider),
+            Divider(height: 1, color: AppColors.divider),
             const SizedBox(height: 12),
 
             if (isSubmitting)
-              const Center(
+              Center(
                 child: Padding(
                   padding: EdgeInsets.symmetric(vertical: 10),
                   child: SizedBox(
@@ -202,7 +202,7 @@ class StaffDeviceCheckCard extends StatelessWidget {
                     ),
                     child: Text(
                       l10n?.staffCancel ?? 'Cancel',
-                      style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                      style: TextStyle(fontSize: 12, color: AppColors.textMuted),
                     ),
                   ),
                 ),
@@ -237,20 +237,20 @@ class StaffDeviceCheckCard extends StatelessWidget {
               TextFormField(
                 initialValue: noteText,
                 onChanged: onNoteChanged,
-                style: const TextStyle(fontSize: 12, color: AppColors.textPrimary),
+                style: TextStyle(fontSize: 12, color: AppColors.textPrimary),
                 decoration: InputDecoration(
                   hintText: l10n?.staffAddNote ?? 'Add a note (optional)',
-                  hintStyle: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                  hintStyle: TextStyle(fontSize: 12, color: AppColors.textMuted),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                   filled: true,
                   fillColor: AppColors.background,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: AppColors.border),
+                    borderSide: BorderSide(color: AppColors.border),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: AppColors.border),
+                    borderSide: BorderSide(color: AppColors.border),
                   ),
                 ),
               ),
@@ -294,7 +294,7 @@ class _BigStatusButton extends StatelessWidget {
               label,
               textAlign: TextAlign.center,
               maxLines: 2,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 11.5,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textWhite,
@@ -365,7 +365,7 @@ class _RecordedStrip extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             '"$note"',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontStyle: FontStyle.italic,
               color: AppColors.textSecondary,

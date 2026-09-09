@@ -50,7 +50,7 @@ class EmptyStateView extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textPrimary,
@@ -61,7 +61,7 @@ class EmptyStateView extends StatelessWidget {
               const SizedBox(height: 6),
               Text(
                 subtitle!,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
                   color: AppColors.textSecondary,
                   height: 1.4,
@@ -135,7 +135,7 @@ class ErrorStateView extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textPrimary,
@@ -146,7 +146,7 @@ class ErrorStateView extends StatelessWidget {
               const SizedBox(height: 6),
               Text(
                 subtitle!,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
                   color: AppColors.textSecondary,
                   height: 1.4,

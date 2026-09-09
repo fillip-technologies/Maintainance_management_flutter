@@ -34,7 +34,7 @@ class LanguageSwitcherButton extends ConsumerWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
+            Icon(
               Icons.translate_rounded,
               size: 15,
               color: AppColors.primary,
@@ -42,7 +42,7 @@ class LanguageSwitcherButton extends ConsumerWidget {
             const SizedBox(width: 6),
             Text(
               isHindi ? 'हिन्दी' : 'English',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
                 color: AppColors.primary,

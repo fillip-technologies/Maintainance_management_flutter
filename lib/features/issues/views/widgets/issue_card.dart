@@ -40,13 +40,13 @@ class IssueCard extends StatelessWidget {
     final cardBg = isSelected
         ? AppColors.primaryBg.withValues(alpha: 0.25)
         : (isResolved
-            ? const Color(0xFFF0FDF4)
+            ? AppColors.statusSuccessBg
             : (isRaisedOrCritical
-                ? const Color(0xFFFEF2F2)
+                ? AppColors.statusErrorBg
                 : (issue.status == IssueStatus.inProgress
-                    ? const Color(0xFFFFFBEB)
+                    ? AppColors.statusWarningBg
                     : (issue.status == IssueStatus.onHold
-                        ? const Color(0xFFFAF5FF)
+                        ? AppColors.statusPurpleBg
                         : AppColors.surface))));
 
     final borderColor = isSelected
@@ -107,7 +107,7 @@ class IssueCard extends StatelessWidget {
                   ],
                   Text(
                     issue.id.length > 8 ? '#${issue.id.substring(0, 8)}' : '#${issue.id}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                       color: AppColors.primary,
@@ -125,11 +125,11 @@ class IssueCard extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.layers_outlined, size: 11, color: AppColors.purpleText),
+                          Icon(Icons.layers_outlined, size: 11, color: AppColors.purpleText),
                           const SizedBox(width: 3),
                           Text(
                             l10n?.unitsAffectedBadge(unitsCount) ?? '$unitsCount Units Affected',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
                               color: AppColors.purpleText,
@@ -156,7 +156,7 @@ class IssueCard extends StatelessWidget {
                   issue.title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
@@ -173,9 +173,9 @@ class IssueCard extends StatelessWidget {
                     height: 36,
                     decoration: BoxDecoration(
                       color: isResolved
-                          ? const Color(0xFFDCFCE7)
+                          ? AppColors.statusSuccessTagBg
                           : (isRaisedOrCritical
-                              ? const Color(0xFFFEE2E2)
+                              ? AppColors.statusErrorTagBg
                               : AppColors.primaryBg),
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -211,7 +211,7 @@ class IssueCard extends StatelessWidget {
                       children: [
                         Text(
                           issue.deviceName,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,
@@ -219,7 +219,7 @@ class IssueCard extends StatelessWidget {
                         ),
                         Text(
                           '${issue.zoneName}${issue.categoryName.isNotEmpty ? " • ${issue.categoryName}" : ""}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
                             color: AppColors.textSecondary,
                           ),
@@ -237,7 +237,7 @@ class IssueCard extends StatelessWidget {
                   issue.displayDescription,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     color: AppColors.textSecondary,
                     height: 1.3,
@@ -248,7 +248,7 @@ class IssueCard extends StatelessWidget {
               // Footer / Action Bar
               if (trailingAction != null) ...[
                 const SizedBox(height: 12),
-                const Divider(height: 1, color: AppColors.divider),
+                Divider(height: 1, color: AppColors.divider),
                 const SizedBox(height: 10),
                 Align(
                   alignment: Alignment.centerRight,

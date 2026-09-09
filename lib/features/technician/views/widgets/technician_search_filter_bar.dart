@@ -74,14 +74,14 @@ class _TechnicianSearchFilterBarState extends State<TechnicianSearchFilterBar> {
         children: [
           TextField(
             controller: _searchController,
-            style: const TextStyle(fontSize: 13, color: AppColors.textPrimary),
+            style: TextStyle(fontSize: 13, color: AppColors.textPrimary),
             decoration: InputDecoration(
               hintText: searchHint,
-              hintStyle: const TextStyle(fontSize: 13, color: AppColors.textMuted),
-              prefixIcon: const Icon(Icons.search, size: 20, color: AppColors.icon),
+              hintStyle: TextStyle(fontSize: 13, color: AppColors.textMuted),
+              prefixIcon: Icon(Icons.search, size: 20, color: AppColors.icon),
               suffixIcon: widget.searchQuery.isNotEmpty
                   ? IconButton(
-                      icon: const Icon(Icons.clear, size: 16, color: AppColors.icon),
+                      icon: Icon(Icons.clear, size: 16, color: AppColors.icon),
                       onPressed: () {
                         _searchController.clear();
                         widget.onSearchChanged('');
@@ -177,7 +177,7 @@ class _TechnicianSearchFilterBarState extends State<TechnicianSearchFilterBar> {
             Icon(
               icon,
               size: 13,
-              color: isSelected ? Colors.white : AppColors.textSecondary,
+              color: isSelected ? AppColors.white : AppColors.textSecondary,
             ),
             const SizedBox(width: 5),
             Text(
@@ -185,7 +185,7 @@ class _TechnicianSearchFilterBarState extends State<TechnicianSearchFilterBar> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                color: isSelected ? Colors.white : AppColors.textPrimary,
+                color: isSelected ? AppColors.white : AppColors.textPrimary,
               ),
             ),
             const SizedBox(width: 5),
@@ -193,7 +193,7 @@ class _TechnicianSearchFilterBarState extends State<TechnicianSearchFilterBar> {
               padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? Colors.white.withValues(alpha: 0.25)
+                    ? AppColors.white.withValues(alpha: 0.25)
                     : AppColors.border.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(10),
               ),
@@ -202,7 +202,7 @@ class _TechnicianSearchFilterBarState extends State<TechnicianSearchFilterBar> {
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.bold,
-                  color: isSelected ? Colors.white : AppColors.textSecondary,
+                  color: isSelected ? AppColors.white : AppColors.textSecondary,
                 ),
               ),
             ),

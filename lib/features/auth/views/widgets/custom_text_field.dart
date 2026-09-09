@@ -28,7 +28,7 @@ class CustomTextField extends StatelessWidget {
       keyboardType: keyboardType,
       obscureText: obscureText,
       onChanged: onChanged,
-      style: const TextStyle(color: AppColors.textPrimary, fontSize: 15),
+      style: TextStyle(color: AppColors.textPrimary, fontSize: 15),
       decoration: InputDecoration(
         labelText: labelText,
         hintText: hintText,
@@ -37,15 +37,15 @@ class CustomTextField extends StatelessWidget {
         fillColor: AppColors.surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColors.border),
+          borderSide: BorderSide(color: AppColors.border),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColors.border),
+          borderSide: BorderSide(color: AppColors.border),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+          borderSide: BorderSide(color: AppColors.primary, width: 1.5),
         ),
       ),
     );

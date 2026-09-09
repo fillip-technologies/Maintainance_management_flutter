@@ -32,7 +32,7 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
     final actionNotifier = ref.read(technicianActionViewModelProvider);
 
     return treeAsync.when(
-      loading: () => const Center(
+      loading: () => Center(
         child: CircularProgressIndicator(color: AppColors.primary),
       ),
       error: (err, _) => Center(
@@ -41,12 +41,12 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.error_outline_rounded, size: 48, color: AppColors.error),
+              Icon(Icons.error_outline_rounded, size: 48, color: AppColors.error),
               const SizedBox(height: 12),
               Text(
                 l10n.techFailedToLoadZones('$err'),
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
               ),
               const SizedBox(height: 16),
               ElevatedButton.icon(
@@ -55,7 +55,7 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                 label: Text(l10n.retry),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
+                  foregroundColor: AppColors.white,
                 ),
               ),
             ],
@@ -102,9 +102,9 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
             ),
 
             if (state.isDrillingDown)
-              const LinearProgressIndicator(
+              LinearProgressIndicator(
                 minHeight: 2.5,
-                backgroundColor: Colors.transparent,
+                backgroundColor: AppColors.transparent,
                 color: AppColors.primary,
               ),
 
@@ -137,12 +137,12 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.info_outline_rounded, size: 16, color: AppColors.error),
+                            Icon(Icons.info_outline_rounded, size: 16, color: AppColors.error),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 state.errorMessage!,
-                                style: const TextStyle(fontSize: 11, color: AppColors.error),
+                                style: TextStyle(fontSize: 11, color: AppColors.error),
                               ),
                             ),
                           ],
@@ -156,7 +156,7 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                         padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
                         child: Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.account_tree_outlined,
                               size: 14,
                               color: AppColors.textSecondary,
@@ -166,7 +166,7 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                               isAtRoot
                                   ? l10n.techAssignedZonesCount(displayedSubzones.length)
                                   : l10n.techSubZonesCount(displayedSubzones.length),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.textSecondary,
@@ -210,7 +210,7 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                         padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                         child: Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.build_circle_outlined,
                               size: 14,
                               color: AppColors.error,
@@ -218,7 +218,7 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                             const SizedBox(width: 6),
                             Text(
                               l10n.techUnresolvedHardwareCount(displayedDevices.length),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.error,
@@ -276,7 +276,7 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                             Container(
                               width: 7,
                               height: 7,
-                              decoration: const BoxDecoration(
+                              decoration: BoxDecoration(
                                 color: AppColors.warning,
                                 shape: BoxShape.circle,
                               ),
@@ -284,7 +284,7 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                             const SizedBox(width: 6),
                             Text(
                               l10n.techFacilityIncidentsCount(facilityIncidents.length),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.warningText,

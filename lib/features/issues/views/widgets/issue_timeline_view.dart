@@ -33,7 +33,7 @@ class IssueTimelineView extends ConsumerWidget {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: AppColors.border),
             ),
-            child: const Row(
+            child: Row(
               children: [
                 Icon(Icons.info_outline, size: 18, color: AppColors.iconLight),
                 SizedBox(width: 8),
@@ -77,16 +77,16 @@ class IssueTimelineView extends ConsumerWidget {
         ),
         child: Row(
           children: [
-            const Icon(Icons.error_outline, color: AppColors.error, size: 18),
+            Icon(Icons.error_outline, color: AppColors.error, size: 18),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
                 'Failed to load timeline: $e',
-                style: const TextStyle(fontSize: 12, color: AppColors.errorText),
+                style: TextStyle(fontSize: 12, color: AppColors.errorText),
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.refresh, size: 16, color: AppColors.error),
+              icon: Icon(Icons.refresh, size: 16, color: AppColors.error),
               onPressed: () => ref.invalidate(issueHistoryProvider(issueId)),
             ),
           ],
@@ -160,7 +160,7 @@ class IssueTimelineView extends ConsumerWidget {
                         StatusBadge.issue(item.toStatus),
                         Text(
                           _formatTimestamp(item.createdAt),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w500,
                             color: AppColors.textMuted,
@@ -173,13 +173,13 @@ class IssueTimelineView extends ConsumerWidget {
                     // Author line
                     Row(
                       children: [
-                        const Icon(Icons.person_outline, size: 13, color: AppColors.textSecondary),
+                        Icon(Icons.person_outline, size: 13, color: AppColors.textSecondary),
                         const SizedBox(width: 4),
                         Text(
                           item.changedByUserName.isNotEmpty
                               ? item.changedByUserName
                               : 'System Event',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,
@@ -189,7 +189,7 @@ class IssueTimelineView extends ConsumerWidget {
                           const SizedBox(width: 6),
                           Text(
                             '(${item.fromStatus!.label} → ${item.toStatus.label})',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 11,
                               color: AppColors.textMuted,
                             ),
@@ -211,7 +211,7 @@ class IssueTimelineView extends ConsumerWidget {
                         ),
                         child: Text(
                           '"${item.comment!.trim()}"',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
                             fontStyle: FontStyle.italic,
                             color: AppColors.textSecondary,

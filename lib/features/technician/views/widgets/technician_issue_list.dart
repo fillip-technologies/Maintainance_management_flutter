@@ -44,7 +44,7 @@ class TechnicianIssueList extends StatelessWidget {
         itemCount: (isLoading || hasError || issues.isEmpty) ? 1 : issues.length,
         itemBuilder: (context, index) {
           if (isLoading) {
-            return const Padding(
+            return Padding(
               padding: EdgeInsets.only(top: 80),
               child: Center(
                 child: CircularProgressIndicator(color: AppColors.primary),

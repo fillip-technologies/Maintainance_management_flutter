@@ -541,5 +541,8 @@
   "zoneStatusOffline": "Offline",
   "zoneStatusEmpty": "No zones assigned",
   "zoneStatusLoadFailed": "Couldn't load zone status",
-  "pressBackAgainToExit": "Press back again to exit"
+  "pressBackAgainToExit": "Press back again to exit",
+  "themeTitle": "Theme",
+  "themeLight": "Light Mode",
+  "themeDark": "Dark Mode"
 }

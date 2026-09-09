@@ -44,7 +44,7 @@ class TechnicianBreadcrumbBar extends StatelessWidget {
                   color: AppColors.primary.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.arrow_back_rounded,
                   size: 18,
                   color: AppColors.primary,
@@ -118,10 +118,10 @@ class _BreadcrumbChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
-          color: isActive ? AppColors.primary.withValues(alpha: 0.12) : Colors.transparent,
+          color: isActive ? AppColors.primary.withValues(alpha: 0.12) : AppColors.transparent,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isActive ? AppColors.primary.withValues(alpha: 0.3) : Colors.transparent,
+            color: isActive ? AppColors.primary.withValues(alpha: 0.3) : AppColors.transparent,
             width: 1,
           ),
         ),

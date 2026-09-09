@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/config/app_config.dart';
-import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/theme.dart';
 import '../../../../core/widgets/language_switcher_button.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../auth/auth.dart';
@@ -21,7 +21,7 @@ class ProfilePage extends ConsumerWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
-            const Icon(Icons.logout_rounded, color: AppColors.error, size: 22),
+            Icon(Icons.logout_rounded, color: AppColors.error, size: 22),
             const SizedBox(width: 8),
             Text(
               l10n.signOut,
@@ -31,14 +31,14 @@ class ProfilePage extends ConsumerWidget {
         ),
         content: Text(
           l10n.confirmSignOut,
-          style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+          style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogCtx).pop(false),
             child: Text(
               l10n.cancel,
-              style: const TextStyle(color: AppColors.textSecondary),
+              style: TextStyle(color: AppColors.textSecondary),
             ),
           ),
           ElevatedButton(
@@ -69,6 +69,8 @@ class ProfilePage extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final user = ref.watch(authStateProvider).value;
     final profileState = ref.watch(profileViewModelProvider);
+    final themeMode = ref.watch(themeModeProvider);
+    final isDark = themeMode == ThemeMode.dark;
 
     if (user == null) {
       return Scaffold(
@@ -126,7 +128,7 @@ class ProfilePage extends ConsumerWidget {
         ),
         title: Text(
           l10n.profile,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.bold,
             color: AppColors.textPrimary,
@@ -157,7 +159,7 @@ class ProfilePage extends ConsumerWidget {
                     ? l10n.roleHardwareTechnician
                     : l10n.roleZoneStaff,
               ),
-              const Divider(color: AppColors.divider, height: 1),
+              Divider(color: AppColors.divider, height: 1),
               ProfileInfoTile(
                 icon: isTech ? Icons.assignment_outlined : Icons.place_outlined,
                 label: l10n.assignedLocation,
@@ -170,7 +172,7 @@ class ProfilePage extends ConsumerWidget {
                 imageUrl: !isTech ? effectiveZoneLogoUrl : null,
               ),
               if (user.clientId != null && user.clientId!.isNotEmpty) ...[
-                const Divider(color: AppColors.divider, height: 1),
+                Divider(color: AppColors.divider, height: 1),
                 ProfileInfoTile(
                   icon: Icons.business_outlined,
                   label: l10n.organizationId,
@@ -178,7 +180,7 @@ class ProfilePage extends ConsumerWidget {
                   copyableValue: user.clientId,
                 ),
               ],
-              const Divider(color: AppColors.divider, height: 1),
+              Divider(color: AppColors.divider, height: 1),
               ProfileInfoTile(
                 icon: Icons.fingerprint,
                 label: l10n.userId,
@@ -207,14 +209,14 @@ class ProfilePage extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(color: AppColors.border),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.translate_rounded,
                         size: 18,
                         color: AppColors.primary,
                       ),
                     ),
                     const SizedBox(width: 14),
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -242,7 +244,62 @@ class ProfilePage extends ConsumerWidget {
                   ],
                 ),
               ),
-              const Divider(color: AppColors.divider, height: 1),
+              Divider(color: AppColors.divider, height: 1),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: AppColors.background,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: Icon(
+                        isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
+                        size: 18,
+                        color: isDark ? AppColors.sunAccent : AppColors.primary,
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${l10n.themeTitle} / थीम',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textMuted,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            isDark ? l10n.themeDark : l10n.themeLight,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Switch(
+                      key: const ValueKey('theme_mode_switch'),
+                      value: isDark,
+                      activeTrackColor: AppColors.primary,
+                      onChanged: (_) {
+                        ref.read(themeModeProvider.notifier).toggleTheme();
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              Divider(color: AppColors.divider, height: 1),
               ProfileInfoTile(
                 icon: Icons.verified_outlined,
                 label: l10n.appVersion,
@@ -278,7 +335,7 @@ class ProfilePage extends ConsumerWidget {
                           color: AppColors.errorLight,
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.logout_rounded,
                           color: AppColors.error,
                           size: 20,
@@ -291,7 +348,7 @@ class ProfilePage extends ConsumerWidget {
                           children: [
                             Text(
                               l10n.signOut,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.error,
@@ -300,7 +357,7 @@ class ProfilePage extends ConsumerWidget {
                             const SizedBox(height: 2),
                             Text(
                               l10n.confirmSignOut,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 12,
                                 color: AppColors.textSecondary,
                               ),
@@ -309,7 +366,7 @@ class ProfilePage extends ConsumerWidget {
                         ),
                       ),
                       if (profileState.isLoggingOut)
-                        const SizedBox(
+                        SizedBox(
                           width: 20,
                           height: 20,
                           child: CircularProgressIndicator(
@@ -318,7 +375,7 @@ class ProfilePage extends ConsumerWidget {
                           ),
                         )
                       else
-                        const Icon(
+                        Icon(
                           Icons.chevron_right_rounded,
                           size: 20,
                           color: AppColors.error,
@@ -341,7 +398,7 @@ class ProfilePage extends ConsumerWidget {
       padding: const EdgeInsets.only(left: 4),
       child: Text(
         title.toUpperCase(),
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w700,
           color: AppColors.textMuted,

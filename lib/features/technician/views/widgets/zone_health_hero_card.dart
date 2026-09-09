@@ -75,7 +75,7 @@ class ZoneHealthHeroCard extends StatelessWidget {
                         color: AppColors.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.radar_rounded,
                         size: 20,
                         color: AppColors.primary,
@@ -90,7 +90,7 @@ class ZoneHealthHeroCard extends StatelessWidget {
                             l10n.techCoverageOverview,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                               color: AppColors.textPrimary,
@@ -100,7 +100,7 @@ class ZoneHealthHeroCard extends StatelessWidget {
                             l10n.techZonesDevicesSummary(rootZones.length, totalDevices),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 11,
                               color: AppColors.textSecondary,
                             ),
@@ -243,7 +243,7 @@ class ZoneHealthHeroCard extends StatelessWidget {
                       zone.name,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w800,
                         color: AppColors.textPrimary,
@@ -258,7 +258,7 @@ class ZoneHealthHeroCard extends StatelessWidget {
                           : l10n.techZoneDepthStatus(zone.depth, zone.status.toUpperCase()),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 11,
                         color: AppColors.textSecondary,
                       ),
@@ -330,7 +330,7 @@ class ZoneHealthHeroCard extends StatelessWidget {
               color: AppColors.border.withValues(alpha: 0.4),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: const Icon(Icons.cloud_off_rounded, size: 22, color: AppColors.textSecondary),
+            child: Icon(Icons.cloud_off_rounded, size: 22, color: AppColors.textSecondary),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -339,7 +339,7 @@ class ZoneHealthHeroCard extends StatelessWidget {
               children: [
                 Text(
                   zone.name,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w800,
                     color: AppColors.textPrimary,
@@ -349,7 +349,7 @@ class ZoneHealthHeroCard extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   l10n.techZoneHealthLoadFailed,
-                  style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                  style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
                 ),
               ],
             ),

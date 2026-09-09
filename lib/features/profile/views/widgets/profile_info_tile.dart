@@ -64,7 +64,7 @@ class ProfileInfoTile extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     color: AppColors.textMuted,
                     fontWeight: FontWeight.w500,
@@ -73,7 +73,7 @@ class ProfileInfoTile extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   value,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     color: AppColors.textPrimary,
                     fontWeight: FontWeight.w600,
@@ -92,7 +92,7 @@ class ProfileInfoTile extends StatelessWidget {
                 AppSnackbar.info(l10n?.copiedToClipboard ?? 'Copied to clipboard');
               },
               borderRadius: BorderRadius.circular(8),
-              child: const Padding(
+              child: Padding(
                 padding: EdgeInsets.all(6),
                 child: Icon(
                   Icons.copy_rounded,

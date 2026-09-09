@@ -14,12 +14,12 @@ class LanguageSegmentedControl extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
-        color: const Color(0xFFF1F5F9), // Sleek neutral slate track
+        color: AppColors.trackBackground, // Sleek neutral slate track
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: AppColors.border, width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
+            color: AppColors.cardShadow,
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -29,7 +29,7 @@ class LanguageSegmentedControl extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           // Icon prefix
-          const Padding(
+          Padding(
             padding: EdgeInsets.only(left: 8, right: 6),
             child: Icon(
               Icons.translate_rounded,
@@ -88,12 +88,12 @@ class _SegmentPill extends StatelessWidget {
         curve: Curves.easeInOut,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.surface : Colors.transparent,
+          color: isSelected ? AppColors.surface : AppColors.transparent,
           borderRadius: BorderRadius.circular(20),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
+                    color: AppColors.cardShadow,
                     blurRadius: 4,
                     offset: const Offset(0, 1.5),
                   ),

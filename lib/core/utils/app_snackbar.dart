@@ -147,16 +147,16 @@ class AppSnackbar {
         behavior: SnackBarBehavior.floating,
         width: 240,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        backgroundColor: const Color(0xE61E293B),
+        backgroundColor: AppColors.snackbarBg,
         duration: duration,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         content: Text(
           message,
           textAlign: TextAlign.center,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 12.5,
             fontWeight: FontWeight.w500,
-            color: Colors.white,
+            color: AppColors.white,
           ),
         ),
       ),

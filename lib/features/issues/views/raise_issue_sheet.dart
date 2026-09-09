@@ -33,7 +33,7 @@ class RaiseIssueSheet extends ConsumerStatefulWidget {
       context: context,
       isScrollControlled: true,
       enableDrag: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.transparent,
       builder: (_) => RaiseIssueSheet(
         devices: devices,
         initialDevice: initialDevice,
@@ -150,7 +150,7 @@ class _RaiseIssueSheetState extends ConsumerState<RaiseIssueSheet> {
         child: Wrap(
           children: [
             ListTile(
-              leading: const Icon(Icons.camera_alt, color: AppColors.primary),
+              leading: Icon(Icons.camera_alt, color: AppColors.primary),
               title: const Text('Take Defect Photo'),
               onTap: () {
                 Navigator.pop(ctx);
@@ -158,7 +158,7 @@ class _RaiseIssueSheetState extends ConsumerState<RaiseIssueSheet> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.photo_library, color: AppColors.primary),
+              leading: Icon(Icons.photo_library, color: AppColors.primary),
               title: const Text('Choose from Gallery'),
               onTap: () {
                 Navigator.pop(ctx);
@@ -231,7 +231,7 @@ class _RaiseIssueSheetState extends ConsumerState<RaiseIssueSheet> {
 
     return Container(
       constraints: BoxConstraints(maxHeight: maxHeight),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -276,12 +276,12 @@ class _RaiseIssueSheetState extends ConsumerState<RaiseIssueSheet> {
                               color: AppColors.errorLight,
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child: const Icon(Icons.report_problem_outlined, color: AppColors.errorText, size: 20),
+                            child: Icon(Icons.report_problem_outlined, color: AppColors.errorText, size: 20),
                           ),
                           const SizedBox(width: 10),
                           Text(
                             l10n?.raiseIssueTitle ?? 'Report a Problem',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: AppColors.textPrimary,
@@ -291,11 +291,11 @@ class _RaiseIssueSheetState extends ConsumerState<RaiseIssueSheet> {
                       ),
                       IconButton(
                         onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.close, color: AppColors.icon),
+                        icon: Icon(Icons.close, color: AppColors.icon),
                       ),
                     ],
                   ),
-                  const Divider(color: AppColors.divider),
+                  Divider(color: AppColors.divider),
                   const SizedBox(height: 12),
 
                   if (_errorMessage != null) ...[
@@ -308,12 +308,12 @@ class _RaiseIssueSheetState extends ConsumerState<RaiseIssueSheet> {
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.error_outline, color: AppColors.errorText, size: 18),
+                          Icon(Icons.error_outline, color: AppColors.errorText, size: 18),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               _errorMessage!,
-                              style: const TextStyle(fontSize: 13, color: AppColors.errorText),
+                              style: TextStyle(fontSize: 13, color: AppColors.errorText),
                             ),
                           ),
                         ],
@@ -325,7 +325,7 @@ class _RaiseIssueSheetState extends ConsumerState<RaiseIssueSheet> {
                   // 1. Device Selection Dropdown
                   Text(
                     l10n?.raiseSelectEquipment ?? 'Which equipment?',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textSecondary,
@@ -362,7 +362,7 @@ class _RaiseIssueSheetState extends ConsumerState<RaiseIssueSheet> {
                                   child: Text(
                                     '${d.name} (${d.zoneName})',
                                     overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
+                                    style: TextStyle(fontSize: 14, color: AppColors.textPrimary),
                                   ),
                                 ),
                               ],
@@ -385,7 +385,7 @@ class _RaiseIssueSheetState extends ConsumerState<RaiseIssueSheet> {
                   // 2. Defect Category Selection — visual chip grid
                   Text(
                     l10n?.raiseDefectCategory ?? 'What is wrong?',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textSecondary,
@@ -395,7 +395,7 @@ class _RaiseIssueSheetState extends ConsumerState<RaiseIssueSheet> {
                   if (_isLoadingCategories)
                     Row(
                       children: [
-                        const SizedBox(
+                        SizedBox(
                           width: 16,
                           height: 16,
                           child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
@@ -403,7 +403,7 @@ class _RaiseIssueSheetState extends ConsumerState<RaiseIssueSheet> {
                         const SizedBox(width: 10),
                         Text(
                           l10n?.raiseLoadingCategories ?? 'Loading defect types...',
-                          style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                          style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                         ),
                       ],
                     )
@@ -417,12 +417,12 @@ class _RaiseIssueSheetState extends ConsumerState<RaiseIssueSheet> {
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.info_outline, size: 16, color: AppColors.textSecondary),
+                          Icon(Icons.info_outline, size: 16, color: AppColors.textSecondary),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               l10n?.raiseSelectUnitHint ?? 'Please choose a unit above first',
-                              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                             ),
                           ),
                         ],
@@ -438,7 +438,7 @@ class _RaiseIssueSheetState extends ConsumerState<RaiseIssueSheet> {
                       child: Text(
                         l10n?.raiseNoCategoriesInfo ??
                             'No types listed — a general problem will be reported.',
-                        style: const TextStyle(fontSize: 12, color: AppColors.warningText),
+                        style: TextStyle(fontSize: 12, color: AppColors.warningText),
                       ),
                     )
                   else
@@ -477,7 +477,7 @@ class _RaiseIssueSheetState extends ConsumerState<RaiseIssueSheet> {
                   // 3. Priority Selector
                   Text(
                     l10n?.raisePriority ?? 'How urgent?',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textSecondary,
@@ -537,7 +537,7 @@ class _RaiseIssueSheetState extends ConsumerState<RaiseIssueSheet> {
                   // 4. Description Field
                   Text(
                     l10n?.raiseDetails ?? 'Describe the problem',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textSecondary,
@@ -547,7 +547,7 @@ class _RaiseIssueSheetState extends ConsumerState<RaiseIssueSheet> {
                   TextField(
                     controller: _descriptionController,
                     maxLines: 3,
-                    style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
+                    style: TextStyle(color: AppColors.textPrimary, fontSize: 14),
                     decoration: InputDecoration(
                       hintText: l10n?.raiseDetailsHint ??
                           'What is happening? Any sounds, errors, damage...',
@@ -561,7 +561,7 @@ class _RaiseIssueSheetState extends ConsumerState<RaiseIssueSheet> {
                   const SizedBox(height: 14),
 
                   // 5. Evidence Photo (Optional)
-                  const Text(
+                  Text(
                     'Photo Proof (Optional)',
                     style: TextStyle(
                       fontSize: 13,
@@ -589,11 +589,11 @@ class _RaiseIssueSheetState extends ConsumerState<RaiseIssueSheet> {
                             onTap: () => setState(() => _attachedImage = null),
                             child: Container(
                               padding: const EdgeInsets.all(6),
-                              decoration: const BoxDecoration(
-                                color: Colors.black54,
+                              decoration: BoxDecoration(
+                                color: AppColors.black54,
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(Icons.close, color: Colors.white, size: 18),
+                              child: Icon(Icons.close, color: AppColors.white, size: 18),
                             ),
                           ),
                         ),
@@ -616,15 +616,15 @@ class _RaiseIssueSheetState extends ConsumerState<RaiseIssueSheet> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             if (_isPickingImage)
-                              const SizedBox(
+                              SizedBox(
                                 width: 18,
                                 height: 18,
                                 child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
                               )
                             else ...[
-                              const Icon(Icons.add_a_photo_outlined, size: 20, color: AppColors.primary),
+                              Icon(Icons.add_a_photo_outlined, size: 20, color: AppColors.primary),
                               const SizedBox(width: 8),
-                              const Text(
+                              Text(
                                 'Add Photo Evidence',
                                 style: TextStyle(
                                   fontSize: 13,
@@ -654,7 +654,7 @@ class _RaiseIssueSheetState extends ConsumerState<RaiseIssueSheet> {
                         ),
                       ),
                       child: _isSubmitting
-                          ? const SizedBox(
+                          ? SizedBox(
                               height: 20,
                               width: 20,
                               child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.textWhite),

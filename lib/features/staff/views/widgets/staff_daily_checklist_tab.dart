@@ -75,7 +75,7 @@ class StaffDailyChecklistTab extends StatelessWidget {
                           '$completedCount / $total checked today',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w800,
                         color: AppColors.textPrimary,
@@ -136,7 +136,7 @@ class StaffDailyChecklistTab extends StatelessWidget {
             ),
           ),
         ),
-        const Divider(height: 1, color: AppColors.divider),
+        Divider(height: 1, color: AppColors.divider),
 
         // Device Check List
         Expanded(
@@ -149,7 +149,7 @@ class StaffDailyChecklistTab extends StatelessWidget {
               itemCount: (isLoading || hasError || displayedDevices.isEmpty) ? 1 : displayedDevices.length,
               itemBuilder: (context, index) {
                 if (isLoading) {
-                  return const Padding(
+                  return Padding(
                     padding: EdgeInsets.only(top: 80),
                     child: Center(
                       child: CircularProgressIndicator(color: AppColors.primary),

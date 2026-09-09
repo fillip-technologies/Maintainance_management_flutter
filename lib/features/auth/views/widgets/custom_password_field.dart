@@ -33,7 +33,7 @@ class _CustomPasswordFieldState extends State<CustomPasswordField> {
       keyboardType: widget.keyboardType,
       obscureText: _obscureText,
       onChanged: widget.onChanged,
-      style: const TextStyle(color: AppColors.textPrimary, fontSize: 15),
+      style: TextStyle(color: AppColors.textPrimary, fontSize: 15),
       decoration: InputDecoration(
         labelText: widget.labelText,
         hintText: widget.hintText,
@@ -55,15 +55,15 @@ class _CustomPasswordFieldState extends State<CustomPasswordField> {
         fillColor: AppColors.surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColors.border),
+          borderSide: BorderSide(color: AppColors.border),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColors.border),
+          borderSide: BorderSide(color: AppColors.border),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+          borderSide: BorderSide(color: AppColors.primary, width: 1.5),
         ),
       ),
     );

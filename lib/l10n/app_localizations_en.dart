@@ -1126,4 +1126,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pressBackAgainToExit => 'Press back again to exit';
+
+  @override
+  String get themeTitle => 'Theme';
+
+  @override
+  String get themeLight => 'Light Mode';
+
+  @override
+  String get themeDark => 'Dark Mode';
 }

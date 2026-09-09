@@ -2119,6 +2119,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Press back again to exit'**
   String get pressBackAgainToExit;
+
+  /// No description provided for @themeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get themeTitle;
+
+  /// No description provided for @themeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light Mode'**
+  String get themeLight;
+
+  /// No description provided for @themeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark Mode'**
+  String get themeDark;
 }
 
 class _AppLocalizationsDelegate

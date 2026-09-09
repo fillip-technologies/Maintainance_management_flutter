@@ -83,7 +83,7 @@ class TechnicianZoneStatusView extends ConsumerWidget {
     final statusAsync = ref.watch(technicianZoneStatusViewModelProvider);
 
     return statusAsync.when(
-      loading: () => const Center(
+      loading: () => Center(
         child: CircularProgressIndicator(color: AppColors.primary),
       ),
       error: (error, _) => ErrorStateView(
@@ -111,7 +111,7 @@ class TechnicianZoneStatusView extends ConsumerWidget {
                 children: [
                   Text(
                     l10n.zoneStatusTitle,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
@@ -126,7 +126,7 @@ class TechnicianZoneStatusView extends ConsumerWidget {
                     ),
                     child: Text(
                       '${rows.length}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
                         color: AppColors.primary,
@@ -194,7 +194,7 @@ class TechnicianZoneStatusView extends ConsumerWidget {
                                 zoneColWidth: zoneColWidth,
                                 l10n: l10n,
                               ),
-                              const Divider(height: 1, thickness: 1, color: AppColors.border),
+                              Divider(height: 1, thickness: 1, color: AppColors.border),
 
                               // Table Rows with Pull-to-refresh
                               Expanded(
@@ -269,7 +269,7 @@ class _TableHeader extends StatelessWidget {
       color: AppColors.cardAlt,
       child: Row(
         children: [
-          const SizedBox(
+          SizedBox(
             width: _indexColWidth,
             child: Text(
               '#',
@@ -284,7 +284,7 @@ class _TableHeader extends StatelessWidget {
             width: zoneColWidth,
             child: Text(
               l10n.zoneStatusColZone,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 10.5,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textSecondary,
@@ -296,7 +296,7 @@ class _TableHeader extends StatelessWidget {
             child: Text(
               l10n.zoneStatusColHardware,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 10.5,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textSecondary,
@@ -307,7 +307,7 @@ class _TableHeader extends StatelessWidget {
             width: _onlineColWidth,
             child: Text(
               l10n.zoneStatusColOnline,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 10.5,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textSecondary,
@@ -318,7 +318,7 @@ class _TableHeader extends StatelessWidget {
             width: _offlineColWidth,
             child: Text(
               l10n.zoneStatusColOffline,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 10.5,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textSecondary,
@@ -329,7 +329,7 @@ class _TableHeader extends StatelessWidget {
             width: _maintColWidth,
             child: Text(
               l10n.zoneStatusColMaint,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 10.5,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textSecondary,
@@ -340,7 +340,7 @@ class _TableHeader extends StatelessWidget {
             width: _statusColWidth,
             child: Text(
               l10n.zoneStatusColStatus,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 10.5,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textSecondary,
@@ -412,7 +412,7 @@ class _ZoneRow extends StatelessWidget {
                 child: Text(
                   row.dataLoadFailed ? '—' : '${row.hardwareCount}',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
@@ -493,7 +493,7 @@ class _ZoneCell extends StatelessWidget {
               ? Image.network(
                   imageUrl!,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, _, _) => const Center(
+                  errorBuilder: (_, _, _) => Center(
                     child: Icon(
                       Icons.location_on_rounded,
                       size: 13,
@@ -501,7 +501,7 @@ class _ZoneCell extends StatelessWidget {
                     ),
                   ),
                 )
-              : const Center(
+              : Center(
                   child: Icon(
                     Icons.location_on_rounded,
                     size: 13,
@@ -513,7 +513,7 @@ class _ZoneCell extends StatelessWidget {
         Expanded(
           child: Text(
             name,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
@@ -542,7 +542,7 @@ class _CountCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (dataLoadFailed) {
-      return const Text(
+      return Text(
         '—',
         style: TextStyle(
           fontSize: 11.5,
@@ -593,7 +593,7 @@ class _StatusIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (dataLoadFailed) {
-      return const Text(
+      return Text(
         '—',
         style: TextStyle(
           fontSize: 11.5,
@@ -624,7 +624,7 @@ class _StatusIndicator extends StatelessWidget {
             label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11.5,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
