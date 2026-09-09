@@ -22,7 +22,7 @@ class ProfileInfoTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
@@ -89,7 +89,7 @@ class ProfileInfoTile extends StatelessWidget {
             InkWell(
               onTap: () {
                 Clipboard.setData(ClipboardData(text: copyableValue!));
-                AppSnackbar.info(l10n.copiedToClipboard);
+                AppSnackbar.info(l10n?.copiedToClipboard ?? 'Copied to clipboard');
               },
               borderRadius: BorderRadius.circular(8),
               child: const Padding(

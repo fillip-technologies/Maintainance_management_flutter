@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:equipment_management_system/core/theme/colors.dart';
 import 'package:equipment_management_system/features/technician/technician.dart';
 import 'package:equipment_management_system/l10n/app_localizations.dart';
 
@@ -40,6 +41,44 @@ void main() {
         onlineCount: 0,
       );
       expect(emptyZone.overallStatus, ZoneOverallStatus.online);
+    });
+
+    test('1b. isAlerted flags rows with unresolved issues or zero online devices', () {
+      // 1. Zone with active issue raised -> should be alerted red
+      const issueZone = ZoneStatusRow(
+        id: 'z-issue',
+        name: 'Lion Safari',
+        hardwareCount: 20,
+        onlineCount: 19,
+        openIssuesCount: 1,
+      );
+      expect(issueZone.hasUnresolvedIssues, isTrue);
+      expect(issueZone.hasNoOnlineDevices, isFalse);
+      expect(issueZone.isAlerted, isTrue);
+
+      // 2. Zone with 0 online devices -> should be alerted red
+      const downZone = ZoneStatusRow(
+        id: 'z-down',
+        name: 'Dark Cave',
+        hardwareCount: 10,
+        onlineCount: 0,
+        openIssuesCount: 0,
+      );
+      expect(downZone.hasUnresolvedIssues, isFalse);
+      expect(downZone.hasNoOnlineDevices, isTrue);
+      expect(downZone.isAlerted, isTrue);
+
+      // 3. Healthy zone with online devices and 0 open issues -> normal (not alerted)
+      const healthyZone = ZoneStatusRow(
+        id: 'z-ok',
+        name: 'Entry / Exit',
+        hardwareCount: 36,
+        onlineCount: 33,
+        openIssuesCount: 0,
+      );
+      expect(healthyZone.hasUnresolvedIssues, isFalse);
+      expect(healthyZone.hasNoOnlineDevices, isFalse);
+      expect(healthyZone.isAlerted, isFalse);
     });
 
     test('2. fromBreakdown accurately aggregates counts across sub-zones', () {
@@ -256,6 +295,119 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(find.text('Entry / Exit'), findsOneWidget);
     });
+
+    testWidgets('6. TechnicianZoneStatusView highlights rows with unresolved issues or zero online devices in red', (tester) async {
+      final testRows = [
+        // 1. Healthy row -> normal surface styling
+        const ZoneStatusRow(
+          id: 'z-1',
+          name: 'Healthy Zone',
+          hardwareCount: 20,
+          onlineCount: 20,
+          openIssuesCount: 0,
+        ),
+        // 2. Row with unresolved issue -> red alert styling
+        const ZoneStatusRow(
+          id: 'z-2',
+          name: 'Issue Zone',
+          hardwareCount: 15,
+          onlineCount: 14,
+          openIssuesCount: 2,
+        ),
+        // 3. Row with 0 online devices -> red alert styling
+        const ZoneStatusRow(
+          id: 'z-3',
+          name: 'Dark Cave',
+          hardwareCount: 8,
+          onlineCount: 0,
+          openIssuesCount: 0,
+        ),
+      ];
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            technicianZoneStatusViewModelProvider.overrideWith(
+              () => _FakeZoneStatusViewModel(testRows),
+            ),
+          ],
+          child: const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: TechnicianZoneStatusView(),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('Healthy Zone'), findsOneWidget);
+      expect(find.text('Issue Zone'), findsOneWidget);
+      expect(find.text('Dark Cave'), findsOneWidget);
+
+      // Verify row materials exist, alert backgrounds are applied, and no layout overflows occurred
+      final materialFinders = find.byType(Material);
+      final hasAlertBg = materialFinders.evaluate().any((element) {
+        final widget = element.widget as Material;
+        return widget.color == AppColors.errorLight.withValues(alpha: 0.65);
+      });
+      expect(hasAlertBg, isTrue);
+    });
+
+    testWidgets('7. Tapping a zone row switches view mode to spatialExplorer and calls navigateToZone', (tester) async {
+      final testRows = [
+        const ZoneStatusRow(
+          id: 'z-lion',
+          name: 'Lion Safari',
+          hardwareCount: 20,
+          onlineCount: 19,
+          openIssuesCount: 1,
+        ),
+      ];
+
+      final fakeTreeVm = _FakeZoneTreeViewModel();
+      final container = ProviderContainer(
+        overrides: [
+          technicianZoneStatusViewModelProvider.overrideWith(
+            () => _FakeZoneStatusViewModel(testRows),
+          ),
+          technicianZoneTreeViewModelProvider.overrideWith(
+            () => fakeTreeVm,
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: TechnicianZoneStatusView(),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Initially on whatever mode (default spatialExplorer or table)
+      container.read(technicianViewModeProvider.notifier).setMode(TechnicianViewMode.zoneStatusTable);
+      expect(container.read(technicianViewModeProvider), TechnicianViewMode.zoneStatusTable);
+
+      // Tap on the row with 'Lion Safari'
+      await tester.tap(find.text('Lion Safari'));
+      await tester.pump();
+
+      // Verify that view mode switched to spatialExplorer (Zone Map) and navigateToZone was invoked with the row id
+      expect(container.read(technicianViewModeProvider), TechnicianViewMode.spatialExplorer);
+      expect(fakeTreeVm.navigatedZoneId, 'z-lion');
+      expect(fakeTreeVm.fromZoneStatus, isTrue);
+    });
   });
 }
 
@@ -266,4 +418,23 @@ class _FakeZoneStatusViewModel extends TechnicianZoneStatusViewModel {
 
   @override
   Future<List<ZoneStatusRow>> build() async => rows;
+}
+
+class _FakeZoneTreeViewModel extends TechnicianZoneTreeViewModel {
+  String? navigatedZoneId;
+  bool? fromZoneStatus;
+
+  @override
+  Future<TechnicianZoneTreeState> build() async => const TechnicianZoneTreeState();
+
+  @override
+  Future<void> navigateToZone(
+    String zoneId, {
+    String? zoneName,
+    String? imageUrl,
+    bool fromZoneStatus = false,
+  }) async {
+    navigatedZoneId = zoneId;
+    this.fromZoneStatus = fromZoneStatus;
+  }
 }

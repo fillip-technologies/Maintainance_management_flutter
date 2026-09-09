@@ -16,6 +16,7 @@ class ZoneStatusRow {
   final int onlineCount;       // Summed `working` devices in zone subtree
   final int offlineCount;      // Summed `faulty` devices in zone subtree
   final int maintenanceCount;  // Summed `underMaintenance` devices in zone subtree
+  final int openIssuesCount;   // Count of active/unresolved tickets in this zone subtree
   final bool dataLoadFailed;
 
   const ZoneStatusRow({
@@ -26,6 +27,7 @@ class ZoneStatusRow {
     this.onlineCount = 0,
     this.offlineCount = 0,
     this.maintenanceCount = 0,
+    this.openIssuesCount = 0,
     this.dataLoadFailed = false,
   });
 
@@ -34,6 +36,17 @@ class ZoneStatusRow {
       (hardwareCount > 0 && onlineCount == 0)
           ? ZoneOverallStatus.offline
           : ZoneOverallStatus.online;
+
+  /// True if there is at least one active issue raised that is not resolved/closed.
+  bool get hasUnresolvedIssues => openIssuesCount > 0;
+
+  /// True if the zone has hardware units but none are online.
+  bool get hasNoOnlineDevices => hardwareCount > 0 && onlineCount == 0;
+
+  /// True if the row should be flagged with red alert styling:
+  /// - Has an issue raised and not solved (`hasUnresolvedIssues`)
+  /// - OR has hardware but not any device online (`hasNoOnlineDevices`)
+  bool get isAlerted => hasUnresolvedIssues || hasNoOnlineDevices;
 
   /// Returns the zone name formatted in Title Case (first letter capitalized, rest lowercase).
   String get displayName {
@@ -62,6 +75,7 @@ class ZoneStatusRow {
     required String name,
     String? imageUrl,
     required Map<String, Map<String, int>> breakdownMap,
+    int openIssuesCount = 0,
   }) {
     var total = 0, working = 0, faulty = 0, maintenance = 0;
     for (final entry in breakdownMap.values) {
@@ -79,6 +93,7 @@ class ZoneStatusRow {
       onlineCount: working,
       offlineCount: faulty,
       maintenanceCount: maintenance,
+      openIssuesCount: openIssuesCount,
       dataLoadFailed: false,
     );
   }
@@ -91,6 +106,7 @@ class ZoneStatusRow {
     int? onlineCount,
     int? offlineCount,
     int? maintenanceCount,
+    int? openIssuesCount,
     bool? dataLoadFailed,
   }) {
     return ZoneStatusRow(
@@ -101,6 +117,7 @@ class ZoneStatusRow {
       onlineCount: onlineCount ?? this.onlineCount,
       offlineCount: offlineCount ?? this.offlineCount,
       maintenanceCount: maintenanceCount ?? this.maintenanceCount,
+      openIssuesCount: openIssuesCount ?? this.openIssuesCount,
       dataLoadFailed: dataLoadFailed ?? this.dataLoadFailed,
     );
   }

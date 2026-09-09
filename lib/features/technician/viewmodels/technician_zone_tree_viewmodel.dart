@@ -213,12 +213,53 @@ class TechnicianZoneTreeViewModel extends AsyncNotifier<TechnicianZoneTreeState>
     }
   }
 
+  /// Flag indicating whether the current drill-down was initiated from the Zone Status table.
+  bool _navigatedFromZoneStatus = false;
+
+  /// Navigates directly into a zone by its ID (e.g. when tapping a row in the Zone Status table).
+  Future<void> navigateToZone(
+    String zoneId, {
+    String? zoneName,
+    String? imageUrl,
+    bool fromZoneStatus = false,
+  }) async {
+    _navigatedFromZoneStatus = fromZoneStatus;
+    final current = state.value ?? await future;
+
+    final match = current.rootZones.where((z) => z.id == zoneId).firstOrNull;
+    final targetNode = match ??
+        TechnicianZoneNode(
+          id: zoneId,
+          name: zoneName ?? '',
+          imageUrl: imageUrl,
+        );
+
+    // Reset path back to root first so drillDown constructs a clean 1-level path [targetNode]
+    state = AsyncValue.data(current.copyWith(
+      currentPath: const [],
+      currentSubzones: const [],
+      currentDevices: const [],
+      currentIssues: const [],
+      clearError: true,
+    ));
+
+    await drillDown(targetNode);
+  }
+
   /// Navigates back up one level in the breadcrumb path.
   Future<void> navigateUp() async {
     final current = state.value;
     if (current == null || current.isAtRoot) return;
 
     if (current.currentPath.length <= 1) {
+      if (_navigatedFromZoneStatus) {
+        _navigatedFromZoneStatus = false;
+        jumpToRoot();
+        ref
+            .read(technicianViewModeProvider.notifier)
+            .setMode(TechnicianViewMode.zoneStatusTable);
+        return;
+      }
       jumpToRoot();
       return;
     }
@@ -246,6 +287,7 @@ class TechnicianZoneTreeViewModel extends AsyncNotifier<TechnicianZoneTreeState>
 
   /// Resets back to top-level root zones overview.
   void jumpToRoot() {
+    _navigatedFromZoneStatus = false;
     final current = state.value;
     if (current == null) return;
 

@@ -3,8 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/widgets/empty_state_view.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../models/technician_zone_tree_state.dart';
 import '../../models/zone_status_row.dart';
+import '../../viewmodels/technician_view_mode_provider.dart';
 import '../../viewmodels/technician_zone_status_viewmodel.dart';
+import '../../viewmodels/technician_zone_tree_viewmodel.dart';
 
 const double _indexColWidth = 22.0;
 const double _totalColWidth = 44.0;
@@ -208,11 +211,25 @@ class TechnicianZoneStatusView extends ConsumerWidget {
                                       color: AppColors.divider.withValues(alpha: 0.6),
                                     ),
                                     itemBuilder: (context, index) {
+                                      final row = rows[index];
                                       return _ZoneRow(
-                                        row: rows[index],
+                                        row: row,
                                         index: index,
                                         zoneColWidth: zoneColWidth,
                                         l10n: l10n,
+                                        onTap: () {
+                                          ref
+                                              .read(technicianViewModeProvider.notifier)
+                                              .setMode(TechnicianViewMode.spatialExplorer);
+                                          ref
+                                              .read(technicianZoneTreeViewModelProvider.notifier)
+                                              .navigateToZone(
+                                                row.id,
+                                                zoneName: row.name,
+                                                imageUrl: row.imageUrl,
+                                                fromZoneStatus: true,
+                                              );
+                                        },
                                       );
                                     },
                                   ),
@@ -342,98 +359,109 @@ class _ZoneRow extends StatelessWidget {
   final int index;
   final double zoneColWidth;
   final AppLocalizations l10n;
+  final VoidCallback? onTap;
 
   const _ZoneRow({
     required this.row,
     required this.index,
     required this.zoneColWidth,
     required this.l10n,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 42,
-      padding: const EdgeInsets.symmetric(horizontal: _rowHorizontalPadding),
-      color: AppColors.surface,
-      child: Row(
-        children: [
-          // # Index
-          SizedBox(
-            width: _indexColWidth,
-            child: Text(
-              '${index + 1}',
-              style: const TextStyle(
-                fontSize: 11.5,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
+    final isAlerted = row.isAlerted;
+
+    return Material(
+      color: isAlerted
+          ? AppColors.errorLight.withValues(alpha: 0.65)
+          : AppColors.surface,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          height: 42,
+          padding: const EdgeInsets.symmetric(horizontal: _rowHorizontalPadding),
+          child: Row(
+            children: [
+              // # Index
+              SizedBox(
+                width: _indexColWidth,
+                child: Text(
+                  '${index + 1}',
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    color: isAlerted ? AppColors.errorText : AppColors.textSecondary,
+                  ),
+                ),
               ),
-            ),
-          ),
 
-          // Zone / Area Cell (sized to max name width)
-          SizedBox(
-            width: zoneColWidth,
-            child: _ZoneCell(
-              name: row.displayName,
-              imageUrl: row.imageUrl,
-            ),
-          ),
-
-          // Total Count (Total column, centered)
-          SizedBox(
-            width: _totalColWidth,
-            child: Text(
-              row.dataLoadFailed ? '—' : '${row.hardwareCount}',
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+              // Zone / Area Cell (sized to max name width)
+              SizedBox(
+                width: zoneColWidth,
+                child: _ZoneCell(
+                  name: row.displayName,
+                  imageUrl: row.imageUrl,
+                ),
               ),
-            ),
-          ),
 
-          // Online Count
-          SizedBox(
-            width: _onlineColWidth,
-            child: _CountCell(
-              value: row.onlineCount,
-              dotColor: AppColors.success,
-              dataLoadFailed: row.dataLoadFailed,
-            ),
-          ),
+              // Total Count (Total column, centered)
+              SizedBox(
+                width: _totalColWidth,
+                child: Text(
+                  row.dataLoadFailed ? '—' : '${row.hardwareCount}',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
 
-          // Offline Count
-          SizedBox(
-            width: _offlineColWidth,
-            child: _CountCell(
-              value: row.offlineCount,
-              dotColor: AppColors.error,
-              dataLoadFailed: row.dataLoadFailed,
-            ),
-          ),
+              // Online Count
+              SizedBox(
+                width: _onlineColWidth,
+                child: _CountCell(
+                  value: row.onlineCount,
+                  dotColor: AppColors.success,
+                  dataLoadFailed: row.dataLoadFailed,
+                ),
+              ),
 
-          // Maint. Count
-          SizedBox(
-            width: _maintColWidth,
-            child: _CountCell(
-              value: row.maintenanceCount,
-              dotColor: AppColors.warning,
-              dataLoadFailed: row.dataLoadFailed,
-            ),
-          ),
+              // Offline Count
+              SizedBox(
+                width: _offlineColWidth,
+                child: _CountCell(
+                  value: row.offlineCount,
+                  dotColor: AppColors.error,
+                  dataLoadFailed: row.dataLoadFailed,
+                ),
+              ),
 
-          // Overall Status (colored circle + text, no background pill)
-          SizedBox(
-            width: _statusColWidth,
-            child: _StatusIndicator(
-              status: row.overallStatus,
-              dataLoadFailed: row.dataLoadFailed,
-              l10n: l10n,
-            ),
+              // Maint. Count
+              SizedBox(
+                width: _maintColWidth,
+                child: _CountCell(
+                  value: row.maintenanceCount,
+                  dotColor: AppColors.warning,
+                  dataLoadFailed: row.dataLoadFailed,
+                ),
+              ),
+
+              // Overall Status (colored circle + text, no background pill)
+              SizedBox(
+                width: _statusColWidth,
+                child: _StatusIndicator(
+                  status: row.overallStatus,
+                  dataLoadFailed: row.dataLoadFailed,
+                  l10n: l10n,
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

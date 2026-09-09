@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../devices/repositories/zone_repository.dart';
+import '../../issues/issues.dart';
 import '../../realtime/realtime.dart';
 import '../models/technician_zone_tree_state.dart';
 import '../models/zone_status_row.dart';
@@ -65,20 +66,40 @@ class TechnicianZoneStatusViewModel extends AsyncNotifier<List<ZoneStatusRow>> {
     });
   }
 
-  /// Loads root zones assigned to the technician and sums their sub-tree breakdown.
+  /// Loads root zones assigned to the technician and sums their sub-tree breakdown and issue counts.
   Future<List<ZoneStatusRow>> _loadZoneStatuses() async {
     final zoneRepo = ref.read(zoneRepositoryProvider);
+    final issueRepo = ref.read(issueRepositoryProvider);
     final roots = await zoneRepo.getMyZones();
     final rows = <ZoneStatusRow>[];
 
     for (final root in roots) {
       try {
-        final breakdownMap = await zoneRepo.getZoneBreakdown(root.id);
+        final breakdownFuture = zoneRepo.getZoneBreakdown(root.id);
+        final issuesFuture = issueRepo.getIssues(
+          zoneId: root.id,
+          includeSubzones: true,
+          scope: 'technician',
+          limit: 100,
+        );
+
+        final breakdownMap = await breakdownFuture;
+
+        var unresolvedCount = 0;
+        try {
+          final issues = await issuesFuture;
+          unresolvedCount = issues.where((i) =>
+              i.status != IssueStatus.resolved && i.status != IssueStatus.closed).length;
+        } catch (e) {
+          AppLogger.w('⚠️ [TechnicianZoneStatusViewModel] Issues lookup failed for ${root.name}: $e');
+        }
+
         rows.add(ZoneStatusRow.fromBreakdown(
           id: root.id,
           name: root.name,
           imageUrl: root.imageUrl,
           breakdownMap: breakdownMap,
+          openIssuesCount: unresolvedCount,
         ));
       } catch (err) {
         AppLogger.w('⚠️ [TechnicianZoneStatusViewModel] Breakdown failed for ${root.name}: $err');
