@@ -40,7 +40,8 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage> {
 
   void _toggleSelectAll(List<IssueModel> displayedIssues) {
     setState(() {
-      final allSelected = displayedIssues.isNotEmpty &&
+      final allSelected =
+          displayedIssues.isNotEmpty &&
           displayedIssues.every((i) => _selectedIssueIds.contains(i.id));
       if (allSelected) {
         _selectedIssueIds.clear();
@@ -58,7 +59,9 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage> {
 
     setState(() => _isApplying = true);
     try {
-      final result = await ref.read(technicianActionViewModelProvider).bulkUpdateStatus(
+      final result = await ref
+          .read(technicianActionViewModelProvider)
+          .bulkUpdateStatus(
             issueIds: _selectedIssueIds.toList(),
             toStatus: _bulkStatus,
           );
@@ -67,7 +70,8 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage> {
       final errorCount = result.errors.length;
       if (mounted) {
         if (errorCount == 0) {
-          final msg = l10n?.bulkStatusSuccessMsg(count, _bulkStatus.label) ??
+          final msg =
+              l10n?.bulkStatusSuccessMsg(count, _bulkStatus.label) ??
               '$count tickets updated to ${_bulkStatus.label}';
           AppSnackbar.success(msg);
         } else {
@@ -210,18 +214,22 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage> {
             children: [
               Expanded(
                 child: _ModeSwitchButton(
-                  icon: Icons.account_tree_rounded,
-                  label: l10n.techViewSpatial,
-                  isActive: activeMode == TechnicianViewMode.spatialExplorer,
-                  onTap: () => viewModeNotifier.setMode(TechnicianViewMode.spatialExplorer),
+                  icon: Icons.grid_view_rounded,
+                  label: l10n.techViewStatus,
+                  isActive: activeMode == TechnicianViewMode.zoneStatusTable,
+                  onTap: () => viewModeNotifier.setMode(
+                    TechnicianViewMode.zoneStatusTable,
+                  ),
                 ),
               ),
               Expanded(
                 child: _ModeSwitchButton(
-                  icon: Icons.grid_view_rounded,
-                  label: l10n.techViewStatus,
-                  isActive: activeMode == TechnicianViewMode.zoneStatusTable,
-                  onTap: () => viewModeNotifier.setMode(TechnicianViewMode.zoneStatusTable),
+                  icon: Icons.account_tree_rounded,
+                  label: l10n.techViewSpatial,
+                  isActive: activeMode == TechnicianViewMode.spatialExplorer,
+                  onTap: () => viewModeNotifier.setMode(
+                    TechnicianViewMode.spatialExplorer,
+                  ),
                 ),
               ),
               Expanded(
@@ -229,17 +237,18 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage> {
                   icon: Icons.list_alt_rounded,
                   label: l10n.techViewQueue,
                   isActive: activeMode == TechnicianViewMode.workQueue,
-                  onTap: () => viewModeNotifier.setMode(TechnicianViewMode.workQueue),
+                  onTap: () =>
+                      viewModeNotifier.setMode(TechnicianViewMode.workQueue),
                 ),
               ),
             ],
           ),
         ),
 
-        if (activeMode == TechnicianViewMode.spatialExplorer)
-          const Expanded(child: ZoneTreeExplorerView())
-        else if (activeMode == TechnicianViewMode.zoneStatusTable)
+        if (activeMode == TechnicianViewMode.zoneStatusTable)
           const Expanded(child: TechnicianZoneStatusView())
+        else if (activeMode == TechnicianViewMode.spatialExplorer)
+          const Expanded(child: ZoneTreeExplorerView())
         else
           Expanded(
             child: Column(
@@ -257,182 +266,224 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage> {
 
                 Divider(height: 1, color: AppColors.divider),
 
-        // Selection mode toggle & select-all row
-        if (currentList.isNotEmpty) ...[
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-            color: AppColors.cardAlt,
-            child: Row(
-              children: [
-                if (_isSelectionMode) ...[
-                  InkWell(
-                    onTap: () => _toggleSelectAll(currentList),
-                    borderRadius: BorderRadius.circular(6),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
-                      child: Row(
-                        children: [
-                          Icon(
-                            currentList.isNotEmpty &&
-                                    currentList.every((i) => _selectedIssueIds.contains(i.id))
-                                ? Icons.check_box
-                                : Icons.check_box_outline_blank,
-                            size: 16,
-                            color: AppColors.primary,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            currentList.isNotEmpty &&
-                                    currentList.every((i) => _selectedIssueIds.contains(i.id))
-                                ? l10n.clearSelection
-                                : l10n.selectAll,
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primary,
+                // Selection mode toggle & select-all row
+                if (currentList.isNotEmpty) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 6,
+                    ),
+                    color: AppColors.cardAlt,
+                    child: Row(
+                      children: [
+                        if (_isSelectionMode) ...[
+                          InkWell(
+                            onTap: () => _toggleSelectAll(currentList),
+                            borderRadius: BorderRadius.circular(6),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 4,
+                                horizontal: 4,
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    currentList.isNotEmpty &&
+                                            currentList.every(
+                                              (i) => _selectedIssueIds.contains(
+                                                i.id,
+                                              ),
+                                            )
+                                        ? Icons.check_box
+                                        : Icons.check_box_outline_blank,
+                                    size: 16,
+                                    color: AppColors.primary,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    currentList.isNotEmpty &&
+                                            currentList.every(
+                                              (i) => _selectedIssueIds.contains(
+                                                i.id,
+                                              ),
+                                            )
+                                        ? l10n.clearSelection
+                                        : l10n.selectAll,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ],
-                      ),
-                    ),
-                  ),
-                ],
-                const Spacer(),
-                TextButton.icon(
-                  onPressed: () {
-                    setState(() {
-                      _isSelectionMode = !_isSelectionMode;
-                      if (!_isSelectionMode) _selectedIssueIds.clear();
-                    });
-                  },
-                  icon: Icon(
-                    _isSelectionMode ? Icons.close : Icons.checklist_rtl_rounded,
-                    size: 16,
-                  ),
-                  label: Text(
-                    _isSelectionMode ? l10n.doneSelecting : l10n.selectMode,
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                  ),
-                  style: TextButton.styleFrom(
-                    visualDensity: VisualDensity.compact,
-                    foregroundColor: _isSelectionMode ? AppColors.error : AppColors.primary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Divider(height: 1, color: AppColors.divider),
-        ],
-
-        // Bulk Action Bar (matches TicketList.jsx in web frontend)
-        if (_selectedIssueIds.isNotEmpty) ...[
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            color: AppColors.primaryBg.withValues(alpha: 0.5),
-            child: Row(
-              children: [
-                Icon(Icons.check_circle, size: 18, color: AppColors.primary),
-                const SizedBox(width: 8),
-                Text(
-                  '${_selectedIssueIds.length} Selected',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
-                  ),
-                ),
-                const Spacer(),
-                DropdownButton<IssueStatus>(
-                  value: _bulkStatus,
-                  underline: const SizedBox.shrink(),
-                  isDense: true,
-                  items: [
-                    DropdownMenuItem(
-                      value: IssueStatus.resolved,
-                      child: Text(
-                        'Resolved',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.successText,
-                        ),
-                      ),
-                    ),
-                    DropdownMenuItem(
-                      value: IssueStatus.inProgress,
-                      child: Text(
-                        'In Progress',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.warningText,
-                        ),
-                      ),
-                    ),
-                    DropdownMenuItem(
-                      value: IssueStatus.onHold,
-                      child: Text(
-                        'On Hold',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.purpleText,
-                        ),
-                      ),
-                    ),
-                  ],
-                  onChanged: (val) {
-                    if (val != null) setState(() => _bulkStatus = val);
-                  },
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: _isApplying ? null : _handleBulkApply,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: AppColors.textWhite,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  ),
-                  child: _isApplying
-                      ? SizedBox(
-                          width: 14,
-                          height: 14,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: AppColors.white,
+                        const Spacer(),
+                        TextButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              _isSelectionMode = !_isSelectionMode;
+                              if (!_isSelectionMode) _selectedIssueIds.clear();
+                            });
+                          },
+                          icon: Icon(
+                            _isSelectionMode
+                                ? Icons.close
+                                : Icons.checklist_rtl_rounded,
+                            size: 16,
                           ),
-                        )
-                      : Text(
-                          l10n.applyToSelected,
-                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                          label: Text(
+                            _isSelectionMode
+                                ? l10n.doneSelecting
+                                : l10n.selectMode,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          style: TextButton.styleFrom(
+                            visualDensity: VisualDensity.compact,
+                            foregroundColor: _isSelectionMode
+                                ? AppColors.error
+                                : AppColors.primary,
+                          ),
                         ),
-                ),
-                const SizedBox(width: 6),
-                IconButton(
-                  icon: Icon(Icons.close, size: 18, color: AppColors.icon),
-                  onPressed: () => setState(() {
-                    _selectedIssueIds.clear();
-                    _isSelectionMode = false;
-                  }),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-              ],
-            ),
-          ),
-          Divider(height: 1, color: AppColors.divider),
-        ],
+                      ],
+                    ),
+                  ),
+                  Divider(height: 1, color: AppColors.divider),
+                ],
 
-        // Active Tab View Content
-        Expanded(
-          child: _buildCurrentTab(
-            queueState: queueState,
-            tabIndex: queueState.filter.tabIndex,
-          ),
-        ),
+                // Bulk Action Bar (matches TicketList.jsx in web frontend)
+                if (_selectedIssueIds.isNotEmpty) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    color: AppColors.primaryBg.withValues(alpha: 0.5),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.check_circle,
+                          size: 18,
+                          color: AppColors.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${_selectedIssueIds.length} Selected',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                        const Spacer(),
+                        DropdownButton<IssueStatus>(
+                          value: _bulkStatus,
+                          underline: const SizedBox.shrink(),
+                          isDense: true,
+                          items: [
+                            DropdownMenuItem(
+                              value: IssueStatus.resolved,
+                              child: Text(
+                                'Resolved',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.successText,
+                                ),
+                              ),
+                            ),
+                            DropdownMenuItem(
+                              value: IssueStatus.inProgress,
+                              child: Text(
+                                'In Progress',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.warningText,
+                                ),
+                              ),
+                            ),
+                            DropdownMenuItem(
+                              value: IssueStatus.onHold,
+                              child: Text(
+                                'On Hold',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.purpleText,
+                                ),
+                              ),
+                            ),
+                          ],
+                          onChanged: (val) {
+                            if (val != null) setState(() => _bulkStatus = val);
+                          },
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          onPressed: _isApplying ? null : _handleBulkApply,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: AppColors.textWhite,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: _isApplying
+                              ? SizedBox(
+                                  width: 14,
+                                  height: 14,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: AppColors.white,
+                                  ),
+                                )
+                              : Text(
+                                  l10n.applyToSelected,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                        ),
+                        const SizedBox(width: 6),
+                        IconButton(
+                          icon: Icon(
+                            Icons.close,
+                            size: 18,
+                            color: AppColors.icon,
+                          ),
+                          onPressed: () => setState(() {
+                            _selectedIssueIds.clear();
+                            _isSelectionMode = false;
+                          }),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Divider(height: 1, color: AppColors.divider),
+                ],
+
+                // Active Tab View Content
+                Expanded(
+                  child: _buildCurrentTab(
+                    queueState: queueState,
+                    tabIndex: queueState.filter.tabIndex,
+                  ),
+                ),
               ],
             ),
           ),
@@ -530,4 +581,3 @@ class _ModeSwitchButton extends StatelessWidget {
     );
   }
 }
-

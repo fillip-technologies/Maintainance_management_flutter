@@ -10,7 +10,7 @@ import '../models/technician_zone_tree_state.dart';
 /// reload.
 class TechnicianViewModeNotifier extends Notifier<TechnicianViewMode> {
   @override
-  TechnicianViewMode build() => TechnicianViewMode.spatialExplorer;
+  TechnicianViewMode build() => TechnicianViewMode.zoneStatusTable;
 
   void setMode(TechnicianViewMode mode) => state = mode;
 }

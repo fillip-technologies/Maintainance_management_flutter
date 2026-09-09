@@ -200,10 +200,18 @@ void main() {
       expect(drilledState.currentPath.length, 2);
     });
 
-    test('view mode toggles between spatial explorer and work queue', () {
+    test('view mode defaults to zone status table and toggles between modes', () {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
+      expect(
+        container.read(technicianViewModeProvider),
+        TechnicianViewMode.zoneStatusTable,
+      );
+
+      container
+          .read(technicianViewModeProvider.notifier)
+          .setMode(TechnicianViewMode.spatialExplorer);
       expect(
         container.read(technicianViewModeProvider),
         TechnicianViewMode.spatialExplorer,
