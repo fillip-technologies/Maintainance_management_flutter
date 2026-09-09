@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/profile/profile.dart';
-import '../theme/colors.dart';
+import '../theme/theme.dart';
 
 class LanguageSwitcherButton extends ConsumerWidget {
   final bool isCompact;
@@ -13,6 +13,7 @@ class LanguageSwitcherButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(themeModeProvider);
     final currentLocale = ref.watch(localeProvider);
     final isHindi = currentLocale.languageCode == 'hi';
 

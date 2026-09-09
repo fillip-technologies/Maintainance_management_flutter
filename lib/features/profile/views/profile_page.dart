@@ -241,7 +241,7 @@ class ProfilePage extends ConsumerWidget {
                         ],
                       ),
                     ),
-                    const LanguageSwitcherButton(isCompact: false),
+                    LanguageSwitcherButton(isCompact: false),
                   ],
                 ),
               ),

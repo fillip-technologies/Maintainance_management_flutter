@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:equipment_management_system/core/theme/theme.dart';
 import 'package:equipment_management_system/features/auth/auth.dart';
 import 'package:equipment_management_system/features/profile/views/profile_page.dart';
+import 'package:equipment_management_system/core/widgets/language_switcher_button.dart';
 import 'package:equipment_management_system/l10n/app_localizations.dart';
 
 class FakeAuthNotifier extends AuthNotifier {
@@ -127,6 +128,14 @@ void main() {
       final switchWidgetBefore = tester.widget<Switch>(switchFinder);
       expect(switchWidgetBefore.value, isFalse);
 
+      // Verify language switcher button has light primaryBg before toggle
+      final langBtnFinder = find.byType(LanguageSwitcherButton);
+      expect(langBtnFinder, findsOneWidget);
+      final containerBefore = tester.widget<Container>(
+        find.descendant(of: langBtnFinder, matching: find.byType(Container)),
+      );
+      expect((containerBefore.decoration as BoxDecoration).color, AppLightColors.primaryBg);
+
       // Tap switch to toggle to Dark Mode
       await tester.tap(switchFinder);
       await tester.pumpAndSettle();
@@ -136,6 +145,12 @@ void main() {
       final switchWidgetAfter = tester.widget<Switch>(switchFinder);
       expect(switchWidgetAfter.value, isTrue);
 
+      // Verify language switcher button INSTANTLY updated to dark primaryBg without navigating away
+      final containerAfter = tester.widget<Container>(
+        find.descendant(of: langBtnFinder, matching: find.byType(Container)),
+      );
+      expect((containerAfter.decoration as BoxDecoration).color, AppDarkColors.primaryBg);
+
       // Tap switch again to toggle back to Light Mode
       await tester.tap(switchFinder);
       await tester.pumpAndSettle();
@@ -143,6 +158,11 @@ void main() {
       expect(find.text('Light Mode'), findsOneWidget);
       final switchWidgetFinal = tester.widget<Switch>(switchFinder);
       expect(switchWidgetFinal.value, isFalse);
+
+      final containerFinal = tester.widget<Container>(
+        find.descendant(of: langBtnFinder, matching: find.byType(Container)),
+      );
+      expect((containerFinal.decoration as BoxDecoration).color, AppLightColors.primaryBg);
     });
   });
 }
