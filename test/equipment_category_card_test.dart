@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:equipment_management_system/features/devices/devices.dart';
-import 'package:equipment_management_system/features/staff/views/widgets/equipment_category_card.dart';
-import 'package:equipment_management_system/features/staff/views/widgets/category_devices_sheet.dart';
-import 'package:equipment_management_system/l10n/app_localizations.dart';
+import '../lib/features/devices/devices.dart';
+import '../lib/features/staff/views/widgets/equipment_category_card.dart';
+import '../lib/features/staff/views/widgets/category_devices_sheet.dart';
+import '../lib/l10n/app_localizations.dart';
 
 void main() {
   Widget buildTestWidget(Widget child) {

@@ -1,11 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:equipment_management_system/core/theme/colors.dart';
-import 'package:equipment_management_system/core/utils/app_snackbar.dart';
-import 'package:equipment_management_system/features/devices/devices.dart';
-import 'package:equipment_management_system/features/location/location_helper.dart';
-import 'package:equipment_management_system/l10n/app_localizations.dart';
+import '../../../core/theme/colors.dart';
+import '../../../core/utils/app_snackbar.dart';
+import '../../devices/devices.dart';
+import '../../location/location_helper.dart';
+import '../../../l10n/app_localizations.dart';
 import '../controllers/replace_device_controller.dart';
 import '../controllers/replace_device_state.dart';
 import '../models/issue_model.dart';

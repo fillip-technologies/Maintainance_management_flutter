@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:equipment_management_system/core/theme/colors.dart';
-import 'package:equipment_management_system/core/utils/app_snackbar.dart';
-import 'package:equipment_management_system/features/location/location_helper.dart';
-import 'package:equipment_management_system/features/technician/viewmodels/technician_action_viewmodel.dart';
-import 'package:equipment_management_system/features/technician/viewmodels/technician_queue_viewmodel.dart';
-import 'package:equipment_management_system/l10n/app_localizations.dart';
+import '../../../core/theme/colors.dart';
+import '../../../core/utils/app_snackbar.dart';
+import '../../location/location_helper.dart';
+import '../../technician/viewmodels/technician_action_viewmodel.dart';
+import '../../technician/viewmodels/technician_queue_viewmodel.dart';
+import '../../../l10n/app_localizations.dart';
 import '../controllers/bulk_resolve_controller.dart';
 import '../controllers/bulk_resolve_state.dart';
 import '../models/issue_model.dart';

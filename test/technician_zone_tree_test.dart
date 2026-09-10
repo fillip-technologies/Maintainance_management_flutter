@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:equipment_management_system/core/theme/colors.dart';
-import 'package:equipment_management_system/features/devices/devices.dart';
-import 'package:equipment_management_system/features/issues/issues.dart';
-import 'package:equipment_management_system/features/technician/models/technician_queue_state.dart';
-import 'package:equipment_management_system/features/technician/models/technician_zone_tree_state.dart';
-import 'package:equipment_management_system/features/technician/viewmodels/technician_view_mode_provider.dart';
-import 'package:equipment_management_system/features/technician/views/widgets/subzone_grid_card.dart';
-import 'package:equipment_management_system/features/technician/views/widgets/technician_search_filter_bar.dart';
-import 'package:equipment_management_system/features/technician/views/widgets/zone_device_card.dart';
-import 'package:equipment_management_system/l10n/app_localizations.dart';
+import '../lib/core/theme/colors.dart';
+import '../lib/features/devices/devices.dart';
+import '../lib/features/issues/issues.dart';
+import '../lib/features/technician/models/technician_queue_state.dart';
+import '../lib/features/technician/models/technician_zone_tree_state.dart';
+import '../lib/features/technician/viewmodels/technician_view_mode_provider.dart';
+import '../lib/features/technician/views/widgets/subzone_grid_card.dart';
+import '../lib/features/technician/views/widgets/technician_search_filter_bar.dart';
+import '../lib/features/technician/views/widgets/zone_device_card.dart';
+import '../lib/l10n/app_localizations.dart';
 
 /// Wraps a technician widget with the localization delegates it now needs.
 Widget _localized(Widget child) => MaterialApp(

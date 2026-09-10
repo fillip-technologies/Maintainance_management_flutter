@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:equipment_management_system/core/theme/colors.dart';
-import 'package:equipment_management_system/features/issues/models/issue_model.dart';
+import '../../../../../core/theme/colors.dart';
+import '../../../models/issue_model.dart';
 
 class StatusChoiceChips extends StatelessWidget {
   final List<IssueStatus> allowedStatuses;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/dark_colors.dart';
 import '../../../../core/widgets/status_badge.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../devices/models/device_model.dart';
@@ -52,9 +53,21 @@ class ZoneDeviceCard extends StatelessWidget {
     final topIssue = _topIssue;
     final isDefective = topIssue != null;
 
+    final isDark = Theme.of(context).brightness == Brightness.dark || AppColors.isDark;
+
     final borderColor = isDefective ? AppColors.error : AppColors.success;
-    final cardBg = isDefective ? AppColors.statusErrorBg : AppColors.statusSuccessBg;
-    final iconBoxBg = isDefective ? AppColors.statusErrorTagBg : AppColors.statusSuccessTagBg;
+    final cardBg = isDefective
+        ? (isDark ? AppDarkColors.statusErrorBg : AppLightColors.statusErrorBg)
+        : (isDark ? AppDarkColors.statusSuccessBg : AppLightColors.statusSuccessBg);
+    final iconBoxBg = isDefective
+        ? (isDark ? AppDarkColors.statusErrorTagBg : AppLightColors.statusErrorTagBg)
+        : (isDark ? AppDarkColors.statusSuccessTagBg : AppLightColors.statusSuccessTagBg);
+
+    final textColor = isDark ? AppDarkColors.textPrimary : AppLightColors.textPrimary;
+    final textSecondaryColor = isDark ? AppDarkColors.textSecondary : AppLightColors.textSecondary;
+    final codeBadgeBg = isDark ? AppDarkColors.surface : AppLightColors.white;
+    final codeBadgeBorder = isDark ? AppDarkColors.borderHover : AppLightColors.border;
+    final codeBadgeTextColor = isDark ? AppDarkColors.textPrimary : AppLightColors.textPrimary;
 
     return InkWell(
       onTap: onTap ??
@@ -128,21 +141,24 @@ class ZoneDeviceCard extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: borderColor,
                           borderRadius: BorderRadius.circular(9),
-                          border: Border.all(color: AppColors.white, width: 1.5),
+                          border: Border.all(
+                            color: isDark ? cardBg : AppLightColors.white,
+                            width: 1.5,
+                          ),
                         ),
                         child: topIssue != null
                             ? Text(
                                 // How many units this issue affects (bulk defects
                                 // hit several); a normal issue is just 1.
                                 '${topIssue.unitsAffected ?? 1}',
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w900,
-                                  color: AppColors.white,
+                                  color: Colors.white,
                                   height: 1,
                                 ),
                               )
-                            : Icon(Icons.check, size: 10, color: AppColors.white),
+                            : const Icon(Icons.check, size: 10, color: Colors.white),
                       ),
                     ),
                   ],
@@ -159,7 +175,7 @@ class ZoneDeviceCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w800,
-                color: AppColors.textPrimary,
+                color: textColor,
                 height: 1.15,
               ),
               maxLines: 2,
@@ -176,9 +192,9 @@ class ZoneDeviceCard extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
                         decoration: BoxDecoration(
-                          color: AppColors.white,
+                          color: codeBadgeBg,
                           borderRadius: BorderRadius.circular(5),
-                          border: Border.all(color: AppColors.border),
+                          border: Border.all(color: codeBadgeBorder),
                         ),
                         child: Text(
                           device.code,
@@ -188,7 +204,7 @@ class ZoneDeviceCard extends StatelessWidget {
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
                             fontFamily: 'monospace',
-                            color: AppColors.textPrimary,
+                            color: codeBadgeTextColor,
                           ),
                         ),
                       ),
@@ -201,7 +217,7 @@ class ZoneDeviceCard extends StatelessWidget {
                         device.hardwareTypeName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                        style: TextStyle(fontSize: 11, color: textSecondaryColor),
                       ),
                     ),
                 ],

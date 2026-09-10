@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:equipment_management_system/core/theme/colors.dart';
-import 'package:equipment_management_system/core/widgets/app_shimmer.dart';
-import 'package:equipment_management_system/features/staff/models/staff_checklist_state.dart';
-import 'package:equipment_management_system/features/staff/views/widgets/staff_daily_checklist_tab.dart';
-import 'package:equipment_management_system/features/staff/views/widgets/staff_devices_directory_tab.dart';
-import 'package:equipment_management_system/features/staff/views/widgets/staff_issues_tracker_tab.dart';
-import 'package:equipment_management_system/l10n/app_localizations.dart';
+import '../lib/core/theme/colors.dart';
+import '../lib/core/widgets/app_shimmer.dart';
+import '../lib/features/staff/models/staff_checklist_state.dart';
+import '../lib/features/staff/views/widgets/staff_daily_checklist_tab.dart';
+import '../lib/features/staff/views/widgets/staff_devices_directory_tab.dart';
+import '../lib/features/staff/views/widgets/staff_issues_tracker_tab.dart';
+import '../lib/l10n/app_localizations.dart';
 
 void main() {
   Widget buildTestWidget(Widget child, {bool isDark = false}) {

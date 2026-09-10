@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:equipment_management_system/core/theme/colors.dart';
-import 'package:equipment_management_system/core/widgets/status_badge.dart';
-import 'package:equipment_management_system/features/devices/devices.dart';
-import 'package:equipment_management_system/l10n/app_localizations.dart';
+import '../../../../../core/theme/colors.dart';
+import '../../../../../core/widgets/status_badge.dart';
+import '../../../../devices/devices.dart';
+import '../../../../../l10n/app_localizations.dart';
 
 class RaiseBulkDeviceSelector extends StatelessWidget {
   final List<DeviceModel> allDevices;

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:equipment_management_system/core/theme/colors.dart';
-import 'package:equipment_management_system/features/technician/technician.dart';
-import 'package:equipment_management_system/l10n/app_localizations.dart';
+import '../lib/core/theme/colors.dart';
+import '../lib/features/technician/technician.dart';
+import '../lib/l10n/app_localizations.dart';
 
 void main() {
   group('Technician ZoneStatusRow Unit & Aggregation Tests', () {

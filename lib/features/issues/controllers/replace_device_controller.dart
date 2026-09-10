@@ -1,5 +1,5 @@
-import 'package:equipment_management_system/features/devices/devices.dart';
-import 'package:equipment_management_system/l10n/app_localizations.dart';
+import '../../devices/devices.dart';
+import '../../../l10n/app_localizations.dart';
 import 'replace_device_state.dart';
 
 class ReplaceDeviceController {

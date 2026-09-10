@@ -1,6 +1,6 @@
-import 'package:equipment_management_system/features/devices/devices.dart';
-import 'package:equipment_management_system/features/issues/models/issue_model.dart';
-import 'package:equipment_management_system/features/issues/repositories/issue_repository.dart';
+import '../../devices/devices.dart';
+import '../models/issue_model.dart';
+import '../repositories/issue_repository.dart';
 import 'raise_bulk_issue_state.dart';
 
 enum DeviceToggleResult {

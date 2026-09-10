@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:equipment_management_system/features/devices/devices.dart';
-import 'package:equipment_management_system/features/issues/controllers/replace_device_controller.dart';
-import 'package:equipment_management_system/features/issues/controllers/replace_device_state.dart';
+import '../lib/features/devices/devices.dart';
+import '../lib/features/issues/controllers/replace_device_controller.dart';
+import '../lib/features/issues/controllers/replace_device_state.dart';
 
 void main() {
   group('ReplaceDeviceController', () {

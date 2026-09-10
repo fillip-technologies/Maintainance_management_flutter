@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:equipment_management_system/core/theme/theme.dart';
-import 'package:equipment_management_system/features/auth/auth.dart';
-import 'package:equipment_management_system/features/profile/views/profile_page.dart';
-import 'package:equipment_management_system/core/widgets/language_switcher_button.dart';
-import 'package:equipment_management_system/l10n/app_localizations.dart';
+import '../lib/core/theme/theme.dart';
+import '../lib/features/auth/auth.dart';
+import '../lib/features/profile/views/profile_page.dart';
+import '../lib/core/widgets/language_switcher_button.dart';
+import '../lib/l10n/app_localizations.dart';
 
 class FakeAuthNotifier extends AuthNotifier {
   final UserModel _user;

@@ -10,7 +10,7 @@ class ThemeModeNotifier extends Notifier<ThemeMode> {
   ThemeMode build() {
     AppColors.isDark = false;
     _loadSavedThemeMode();
-    return ThemeMode.light;
+    return ThemeMode.dark;
   }
 
   Future<void> _loadSavedThemeMode() async {
@@ -49,5 +49,6 @@ class ThemeModeNotifier extends Notifier<ThemeMode> {
   }
 }
 
-final themeModeProvider =
-    NotifierProvider<ThemeModeNotifier, ThemeMode>(ThemeModeNotifier.new);
+final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeMode>(
+  ThemeModeNotifier.new,
+);

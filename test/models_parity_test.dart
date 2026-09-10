@@ -1,15 +1,15 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:equipment_management_system/l10n/app_localizations.dart';
-import 'package:equipment_management_system/features/auth/auth.dart';
-import 'package:equipment_management_system/features/devices/devices.dart';
-import 'package:equipment_management_system/features/issues/issues.dart';
-import 'package:equipment_management_system/features/daily_logs/daily_logs.dart';
-import 'package:equipment_management_system/features/realtime/realtime.dart';
-import 'package:equipment_management_system/features/profile/profile.dart';
-import 'package:equipment_management_system/core/config/app_config.dart';
-import 'package:equipment_management_system/core/utils/jwt_helper.dart';
+import '../lib/l10n/app_localizations.dart';
+import '../lib/features/auth/auth.dart';
+import '../lib/features/devices/devices.dart';
+import '../lib/features/issues/issues.dart';
+import '../lib/features/daily_logs/daily_logs.dart';
+import '../lib/features/realtime/realtime.dart';
+import '../lib/features/profile/profile.dart';
+import '../lib/core/config/app_config.dart';
+import '../lib/core/utils/jwt_helper.dart';
 
 void main() {
   group('Backend ⟷ Frontend Model Parity Tests', () {

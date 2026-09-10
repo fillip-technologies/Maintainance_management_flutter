@@ -1,4 +1,4 @@
-import 'package:equipment_management_system/features/issues/models/issue_model.dart';
+import '../models/issue_model.dart';
 
 class RaiseBulkIssueState {
   final Set<String> selectedDeviceIds;

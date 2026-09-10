@@ -1,4 +1,4 @@
-import 'package:equipment_management_system/features/devices/devices.dart';
+import '../../devices/devices.dart';
 
 enum DecommissionReason {
   physicalDamage('physical_damage'),

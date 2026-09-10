@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:equipment_management_system/core/theme/colors.dart';
+import '../../../../../core/theme/colors.dart';
 
 class ProofPhotoBox extends StatelessWidget {
   final File? resolutionImage;

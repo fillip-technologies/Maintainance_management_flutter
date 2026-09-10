@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:equipment_management_system/core/theme/colors.dart';
-import 'package:equipment_management_system/l10n/app_localizations.dart';
+import '../../../../../core/theme/colors.dart';
+import '../../../../../l10n/app_localizations.dart';
 
 class ReplaceDeviceSubmitFooter extends StatelessWidget {
   final bool isSubmitting;

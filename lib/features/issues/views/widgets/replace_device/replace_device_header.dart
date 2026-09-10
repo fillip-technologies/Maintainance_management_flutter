@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:equipment_management_system/core/theme/colors.dart';
-import 'package:equipment_management_system/features/issues/models/issue_model.dart';
-import 'package:equipment_management_system/l10n/app_localizations.dart';
+import '../../../../../core/theme/colors.dart';
+import '../../../models/issue_model.dart';
+import '../../../../../l10n/app_localizations.dart';
 
 class ReplaceDeviceHeader extends StatelessWidget {
   final IssueModel issue;

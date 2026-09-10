@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:equipment_management_system/features/issues/models/issue_model.dart';
-import 'package:equipment_management_system/features/issues/views/update_status_sheet.dart';
-import 'package:equipment_management_system/features/location/location_helper.dart';
+import '../lib/features/issues/models/issue_model.dart';
+import '../lib/features/issues/views/update_status_sheet.dart';
+import '../lib/features/location/location_helper.dart';
 
 class TestLocationHelper extends LocationHelper {
   final LocationResult result;

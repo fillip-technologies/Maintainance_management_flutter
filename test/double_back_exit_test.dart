@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:equipment_management_system/core/utils/app_snackbar.dart';
-import 'package:equipment_management_system/core/widgets/double_back_exit_scope.dart';
-import 'package:equipment_management_system/l10n/app_localizations.dart';
+import '../lib/core/utils/app_snackbar.dart';
+import '../lib/core/widgets/double_back_exit_scope.dart';
+import '../lib/l10n/app_localizations.dart';
 
 void main() {
   group('DoubleBackExitScope Unit & Widget Tests', () {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:equipment_management_system/core/theme/colors.dart';
-import 'package:equipment_management_system/features/location/location_helper.dart';
-import 'package:equipment_management_system/features/issues/models/issue_model.dart';
+import '../../../../../core/theme/colors.dart';
+import '../../../../location/location_helper.dart';
+import '../../../models/issue_model.dart';
 
 class StatusGpsSection extends StatelessWidget {
   final IssueStatus selectedStatus;

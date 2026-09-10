@@ -1,4 +1,4 @@
-import 'package:equipment_management_system/features/location/location_helper.dart';
+import './location_helper.dart';
 import 'package:flutter/material.dart';
 
 class LocationPage extends StatefulWidget {

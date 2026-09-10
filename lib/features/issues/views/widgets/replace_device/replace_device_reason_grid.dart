@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:equipment_management_system/core/theme/colors.dart';
-import 'package:equipment_management_system/l10n/app_localizations.dart';
-import 'package:equipment_management_system/features/issues/controllers/replace_device_state.dart';
+import '../../../../../core/theme/colors.dart';
+import '../../../../../l10n/app_localizations.dart';
+import '../../../controllers/replace_device_state.dart';
 
 class ReplaceDeviceReasonGrid extends StatelessWidget {
   final DecommissionReason selectedReason;

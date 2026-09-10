@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:equipment_management_system/features/issues/models/issue_model.dart';
-import 'package:equipment_management_system/features/staff/views/widgets/staff_issues_tracker_tab.dart';
-import 'package:equipment_management_system/l10n/app_localizations.dart';
+import '../lib/features/issues/models/issue_model.dart';
+import '../lib/features/staff/views/widgets/staff_issues_tracker_tab.dart';
+import '../lib/l10n/app_localizations.dart';
 
 void main() {
   Widget buildTestWidget(Widget child) {

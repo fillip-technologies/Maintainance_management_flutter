@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:equipment_management_system/core/theme/colors.dart';
-import 'package:equipment_management_system/core/widgets/status_badge.dart';
-import 'package:equipment_management_system/features/devices/views/helpers/hardware_icon_helper.dart';
-import 'package:equipment_management_system/features/issues/models/issue_model.dart';
-import 'package:equipment_management_system/l10n/app_localizations.dart';
+import '../../../../../core/theme/colors.dart';
+import '../../../../../core/widgets/status_badge.dart';
+import '../../../../devices/views/helpers/hardware_icon_helper.dart';
+import '../../../models/issue_model.dart';
+import '../../../../../l10n/app_localizations.dart';
 
 class BulkResolveGroupAccordion extends StatelessWidget {
   final String groupName;

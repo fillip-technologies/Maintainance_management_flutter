@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:equipment_management_system/features/devices/devices.dart';
-import 'package:equipment_management_system/features/issues/controllers/raise_bulk_issue_controller.dart';
-import 'package:equipment_management_system/features/issues/models/issue_model.dart';
+import '../lib/features/devices/devices.dart';
+import '../lib/features/issues/controllers/raise_bulk_issue_controller.dart';
+import '../lib/features/issues/models/issue_model.dart';
 
 void main() {
   group('RaiseBulkIssueController', () {
