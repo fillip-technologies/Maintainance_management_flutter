@@ -4,6 +4,7 @@ import '../../../../core/theme/colors.dart';
 import '../../../../core/utils/app_snackbar.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../issues/issues.dart';
+import '../../location/location_helper.dart';
 import '../../realtime/realtime.dart';
 import '../models/technician_queue_state.dart';
 import '../models/technician_zone_tree_state.dart';
@@ -59,11 +60,35 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage> {
 
     setState(() => _isApplying = true);
     try {
+      double? lat;
+      double? lng;
+      if (_bulkStatus == IssueStatus.resolved) {
+        final locRes = await LocationHelper().getLocation();
+        if (!locRes.isSuccess) {
+          if (mounted) {
+            AppSnackbar.error(
+              locRes.errorMessage ??
+                  'GPS coordinates are required to resolve tickets. Please turn on GPS.',
+            );
+            if (locRes.error == LocationErrorType.serviceDisabled) {
+              await LocationHelper().openLocationSettings();
+            } else if (locRes.error == LocationErrorType.permissionDeniedForever) {
+              await LocationHelper().openAppSettings();
+            }
+          }
+          return;
+        }
+        lat = locRes.latitude;
+        lng = locRes.longitude;
+      }
+
       final result = await ref
           .read(technicianActionViewModelProvider)
           .bulkUpdateStatus(
             issueIds: _selectedIssueIds.toList(),
             toStatus: _bulkStatus,
+            latitude: lat,
+            longitude: lng,
           );
 
       final count = result.updated.length;
@@ -99,13 +124,15 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage> {
       context,
       issue: issue,
       initialTargetStatus: targetStatus,
-      onStatusUpdated: (newStatus, comment, resolutionPhoto) async {
+      onStatusUpdated: (newStatus, comment, resolutionPhoto, [latitude, longitude]) async {
         try {
           await actionNotifier.updateStatus(
             issueId: issueId,
             toStatus: newStatus,
             notes: comment,
             attachments: resolutionPhoto != null ? [resolutionPhoto] : null,
+            latitude: latitude,
+            longitude: longitude,
           );
 
           final ticketIdStr = issueId.length > 8

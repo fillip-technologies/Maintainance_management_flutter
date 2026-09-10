@@ -304,6 +304,39 @@ void main() {
       expect(history.changedByUserName, 'Raju mistri');
       expect(history.comment, 'Technician arrived on site and started diagnosis');
       expect(history.createdAt.year, 2026);
+      expect(history.latitude, isNull);
+      expect(history.longitude, isNull);
+    });
+
+    test('8b. IssueStatusHistoryModel parses GPS coordinates from numeric and Decimal string payloads', () {
+      // Case 1: Numeric coordinates
+      final numericPayload = {
+        'id': 'hist-gps-01',
+        'issueId': 'iss-01',
+        'toStatus': 'resolved',
+        'latitude': 19.07609,
+        'longitude': 72.87742,
+      };
+      final item1 = IssueStatusHistoryModel.fromJson(numericPayload);
+      expect(item1.latitude, 19.07609);
+      expect(item1.longitude, 72.87742);
+
+      // Case 2: Prisma Decimal string representation (e.g. "19.07609000")
+      final stringPayload = {
+        'id': 'hist-gps-02',
+        'issueId': 'iss-02',
+        'toStatus': 'closed',
+        'latitude': '19.07609000',
+        'longitude': '72.87742600',
+      };
+      final item2 = IssueStatusHistoryModel.fromJson(stringPayload);
+      expect(item2.latitude, closeTo(19.07609, 0.00001));
+      expect(item2.longitude, closeTo(72.877426, 0.00001));
+
+      // Serialization includes coordinates if present
+      final json = item2.toJson();
+      expect(json['latitude'], item2.latitude);
+      expect(json['longitude'], item2.longitude);
     });
 
     test('9. DeviceStatus handles retired and provisioned states correctly', () {

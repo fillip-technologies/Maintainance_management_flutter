@@ -137,6 +137,8 @@ class IssueStatusHistoryModel {
   final String changedByUserName;
   final String? comment;
   final DateTime createdAt;
+  final double? latitude;
+  final double? longitude;
 
   const IssueStatusHistoryModel({
     required this.id,
@@ -147,6 +149,8 @@ class IssueStatusHistoryModel {
     required this.changedByUserName,
     this.comment,
     required this.createdAt,
+    this.latitude,
+    this.longitude,
   });
 
   factory IssueStatusHistoryModel.fromJson(Map<String, dynamic> json) {
@@ -154,6 +158,11 @@ class IssueStatusHistoryModel {
 
     final dateStr = (json['changedAt'] ?? json['changed_at'] ?? json['createdAt'] ?? json['created_at']) as String?;
     final date = dateStr != null ? (DateTime.tryParse(dateStr) ?? DateTime.now()) : DateTime.now();
+
+    final rawLat = json['latitude'];
+    final rawLng = json['longitude'];
+    final latitude = rawLat != null ? double.tryParse(rawLat.toString()) : null;
+    final longitude = rawLng != null ? double.tryParse(rawLng.toString()) : null;
 
     return IssueStatusHistoryModel(
       id: (json['id'] as String?) ?? '',
@@ -168,6 +177,8 @@ class IssueStatusHistoryModel {
       changedByUserName: (json['changedByUserName'] ?? json['changed_by_user_name'] ?? changedByObj?['name']) as String? ?? 'System',
       comment: (json['notes'] ?? json['comment']) as String?,
       createdAt: date,
+      latitude: latitude,
+      longitude: longitude,
     );
   }
 
@@ -181,6 +192,8 @@ class IssueStatusHistoryModel {
       'changed_by_user_name': changedByUserName,
       'notes': comment,
       'changed_at': createdAt.toIso8601String(),
+      if (latitude != null) 'latitude': latitude,
+      if (longitude != null) 'longitude': longitude,
     };
   }
 }

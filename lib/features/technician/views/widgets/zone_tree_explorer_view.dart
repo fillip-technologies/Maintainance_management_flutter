@@ -244,13 +244,15 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                                     context,
                                     issue: issue,
                                     initialTargetStatus: newStatus,
-                                    onStatusUpdated: (status, comment, photo) async {
+                                    onStatusUpdated: (status, comment, photo, [latitude, longitude]) async {
                                       try {
                                         await actionNotifier.updateStatus(
                                           issueId: issueId,
                                           toStatus: status,
                                           notes: comment,
                                           attachments: photo != null ? [photo] : null,
+                                          latitude: latitude,
+                                          longitude: longitude,
                                         );
                                         viewModel.refresh();
                                       } catch (e) {
@@ -307,13 +309,15 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                                     context,
                                     issue: issue,
                                     initialTargetStatus: newStatus,
-                                    onStatusUpdated: (status, comment, photo) async {
+                                    onStatusUpdated: (status, comment, photo, [latitude, longitude]) async {
                                       try {
                                         await actionNotifier.updateStatus(
                                           issueId: issueId,
                                           toStatus: status,
                                           notes: comment,
                                           attachments: photo != null ? [photo] : null,
+                                          latitude: latitude,
+                                          longitude: longitude,
                                         );
                                         viewModel.refresh();
                                       } catch (e) {

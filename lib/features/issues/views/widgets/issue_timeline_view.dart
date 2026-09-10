@@ -220,6 +220,25 @@ class IssueTimelineView extends ConsumerWidget {
                         ),
                       ),
                     ],
+
+                    // GPS Location Coordinates
+                    if (item.latitude != null && item.longitude != null) ...[
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Icon(Icons.location_on_outlined, size: 13, color: AppColors.primary),
+                          const SizedBox(width: 4),
+                          Text(
+                            'GPS: ${item.latitude!.toStringAsFixed(5)}, ${item.longitude!.toStringAsFixed(5)}',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.textMuted,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),

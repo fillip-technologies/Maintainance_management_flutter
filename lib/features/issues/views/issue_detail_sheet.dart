@@ -288,13 +288,15 @@ class IssueDetailSheet extends ConsumerWidget {
                         UpdateStatusSheet.show(
                           sheetContext,
                           issue: currentIssue,
-                          onStatusUpdated: (newStatus, comment, resolutionPhoto) async {
+                          onStatusUpdated: (newStatus, comment, resolutionPhoto, [latitude, longitude]) async {
                             try {
                               await actionController.updateStatus(
                                 issueId: issueId,
                                 toStatus: newStatus,
                                 notes: comment,
                                 attachments: resolutionPhoto != null ? [resolutionPhoto] : null,
+                                latitude: latitude,
+                                longitude: longitude,
                               );
                               AppSnackbar.success(
                                 'Ticket moved to ${newStatus.label}',
@@ -339,6 +341,8 @@ class IssueDetailSheet extends ConsumerWidget {
                               newDeviceName,
                               newDeviceSerial,
                               proofPhoto,
+                              latitude,
+                              longitude,
                             }) async {
                               final replacementText = switch (replacementChoice) {
                                 ReplacementChoice.inStock => 'Installed in-stock spare unit ($spareDeviceId).',
@@ -352,6 +356,8 @@ class IssueDetailSheet extends ConsumerWidget {
                                   toStatus: IssueStatus.resolved,
                                   notes: fullComment,
                                   attachments: proofPhoto != null ? [proofPhoto] : null,
+                                  latitude: latitude,
+                                  longitude: longitude,
                                 );
                                 AppSnackbar.success(
                                   l10n.replacementSuccess,

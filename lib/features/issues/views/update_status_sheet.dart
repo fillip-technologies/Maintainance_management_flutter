@@ -2,26 +2,38 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/theme/colors.dart';
+import '../../location/location_helper.dart';
 import '../models/issue_model.dart';
 import 'replace_device_sheet.dart';
+
+typedef StatusUpdateCallback = Future<void> Function(
+  IssueStatus newStatus,
+  String comment,
+  File? resolutionPhoto, [
+  double? latitude,
+  double? longitude,
+]);
 
 class UpdateStatusSheet extends StatefulWidget {
   final IssueModel issue;
   final IssueStatus? initialTargetStatus;
-  final Function(IssueStatus newStatus, String comment, File? resolutionPhoto) onStatusUpdated;
+  final StatusUpdateCallback onStatusUpdated;
+  final LocationHelper? locationHelper;
 
   const UpdateStatusSheet({
     super.key,
     required this.issue,
     this.initialTargetStatus,
     required this.onStatusUpdated,
+    this.locationHelper,
   });
 
   static Future<void> show(
     BuildContext context, {
     required IssueModel issue,
     IssueStatus? initialTargetStatus,
-    required Function(IssueStatus newStatus, String comment, File? resolutionPhoto) onStatusUpdated,
+    required StatusUpdateCallback onStatusUpdated,
+    LocationHelper? locationHelper,
   }) {
     return showModalBottomSheet(
       context: context,
@@ -32,6 +44,7 @@ class UpdateStatusSheet extends StatefulWidget {
         issue: issue,
         initialTargetStatus: initialTargetStatus,
         onStatusUpdated: onStatusUpdated,
+        locationHelper: locationHelper,
       ),
     );
   }
@@ -40,7 +53,7 @@ class UpdateStatusSheet extends StatefulWidget {
   State<UpdateStatusSheet> createState() => _UpdateStatusSheetState();
 }
 
-class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
+class _UpdateStatusSheetState extends State<UpdateStatusSheet> with WidgetsBindingObserver {
   late IssueStatus _selectedStatus;
   final _commentController = TextEditingController();
 
@@ -50,11 +63,55 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
   String? _errorMessage;
   bool _isSubmitting = false;
 
+  late final LocationHelper _locationHelper;
+  LocationResult? _locationResult;
+  bool _isFetchingLocation = false;
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _locationHelper = widget.locationHelper ?? LocationHelper();
     _selectedStatus = _resolveInitialStatus();
     _applyDefaultComment(_selectedStatus);
+    _fetchLocation();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _commentController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      if (_locationResult == null || !_locationResult!.isSuccess) {
+        _fetchLocation();
+      }
+    }
+  }
+
+  Future<void> _fetchLocation() async {
+    if (!mounted) return;
+    setState(() => _isFetchingLocation = true);
+    try {
+      final res = await _locationHelper.getLocation();
+      if (mounted) {
+        setState(() {
+          _locationResult = res;
+          _isFetchingLocation = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _locationResult = LocationResult.failure(LocationErrorType.unknown, e.toString());
+          _isFetchingLocation = false;
+        });
+      }
+    }
   }
 
   /// The caller can request a target status (e.g. from a card's "Resolve"
@@ -81,11 +138,7 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
     }
   }
 
-  @override
-  void dispose() {
-    _commentController.dispose();
-    super.dispose();
-  }
+
 
   IssueStatus _getDefaultNextStatus(IssueStatus current) {
     return switch (current) {
@@ -163,6 +216,38 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
   Future<void> _handleSubmit() async {
     if (_isSubmitting) return;
 
+    setState(() {
+      _errorMessage = null;
+    });
+
+    // Mandatory GPS enforcement when resolving an issue
+    if (_selectedStatus == IssueStatus.resolved) {
+      if (_locationResult == null || !_locationResult!.isSuccess) {
+        setState(() => _isFetchingLocation = true);
+        final freshRes = await _locationHelper.getLocation();
+        if (mounted) {
+          setState(() {
+            _locationResult = freshRes;
+            _isFetchingLocation = false;
+          });
+        }
+
+        if (!freshRes.isSuccess) {
+          final explanation =
+              freshRes.errorMessage ?? 'GPS coordinates are mandatory to mark an issue as Resolved.';
+          setState(() {
+            _errorMessage = 'GPS Required: $explanation Please turn on GPS to proceed.';
+          });
+          if (freshRes.error == LocationErrorType.serviceDisabled) {
+            await _locationHelper.openLocationSettings();
+          } else if (freshRes.error == LocationErrorType.permissionDeniedForever) {
+            await _locationHelper.openAppSettings();
+          }
+          return;
+        }
+      }
+    }
+
     // The work note is optional: a pre-filled default is offered, but a
     // technician who clears it can still submit.
     final comment = _commentController.text.trim();
@@ -173,7 +258,9 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
     });
 
     try {
-      await widget.onStatusUpdated(_selectedStatus, comment, _resolutionImage);
+      final lat = _locationResult?.latitude;
+      final lng = _locationResult?.longitude;
+      await widget.onStatusUpdated(_selectedStatus, comment, _resolutionImage, lat, lng);
       if (mounted) {
         Navigator.pop(context);
       }
@@ -293,8 +380,16 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
                           newDeviceName,
                           newDeviceSerial,
                           proofPhoto,
+                          latitude,
+                          longitude,
                         }) async {
-                          widget.onStatusUpdated(IssueStatus.resolved, notes, null);
+                          widget.onStatusUpdated(
+                            IssueStatus.resolved,
+                            notes,
+                            null,
+                            latitude ?? _locationResult?.latitude,
+                            longitude ?? _locationResult?.longitude,
+                          );
                         },
                       );
                     },
@@ -376,6 +471,10 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
                                 _selectedStatus = s;
                                 _applyDefaultComment(s);
                               });
+                              if (s == IssueStatus.resolved &&
+                                  (_locationResult == null || !_locationResult!.isSuccess)) {
+                                _fetchLocation();
+                              }
                             },
                             borderRadius: BorderRadius.circular(12),
                             child: Container(
@@ -504,13 +603,21 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
                       ),
                     ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
+
+                  // GPS Location Status Indicator
+                  _buildGpsSection(),
+
+                  const SizedBox(height: 16),
 
                   // Submit Button
                   ElevatedButton(
                     onPressed: _isSubmitting ? null : _handleSubmit,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
+                      backgroundColor: _selectedStatus == IssueStatus.resolved &&
+                              (_locationResult == null || !_locationResult!.isSuccess)
+                          ? AppColors.error
+                          : AppColors.primary,
                       foregroundColor: AppColors.textWhite,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
@@ -537,10 +644,282 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> {
                               ),
                             ],
                           )
-                        : Text('Confirm & Transition to ${_selectedStatus.label}'),
+                        : Text(
+                            _selectedStatus == IssueStatus.resolved &&
+                                    (_locationResult == null || !_locationResult!.isSuccess)
+                                ? 'Resolve Ticket (Turn On GPS)'
+                                : 'Confirm & Transition to ${_selectedStatus.label}',
+                          ),
                   ),
                 ],
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGpsSection() {
+    final isResolved = _selectedStatus == IssueStatus.resolved;
+
+    // State 1: Currently fetching GPS coordinates
+    if (_isFetchingLocation) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: AppColors.primaryBg.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: AppColors.primary,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                isResolved
+                    ? 'Acquiring GPS fix (required to resolve ticket)...'
+                    : 'Acquiring GPS coordinates...',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.primary,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // State 2: GPS coordinates successfully acquired
+    if (_locationResult != null && _locationResult!.isSuccess) {
+      final lat = _locationResult!.latitude!;
+      final lng = _locationResult!.longitude!;
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: AppColors.successLight,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.success.withValues(alpha: 0.35)),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.location_on, size: 20, color: AppColors.success),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        'GPS: ${lat.toStringAsFixed(5)}, ${lng.toStringAsFixed(5)}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.successText,
+                        ),
+                      ),
+                      if (isResolved) ...[
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                          decoration: BoxDecoration(
+                            color: AppColors.success,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            'Required ✓',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'On-site technician position recorded',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              icon: Icon(Icons.refresh, size: 18, color: AppColors.successText),
+              tooltip: 'Re-acquire GPS',
+              onPressed: _fetchLocation,
+              visualDensity: VisualDensity.compact,
+            ),
+          ],
+        ),
+      );
+    }
+
+    // State 3: GPS missing & status is RESOLVED (MANDATORY REQUIREMENT)
+    if (isResolved) {
+      final errorType = _locationResult?.error;
+      final errorMsg = _locationResult?.errorMessage;
+
+      final (warningText, primaryBtnLabel, IconData primaryIcon, VoidCallback onPrimaryAction) =
+          switch (errorType) {
+        LocationErrorType.serviceDisabled => (
+            'Location (GPS) is turned off on this device. You must turn on GPS to resolve this ticket.',
+            'Open GPS Settings',
+            Icons.location_on,
+            () async {
+              await _locationHelper.openLocationSettings();
+              _fetchLocation();
+            },
+          ),
+        LocationErrorType.permissionDeniedForever => (
+            'Location permission is permanently denied. Please enable location permissions in device Settings.',
+            'Open App Settings',
+            Icons.settings,
+            () async {
+              await _locationHelper.openAppSettings();
+              _fetchLocation();
+            },
+          ),
+        LocationErrorType.permissionDenied => (
+            'Location permission was denied. Location is mandatory to confirm on-site repair.',
+            'Grant Permission',
+            Icons.my_location,
+            _fetchLocation,
+          ),
+        _ => (
+            errorMsg ?? 'GPS coordinates are mandatory to mark an issue as Resolved.',
+            'Turn On / Retry GPS',
+            Icons.my_location,
+            _fetchLocation,
+          ),
+      };
+
+      return Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: AppColors.errorLight,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.error.withValues(alpha: 0.4), width: 1.2),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.location_disabled_rounded, color: AppColors.errorText, size: 22),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'GPS Location Required to Resolve',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.errorText,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        warningText,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                ElevatedButton.icon(
+                  onPressed: onPrimaryAction,
+                  icon: Icon(primaryIcon, size: 14),
+                  label: Text(
+                    primaryBtnLabel,
+                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.error,
+                    foregroundColor: AppColors.white,
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    elevation: 0,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                OutlinedButton.icon(
+                  onPressed: _fetchLocation,
+                  icon: const Icon(Icons.refresh, size: 14),
+                  label: const Text(
+                    'Retry',
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.errorText,
+                    side: BorderSide(color: AppColors.error.withValues(alpha: 0.5)),
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
+    // State 4: GPS missing & status is NOT resolved (OPTIONAL)
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: AppColors.cardAlt,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.location_off_outlined, size: 16, color: AppColors.textMuted),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'GPS location not acquired (optional for ${_selectedStatus.label})',
+              style: TextStyle(
+                fontSize: 11,
+                color: AppColors.textMuted,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: _fetchLocation,
+            style: TextButton.styleFrom(
+              visualDensity: VisualDensity.compact,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+            ),
+            child: const Text(
+              'Retry GPS',
+              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
             ),
           ),
         ],

@@ -149,6 +149,8 @@ class IssueActionController extends Notifier<IssueActionState> {
     required IssueStatus toStatus,
     String? notes,
     List<File>? attachments,
+    double? latitude,
+    double? longitude,
   }) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
@@ -158,6 +160,8 @@ class IssueActionController extends Notifier<IssueActionState> {
         toStatus: toStatus,
         notes: notes,
         attachments: attachments,
+        latitude: latitude,
+        longitude: longitude,
       );
 
       // Invalidate queues, single detail, device inventory, and history timeline

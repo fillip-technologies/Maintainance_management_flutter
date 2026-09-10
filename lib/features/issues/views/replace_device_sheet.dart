@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../devices/devices.dart';
 import '../../../core/theme/colors.dart';
 import '../../../core/utils/app_snackbar.dart';
+import '../../location/location_helper.dart';
 import '../models/issue_model.dart';
 import '../../../l10n/app_localizations.dart';
 
@@ -41,6 +42,8 @@ class ReplaceDeviceSheet extends ConsumerStatefulWidget {
     String? newDeviceName,
     String? newDeviceSerial,
     File? proofPhoto,
+    double? latitude,
+    double? longitude,
   }) onConfirm;
 
   const ReplaceDeviceSheet({
@@ -60,6 +63,8 @@ class ReplaceDeviceSheet extends ConsumerStatefulWidget {
       String? newDeviceName,
       String? newDeviceSerial,
       File? proofPhoto,
+      double? latitude,
+      double? longitude,
     }) onConfirm,
   }) {
     return showModalBottomSheet(
@@ -136,6 +141,27 @@ class _ReplaceDeviceSheetState extends ConsumerState<ReplaceDeviceSheet> {
 
     setState(() => _isSubmitting = true);
 
+    double? lat;
+    double? lng;
+    final locRes = await LocationHelper().getLocation();
+    if (!locRes.isSuccess) {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+        AppSnackbar.error(
+          locRes.errorMessage ??
+              'GPS coordinates are required to decommission and resolve tickets. Please turn on GPS.',
+        );
+        if (locRes.error == LocationErrorType.serviceDisabled) {
+          await LocationHelper().openLocationSettings();
+        } else if (locRes.error == LocationErrorType.permissionDeniedForever) {
+          await LocationHelper().openAppSettings();
+        }
+      }
+      return;
+    }
+    lat = locRes.latitude;
+    lng = locRes.longitude;
+
     final reasonText = _getReasonLabel(_selectedReason, l10n);
     final userNotes = _optionalNotesController.text.trim();
     final baseNote = userNotes.isNotEmpty ? '$reasonText. $userNotes' : reasonText;
@@ -157,6 +183,8 @@ class _ReplaceDeviceSheetState extends ConsumerState<ReplaceDeviceSheet> {
         newDeviceName: _selectedSpareDevice?.name,
         newDeviceSerial: _selectedSpareDevice?.code,
         proofPhoto: null, // Camera proof disabled for now
+        latitude: lat,
+        longitude: lng,
       );
 
       if (mounted) {

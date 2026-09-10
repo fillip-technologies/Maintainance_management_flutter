@@ -12,6 +12,8 @@ class TechnicianActionViewModel {
     required IssueStatus toStatus,
     String? notes,
     List<File>? attachments,
+    double? latitude,
+    double? longitude,
   }) async {
     final issueRepo = _ref.read(issueRepositoryProvider);
     await issueRepo.updateIssueStatus(
@@ -19,6 +21,8 @@ class TechnicianActionViewModel {
       toStatus: toStatus,
       notes: notes,
       attachments: attachments,
+      latitude: latitude,
+      longitude: longitude,
     );
 
     _ref.invalidate(technicianIssuesProvider);
@@ -30,12 +34,16 @@ class TechnicianActionViewModel {
     required List<String> issueIds,
     required IssueStatus toStatus,
     String? notes,
+    double? latitude,
+    double? longitude,
   }) async {
     final issueRepo = _ref.read(issueRepositoryProvider);
     final result = await issueRepo.bulkUpdateStatus(
       issueIds: issueIds,
       status: toStatus,
       notes: notes,
+      latitude: latitude,
+      longitude: longitude,
     );
 
     refreshQueue();

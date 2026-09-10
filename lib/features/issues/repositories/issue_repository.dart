@@ -242,12 +242,16 @@ class IssueRepository {
     required List<String> issueIds,
     required IssueStatus status,
     String? notes,
+    double? latitude,
+    double? longitude,
   }) async {
     try {
       final payload = <String, dynamic>{
         'ids': issueIds,
         'status': status.value,
         if (notes != null && notes.trim().isNotEmpty) 'notes': notes.trim(),
+        'latitude': ?latitude,
+        'longitude': ?longitude,
       };
 
       AppLogger.d('📡 [IssueRepository] PATCH /issues/bulk-status with: $payload');
@@ -344,6 +348,8 @@ class IssueRepository {
     required IssueStatus toStatus,
     String? notes,
     List<File>? attachments,
+    double? latitude,
+    double? longitude,
   }) async {
     try {
       dynamic payload;
@@ -364,6 +370,8 @@ class IssueRepository {
         payload = FormData.fromMap({
           'status': toStatus.value,
           if (notes != null && notes.trim().isNotEmpty) 'notes': notes.trim(),
+          'latitude': ?latitude,
+          'longitude': ?longitude,
           if (multipartFiles.isNotEmpty) 'attachments': multipartFiles,
         });
         AppLogger.d('📡 [IssueRepository] PATCH /issues/$issueId/status as multipart with ${multipartFiles.length} file(s)');
@@ -371,6 +379,8 @@ class IssueRepository {
         payload = {
           'status': toStatus.value,
           if (notes != null && notes.trim().isNotEmpty) 'notes': notes.trim(),
+          'latitude': ?latitude,
+          'longitude': ?longitude,
         };
         AppLogger.d('📡 [IssueRepository] PATCH /issues/$issueId/status with: $payload');
       }

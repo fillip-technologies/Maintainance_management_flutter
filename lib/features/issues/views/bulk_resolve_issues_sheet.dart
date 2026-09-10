@@ -5,6 +5,7 @@ import '../../../core/utils/app_snackbar.dart';
 import '../../../core/widgets/status_badge.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../devices/views/helpers/hardware_icon_helper.dart';
+import '../../location/location_helper.dart';
 import '../../technician/viewmodels/technician_action_viewmodel.dart';
 import '../../technician/viewmodels/technician_queue_viewmodel.dart';
 import '../models/issue_model.dart';
@@ -99,6 +100,28 @@ class _BulkResolveIssuesSheetState extends ConsumerState<BulkResolveIssuesSheet>
     setState(() => _isSubmitting = true);
 
     try {
+      double? lat;
+      double? lng;
+      if (_targetStatus == IssueStatus.resolved) {
+        final locRes = await LocationHelper().getLocation();
+        if (!locRes.isSuccess) {
+          if (mounted) {
+            AppSnackbar.error(
+              locRes.errorMessage ??
+                  'GPS coordinates are required to resolve tickets. Please turn on GPS.',
+            );
+            if (locRes.error == LocationErrorType.serviceDisabled) {
+              await LocationHelper().openLocationSettings();
+            } else if (locRes.error == LocationErrorType.permissionDeniedForever) {
+              await LocationHelper().openAppSettings();
+            }
+          }
+          return;
+        }
+        lat = locRes.latitude;
+        lng = locRes.longitude;
+      }
+
       final selectedList = _selectedIssueIds.toList();
       final notes = _notesController.text.trim();
 
@@ -106,6 +129,8 @@ class _BulkResolveIssuesSheetState extends ConsumerState<BulkResolveIssuesSheet>
             issueIds: selectedList,
             toStatus: _targetStatus,
             notes: notes.isNotEmpty ? notes : null,
+            latitude: lat,
+            longitude: lng,
           );
 
       if (!mounted) return;
@@ -771,10 +796,33 @@ class _BulkResolveIssuesSheetState extends ConsumerState<BulkResolveIssuesSheet>
               ],
             ),
             child: SafeArea(
-              child: SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (_targetStatus == IssueStatus.resolved) ...[
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.location_on, size: 13, color: AppColors.success),
+                          const SizedBox(width: 4),
+                          Text(
+                            'GPS coordinates required on device to resolve',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.successText,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
                   onPressed: _isSubmitting || _selectedIssueIds.isEmpty
                       ? null
                       : () => _submitBulkTransition(candidateIssues),
@@ -825,6 +873,8 @@ class _BulkResolveIssuesSheetState extends ConsumerState<BulkResolveIssuesSheet>
                           ],
                         ),
                 ),
+              ),
+                ],
               ),
             ),
           ),
