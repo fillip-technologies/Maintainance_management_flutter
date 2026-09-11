@@ -3,7 +3,7 @@ class AppConfig {
   /// Change these values to update the app's name, tagline, or version globally.
   static const String appName = 'Fixly';
   static const String appTagline = 'Equipment & Maintenance Management';
-  static const String appVersion = '1.0.0';
+  static const String appVersion = '0.0.3-alpha';
 
   /// Default base URL can be passed at build time via:
   /// `flutter run --dart-define=API_BASE_URL=https://api.yourdomain.com/api/v1`
