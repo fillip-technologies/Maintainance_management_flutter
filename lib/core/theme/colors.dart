@@ -134,7 +134,7 @@ class AppLightColors {
 class AppColors {
   AppColors._();
 
-  static bool isDark = false;
+  static bool isDark = true;
 
   // Primary
   static Color get primary => isDark ? AppDarkColors.primary : AppLightColors.primary;

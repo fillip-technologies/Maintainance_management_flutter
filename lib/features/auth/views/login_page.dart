@@ -82,29 +82,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   children: [
                     // Hero Brand Icon
                     Center(
-                      child: Container(
-                        height: 76,
-                        width: 76,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [AppColors.primary, AppColors.primaryDark],
-                          ),
-                          borderRadius: BorderRadius.circular(24),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.primary.withValues(alpha: 0.3),
-                              blurRadius: 16,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          Icons.precision_manufacturing_rounded,
-                          size: 40,
-                          color: AppColors.white,
-                        ),
+                      child: Image.asset(
+                        'assets/splash/splash_logo.png',
+                        height: 80,
+                        width: 80,
                       ),
                     ),
 
