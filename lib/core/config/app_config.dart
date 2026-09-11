@@ -9,7 +9,7 @@ class AppConfig {
   /// `flutter run --dart-define=API_BASE_URL=https://api.yourdomain.com/api/v1`
   static const String defaultBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://localhost:3000/api/v1',
+    defaultValue: 'http://fixly-backend.fillipsoftware.com/api/v1',
   );
 
   /// Formats and normalizes any user-pasted URL (e.g. `https://my-backend.onrender.com`

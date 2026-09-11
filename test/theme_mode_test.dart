@@ -24,41 +24,41 @@ void main() {
       SharedPreferences.setMockInitialValues({});
     });
 
-    test('ThemeModeNotifier defaults to ThemeMode.light', () {
+    test('ThemeModeNotifier defaults to ThemeMode.dark', () {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
       final mode = container.read(themeModeProvider);
-      expect(mode, ThemeMode.light);
+      expect(mode, ThemeMode.dark);
     });
 
-    test('toggleTheme toggles between light and dark and persists to SharedPreferences', () async {
+    test('toggleTheme toggles between dark and light and persists to SharedPreferences', () async {
       SharedPreferences.setMockInitialValues({});
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
       final notifier = container.read(themeModeProvider.notifier);
+      expect(container.read(themeModeProvider), ThemeMode.dark);
+      expect(AppColors.isDark, isTrue);
+      expect(AppColors.background, AppDarkColors.background);
+
+      // Toggle to light
+      await notifier.toggleTheme();
       expect(container.read(themeModeProvider), ThemeMode.light);
       expect(AppColors.isDark, isFalse);
       expect(AppColors.background, AppLightColors.background);
+      expect(AppColors.surface, AppLightColors.surface);
+      expect(AppColors.textPrimary, AppLightColors.textPrimary);
 
-      // Toggle to dark
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString('selected_theme_mode'), 'light');
+
+      // Toggle back to dark
       await notifier.toggleTheme();
       expect(container.read(themeModeProvider), ThemeMode.dark);
       expect(AppColors.isDark, isTrue);
       expect(AppColors.background, AppDarkColors.background);
-      expect(AppColors.surface, AppDarkColors.surface);
-      expect(AppColors.textPrimary, AppDarkColors.textPrimary);
-
-      final prefs = await SharedPreferences.getInstance();
       expect(prefs.getString('selected_theme_mode'), 'dark');
-
-      // Toggle back to light
-      await notifier.toggleTheme();
-      expect(container.read(themeModeProvider), ThemeMode.light);
-      expect(AppColors.isDark, isFalse);
-      expect(AppColors.background, AppLightColors.background);
-      expect(prefs.getString('selected_theme_mode'), 'light');
     });
 
     test('setThemeMode directly sets mode', () async {
@@ -67,11 +67,11 @@ void main() {
       addTearDown(container.dispose);
 
       final notifier = container.read(themeModeProvider.notifier);
-      await notifier.setThemeMode(ThemeMode.dark);
-      expect(container.read(themeModeProvider), ThemeMode.dark);
+      await notifier.setThemeMode(ThemeMode.light);
+      expect(container.read(themeModeProvider), ThemeMode.light);
 
       final prefs = await SharedPreferences.getInstance();
-      expect(prefs.getString('selected_theme_mode'), 'dark');
+      expect(prefs.getString('selected_theme_mode'), 'light');
     });
 
     test('AppTheme.light and AppTheme.dark have correct brightness and colors', () {
@@ -116,7 +116,7 @@ void main() {
 
       // Check for theme section
       expect(find.textContaining('Theme'), findsOneWidget);
-      expect(find.text('Light Mode'), findsOneWidget);
+      expect(find.text('Dark Mode'), findsOneWidget);
 
       final switchFinder = find.byKey(const ValueKey('theme_mode_switch'));
       expect(switchFinder, findsOneWidget);
@@ -124,45 +124,45 @@ void main() {
       await tester.ensureVisible(switchFinder);
       await tester.pumpAndSettle();
 
-      // Verify switch is currently off (light)
+      // Verify switch is currently on (dark)
       final switchWidgetBefore = tester.widget<Switch>(switchFinder);
-      expect(switchWidgetBefore.value, isFalse);
+      expect(switchWidgetBefore.value, isTrue);
 
-      // Verify language switcher button has light primaryBg before toggle
+      // Verify language switcher button has dark primaryBg before toggle
       final langBtnFinder = find.byType(LanguageSwitcherButton);
       expect(langBtnFinder, findsOneWidget);
       final containerBefore = tester.widget<Container>(
         find.descendant(of: langBtnFinder, matching: find.byType(Container)),
       );
-      expect((containerBefore.decoration as BoxDecoration).color, AppLightColors.primaryBg);
+      expect((containerBefore.decoration as BoxDecoration).color, AppDarkColors.primaryBg);
 
-      // Tap switch to toggle to Dark Mode
+      // Tap switch to toggle to Light Mode
       await tester.tap(switchFinder);
       await tester.pumpAndSettle();
 
-      // Verify label changed to Dark Mode and switch is active
-      expect(find.text('Dark Mode'), findsOneWidget);
+      // Verify label changed to Light Mode and switch is inactive
+      expect(find.text('Light Mode'), findsOneWidget);
       final switchWidgetAfter = tester.widget<Switch>(switchFinder);
-      expect(switchWidgetAfter.value, isTrue);
+      expect(switchWidgetAfter.value, isFalse);
 
-      // Verify language switcher button INSTANTLY updated to dark primaryBg without navigating away
+      // Verify language switcher button updated to light primaryBg
       final containerAfter = tester.widget<Container>(
         find.descendant(of: langBtnFinder, matching: find.byType(Container)),
       );
-      expect((containerAfter.decoration as BoxDecoration).color, AppDarkColors.primaryBg);
+      expect((containerAfter.decoration as BoxDecoration).color, AppLightColors.primaryBg);
 
-      // Tap switch again to toggle back to Light Mode
+      // Tap switch again to toggle back to Dark Mode
       await tester.tap(switchFinder);
       await tester.pumpAndSettle();
 
-      expect(find.text('Light Mode'), findsOneWidget);
+      expect(find.text('Dark Mode'), findsOneWidget);
       final switchWidgetFinal = tester.widget<Switch>(switchFinder);
-      expect(switchWidgetFinal.value, isFalse);
+      expect(switchWidgetFinal.value, isTrue);
 
       final containerFinal = tester.widget<Container>(
         find.descendant(of: langBtnFinder, matching: find.byType(Container)),
       );
-      expect((containerFinal.decoration as BoxDecoration).color, AppLightColors.primaryBg);
+      expect((containerFinal.decoration as BoxDecoration).color, AppDarkColors.primaryBg);
     });
   });
 }

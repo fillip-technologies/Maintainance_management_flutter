@@ -8,7 +8,7 @@ class ThemeModeNotifier extends Notifier<ThemeMode> {
 
   @override
   ThemeMode build() {
-    AppColors.isDark = false;
+    AppColors.isDark = true;
     _loadSavedThemeMode();
     return ThemeMode.dark;
   }
@@ -17,15 +17,19 @@ class ThemeModeNotifier extends Notifier<ThemeMode> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final savedMode = prefs.getString(_prefKey);
-      if (savedMode == 'dark') {
-        AppColors.isDark = true;
-        state = ThemeMode.dark;
-      } else if (savedMode == 'light') {
+      if (savedMode == 'light') {
         AppColors.isDark = false;
         state = ThemeMode.light;
+      } else if (savedMode == 'dark') {
+        AppColors.isDark = true;
+        state = ThemeMode.dark;
+      } else {
+        AppColors.isDark = true;
+        state = ThemeMode.dark;
       }
     } catch (_) {
-      // Default to Light on error
+      AppColors.isDark = true;
+      state = ThemeMode.dark;
     }
   }
 
