@@ -18,6 +18,7 @@ class ZoneStatusRow {
   final int maintenanceCount;  // Summed `underMaintenance` devices in zone subtree
   final int openIssuesCount;   // Count of active/unresolved tickets in this zone subtree
   final bool dataLoadFailed;
+  final bool isEnriching;
 
   const ZoneStatusRow({
     required this.id,
@@ -29,6 +30,7 @@ class ZoneStatusRow {
     this.maintenanceCount = 0,
     this.openIssuesCount = 0,
     this.dataLoadFailed = false,
+    this.isEnriching = false,
   });
 
   /// Faithful to the mock: a zone reads "Online" unless it has hardware and none of it is up.
@@ -46,7 +48,7 @@ class ZoneStatusRow {
   /// True if the row should be flagged with red alert styling:
   /// - Has an issue raised and not solved (`hasUnresolvedIssues`)
   /// - OR has hardware but not any device online (`hasNoOnlineDevices`)
-  bool get isAlerted => hasUnresolvedIssues || hasNoOnlineDevices;
+  bool get isAlerted => !isEnriching && (hasUnresolvedIssues || hasNoOnlineDevices);
 
   /// Returns the zone name formatted in Title Case (first letter capitalized, rest lowercase).
   String get displayName {
@@ -67,6 +69,22 @@ class ZoneStatusRow {
       }
       return word[0].toUpperCase() + word.substring(1).toLowerCase();
     }).join(' ');
+  }
+
+  /// Creates a bare row from basic zone metadata for instantaneous initial display.
+  factory ZoneStatusRow.fromBareNode({
+    required String id,
+    required String name,
+    String? imageUrl,
+    bool isEnriching = true,
+  }) {
+    return ZoneStatusRow(
+      id: id,
+      name: name,
+      imageUrl: imageUrl,
+      isEnriching: isEnriching,
+      dataLoadFailed: false,
+    );
   }
 
   /// Folds a raw breakdown map (from GET /dashboard/zone-breakdown) into a row.
@@ -95,6 +113,7 @@ class ZoneStatusRow {
       maintenanceCount: maintenance,
       openIssuesCount: openIssuesCount,
       dataLoadFailed: false,
+      isEnriching: false,
     );
   }
 
@@ -108,6 +127,7 @@ class ZoneStatusRow {
     int? maintenanceCount,
     int? openIssuesCount,
     bool? dataLoadFailed,
+    bool? isEnriching,
   }) {
     return ZoneStatusRow(
       id: id ?? this.id,
@@ -119,6 +139,7 @@ class ZoneStatusRow {
       maintenanceCount: maintenanceCount ?? this.maintenanceCount,
       openIssuesCount: openIssuesCount ?? this.openIssuesCount,
       dataLoadFailed: dataLoadFailed ?? this.dataLoadFailed,
+      isEnriching: isEnriching ?? this.isEnriching,
     );
   }
 }

@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/network/api_client.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../devices/models/technician_zone_node.dart';
 import '../../devices/repositories/zone_repository.dart';
@@ -86,7 +88,14 @@ class TechnicianZoneTreeViewModel extends AsyncNotifier<TechnicianZoneTreeState>
     final zoneRepo = ref.read(zoneRepositoryProvider);
     final issueRepo = ref.read(issueRepositoryProvider);
 
-    final breakdownMap = await zoneRepo.getZoneBreakdown(node.id);
+    final breakdownFuture = zoneRepo.getZoneBreakdown(node.id);
+    final issuesFuture = issueRepo.getIssues(
+      zoneId: node.id,
+      includeSubzones: true,
+      scope: 'technician',
+    );
+
+    final breakdownMap = await breakdownFuture;
     var total = 0, working = 0, faulty = 0, maintenance = 0;
     for (final entry in breakdownMap.values) {
       total += entry['total'] ?? 0;
@@ -95,19 +104,13 @@ class TechnicianZoneTreeViewModel extends AsyncNotifier<TechnicianZoneTreeState>
       maintenance += entry['underMaintenance'] ?? 0;
     }
 
-    final subtreeIssues = await issueRepo.getIssues(
-      zoneId: node.id,
-      includeSubzones: true,
-      scope: 'technician',
-    );
+    final subtreeIssues = await issuesFuture;
     final active = subtreeIssues
         .where((i) =>
             i.status != IssueStatus.resolved && i.status != IssueStatus.closed)
         .toList();
 
     // How many distinct hardware UNITS are affected — not the ticket count.
-    // (A unit with 3 open tickets counts once; device-less area incidents are
-    // shown separately as "facility incidents", not here.)
     final affectedUnits =
         active.map((i) => i.deviceId).where((id) => id.isNotEmpty).toSet().length;
 
@@ -131,37 +134,40 @@ class TechnicianZoneTreeViewModel extends AsyncNotifier<TechnicianZoneTreeState>
   Future<List<TechnicianZoneNode>> _enrichSubzones(
     List<TechnicianZoneNode> rawSubzones,
   ) async {
-    final result = <TechnicianZoneNode>[];
-    for (final sz in rawSubzones) {
+    return Future.wait(rawSubzones.map((sz) async {
       try {
-        result.add(await _enrichZone(sz));
+        return await _enrichZone(sz);
       } catch (err) {
         AppLogger.w('⚠️ [TechnicianZoneTreeViewModel] Sub-zone enrich failed for ${sz.name}: $err');
-        result.add(sz.copyWith(dataLoadFailed: true));
+        return sz.copyWith(dataLoadFailed: true);
       }
-    }
-    return result;
+    }));
   }
 
-  /// Initial load: fetches assigned zones and enriches each with counts.
+  int _loadGeneration = 0;
+  int _subzoneGeneration = 0;
+
+  /// Initial load: immediately displays assigned zones and streams enrichment one-by-one.
   Future<TechnicianZoneTreeState> _loadRootZones() async {
     final zoneRepo = ref.read(zoneRepositoryProvider);
 
     final rawRoots = await zoneRepo.getMyZones();
-    final enhancedRoots = <TechnicianZoneNode>[];
+    // Prioritize actual top-level zones (parentZoneId == null or depth == 0)
+    final topLevelRoots = rawRoots.where((z) => z.isTopLevel).toList();
+    final rootsToProcess = topLevelRoots.isNotEmpty ? topLevelRoots : rawRoots;
 
-    for (final root in rawRoots) {
-      try {
-        final subzones = await zoneRepo.getSubzones(root.id);
-        enhancedRoots.add(await _enrichZone(root, subzoneCount: subzones.length));
-      } catch (zoneErr) {
-        AppLogger.w('⚠️ [TechnicianZoneTreeViewModel] Root zone enrich failed for ${root.name}: $zoneErr');
-        enhancedRoots.add(root.copyWith(dataLoadFailed: true));
-      }
-    }
+    // Immediately present all zones to user with isEnriching: true
+    final initialNodes = rootsToProcess
+        .map((r) => r.copyWith(isEnriching: true, dataLoadFailed: false))
+        .toList();
+
+    final generation = ++_loadGeneration;
+
+    // Stream progressive updates zone-by-zone in background
+    unawaited(_streamEnrichRootZones(rootsToProcess, generation));
 
     return TechnicianZoneTreeState(
-      rootZones: enhancedRoots,
+      rootZones: initialNodes,
       currentPath: const [],
       currentSubzones: const [],
       currentDevices: const [],
@@ -170,11 +176,58 @@ class TechnicianZoneTreeViewModel extends AsyncNotifier<TechnicianZoneTreeState>
     );
   }
 
+  /// Sequentially enriches root zones with breakdown and defect metrics in real time.
+  Future<void> _streamEnrichRootZones(
+    List<TechnicianZoneNode> roots,
+    int generation,
+  ) async {
+    final zoneRepo = ref.read(zoneRepositoryProvider);
+
+    for (final root in roots) {
+      if (_loadGeneration != generation) return;
+
+      try {
+        final subzones = await zoneRepo.getSubzones(root.id);
+        if (_loadGeneration != generation) return;
+
+        final enriched = await _enrichZone(root, subzoneCount: subzones.length);
+        if (_loadGeneration != generation) return;
+
+        final current = state.value;
+        if (current != null && current.isAtRoot) {
+          final updatedRoots = List<TechnicianZoneNode>.from(current.rootZones);
+          final idx = updatedRoots.indexWhere((z) => z.id == root.id);
+          if (idx != -1) {
+            updatedRoots[idx] = enriched.copyWith(isEnriching: false, dataLoadFailed: false);
+            state = AsyncValue.data(current.copyWith(rootZones: updatedRoots));
+          }
+        }
+      } catch (zoneErr) {
+        AppLogger.w('⚠️ [TechnicianZoneTreeViewModel] Progressive enrich failed for ${root.name}: $zoneErr');
+        final current = state.value;
+        if (current != null && current.isAtRoot) {
+          final updatedRoots = List<TechnicianZoneNode>.from(current.rootZones);
+          final idx = updatedRoots.indexWhere((z) => z.id == root.id);
+          if (idx != -1) {
+            updatedRoots[idx] = root.copyWith(isEnriching: false, dataLoadFailed: true);
+            state = AsyncValue.data(current.copyWith(rootZones: updatedRoots));
+          }
+        }
+      }
+
+      // Courteous 60ms gap between zones to keep network smooth and avoid rate limits
+      await Future.delayed(const Duration(milliseconds: 60));
+    }
+  }
+
   /// Drills down into a specific zone node: updates breadcrumb path and fetches its
-  /// child subzones, direct devices, and active issues.
+  /// child subzones, direct devices, and active issues immediately.
   Future<void> drillDown(TechnicianZoneNode node) async {
     final current = state.value;
     if (current == null) return;
+
+    // Cancel root streaming when drilling down to focus bandwidth on current zone
+    _loadGeneration++;
 
     state = AsyncValue.data(current.copyWith(isDrillingDown: true, clearError: true));
 
@@ -182,34 +235,87 @@ class TechnicianZoneTreeViewModel extends AsyncNotifier<TechnicianZoneTreeState>
     final issueRepo = ref.read(issueRepositoryProvider);
 
     try {
-      final rawSubzones = await zoneRepo.getSubzones(node.id);
-      final enhancedSubzones = await _enrichSubzones(rawSubzones);
-
-      final devices = await zoneRepo.getZoneDevices(node.id);
-      final rawIssues = await issueRepo.getIssues(
+      final subzonesFuture = zoneRepo.getSubzones(node.id);
+      final devicesFuture = zoneRepo.getZoneDevices(node.id);
+      final issuesFuture = issueRepo.getIssues(
         zoneId: node.id,
         includeSubzones: true,
         scope: 'technician',
+        limit: 100,
       );
+
+      final rawSubzones = await subzonesFuture;
+      final devices = await devicesFuture;
+      final rawIssues = await issuesFuture;
       final activeIssues = rawIssues.where((i) =>
           i.status != IssueStatus.resolved &&
           i.status != IssueStatus.closed).toList();
+
+      final initialSubzones = rawSubzones
+          .map((sz) => sz.copyWith(isEnriching: true, dataLoadFailed: false))
+          .toList();
 
       final newPath = [...current.currentPath, node];
 
       state = AsyncValue.data(current.copyWith(
         currentPath: newPath,
-        currentSubzones: enhancedSubzones,
+        currentSubzones: initialSubzones,
         currentDevices: devices,
         currentIssues: activeIssues,
         isDrillingDown: false,
       ));
+
+      // Progressively stream subzone enrichment in background
+      final subzoneGen = ++_subzoneGeneration;
+      unawaited(_streamEnrichSubzones(rawSubzones, newPath, subzoneGen));
     } catch (e, st) {
       AppLogger.e('❌ [TechnicianZoneTreeViewModel] Failed to drill down into ${node.name}: $e', e, st);
+      final errorMsg = e is DioException
+          ? e.extractErrorMessage('Failed to open ${node.name}')
+          : e.toString().replaceFirst('Exception: ', '');
       state = AsyncValue.data(current.copyWith(
         isDrillingDown: false,
-        errorMessage: 'Failed to open ${node.name}: $e',
+        errorMessage: errorMsg,
       ));
+    }
+  }
+
+  /// Progressively streams subzone enrichment in background.
+  Future<void> _streamEnrichSubzones(
+    List<TechnicianZoneNode> subzones,
+    List<TechnicianZoneNode> expectedPath,
+    int generation,
+  ) async {
+    for (final sz in subzones) {
+      if (_subzoneGeneration != generation) return;
+
+      try {
+        final enriched = await _enrichZone(sz);
+        if (_subzoneGeneration != generation) return;
+
+        final current = state.value;
+        if (current != null && current.currentPath.length == expectedPath.length) {
+          final updatedSubzones = List<TechnicianZoneNode>.from(current.currentSubzones);
+          final idx = updatedSubzones.indexWhere((z) => z.id == sz.id);
+          if (idx != -1) {
+            updatedSubzones[idx] = enriched.copyWith(isEnriching: false, dataLoadFailed: false);
+            state = AsyncValue.data(current.copyWith(currentSubzones: updatedSubzones));
+          }
+        }
+      } catch (err) {
+        AppLogger.w('⚠️ [TechnicianZoneTreeViewModel] Subzone progressive enrich failed for ${sz.name}: $err');
+        final current = state.value;
+        if (current != null && current.currentPath.length == expectedPath.length) {
+          final updatedSubzones = List<TechnicianZoneNode>.from(current.currentSubzones);
+          final idx = updatedSubzones.indexWhere((z) => z.id == sz.id);
+          if (idx != -1) {
+            updatedSubzones[idx] = sz.copyWith(isEnriching: false, dataLoadFailed: true);
+            state = AsyncValue.data(current.copyWith(currentSubzones: updatedSubzones));
+          }
+        }
+      }
+
+      await Future.delayed(const Duration(milliseconds: 60));
     }
   }
 
@@ -319,6 +425,7 @@ class TechnicianZoneTreeViewModel extends AsyncNotifier<TechnicianZoneTreeState>
         zoneId: node.id,
         includeSubzones: true,
         scope: 'technician',
+        limit: 100,
       );
       final activeIssues = rawIssues.where((i) =>
           i.status != IssueStatus.resolved &&

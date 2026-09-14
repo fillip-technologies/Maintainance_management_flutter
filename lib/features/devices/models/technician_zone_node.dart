@@ -52,6 +52,9 @@ class TechnicianZoneNode {
   /// misleading all-clear green.
   final bool dataLoadFailed;
 
+  /// True while background progressive streaming is fetching breakdown and issues metrics.
+  final bool isEnriching;
+
   const TechnicianZoneNode({
     required this.id,
     required this.name,
@@ -73,6 +76,7 @@ class TechnicianZoneNode {
     this.devices = const [],
     this.openIssues = const [],
     this.dataLoadFailed = false,
+    this.isEnriching = false,
   });
 
   /// Computed visual health status based on defect severity and device faultiness.
@@ -121,6 +125,7 @@ class TechnicianZoneNode {
     List<DeviceModel>? devices,
     List<IssueModel>? openIssues,
     bool? dataLoadFailed,
+    bool? isEnriching,
   }) {
     return TechnicianZoneNode(
       id: id ?? this.id,
@@ -143,6 +148,7 @@ class TechnicianZoneNode {
       devices: devices ?? this.devices,
       openIssues: openIssues ?? this.openIssues,
       dataLoadFailed: dataLoadFailed ?? this.dataLoadFailed,
+      isEnriching: isEnriching ?? this.isEnriching,
     );
   }
 
@@ -207,6 +213,7 @@ class TechnicianZoneNode {
           .whereType<Map<String, dynamic>>()
           .map<IssueModel>((e) => IssueModel.fromJson(e))
           .toList(),
+      isEnriching: json['isEnriching'] as bool? ?? false,
     );
   }
 }

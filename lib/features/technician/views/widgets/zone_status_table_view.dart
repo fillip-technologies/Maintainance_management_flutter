@@ -409,7 +409,7 @@ class _ZoneRow extends StatelessWidget {
               SizedBox(
                 width: _totalColWidth,
                 child: Text(
-                  row.dataLoadFailed ? '—' : '${row.hardwareCount}',
+                  (row.dataLoadFailed || row.isEnriching) ? '—' : '${row.hardwareCount}',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 12,
@@ -426,6 +426,7 @@ class _ZoneRow extends StatelessWidget {
                   value: row.onlineCount,
                   dotColor: AppColors.success,
                   dataLoadFailed: row.dataLoadFailed,
+                  isEnriching: row.isEnriching,
                 ),
               ),
 
@@ -436,6 +437,7 @@ class _ZoneRow extends StatelessWidget {
                   value: row.offlineCount,
                   dotColor: AppColors.error,
                   dataLoadFailed: row.dataLoadFailed,
+                  isEnriching: row.isEnriching,
                 ),
               ),
 
@@ -446,15 +448,17 @@ class _ZoneRow extends StatelessWidget {
                   value: row.maintenanceCount,
                   dotColor: AppColors.warning,
                   dataLoadFailed: row.dataLoadFailed,
+                  isEnriching: row.isEnriching,
                 ),
               ),
 
-              // Overall Status (colored circle + text, no background pill)
+              // Overall Status (colored circle + text, or subtle spinner when enriching)
               SizedBox(
                 width: _statusColWidth,
                 child: _StatusIndicator(
                   status: row.overallStatus,
                   dataLoadFailed: row.dataLoadFailed,
+                  isEnriching: row.isEnriching,
                   l10n: l10n,
                 ),
               ),
@@ -531,16 +535,18 @@ class _CountCell extends StatelessWidget {
   final int value;
   final Color dotColor;
   final bool dataLoadFailed;
+  final bool isEnriching;
 
   const _CountCell({
     required this.value,
     required this.dotColor,
     this.dataLoadFailed = false,
+    this.isEnriching = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (dataLoadFailed) {
+    if (dataLoadFailed || isEnriching) {
       return Text(
         '—',
         style: TextStyle(
@@ -581,11 +587,13 @@ class _CountCell extends StatelessWidget {
 class _StatusIndicator extends StatelessWidget {
   final ZoneOverallStatus status;
   final bool dataLoadFailed;
+  final bool isEnriching;
   final AppLocalizations l10n;
 
   const _StatusIndicator({
     required this.status,
     this.dataLoadFailed = false,
+    this.isEnriching = false,
     required this.l10n,
   });
 
@@ -599,6 +607,31 @@ class _StatusIndicator extends StatelessWidget {
           color: AppColors.textMuted,
           fontWeight: FontWeight.w600,
         ),
+      );
+    }
+
+    if (isEnriching) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: 8,
+            height: 8,
+            child: CircularProgressIndicator(
+              strokeWidth: 1.2,
+              color: AppColors.textMuted,
+            ),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            '···',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textMuted,
+            ),
+          ),
+        ],
       );
     }
 

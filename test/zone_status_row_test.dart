@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import '../lib/core/theme/colors.dart';
-import '../lib/features/technician/technician.dart';
-import '../lib/l10n/app_localizations.dart';
+import 'package:equipment_management_system/core/theme/colors.dart';
+import 'package:equipment_management_system/features/devices/models/technician_zone_node.dart';
+import 'package:equipment_management_system/features/technician/technician.dart';
+import 'package:equipment_management_system/l10n/app_localizations.dart';
 
 void main() {
   group('Technician ZoneStatusRow Unit & Aggregation Tests', () {
@@ -407,6 +408,92 @@ void main() {
       expect(container.read(technicianViewModeProvider), TechnicianViewMode.spatialExplorer);
       expect(fakeTreeVm.navigatedZoneId, 'z-lion');
       expect(fakeTreeVm.fromZoneStatus, isTrue);
+    });
+
+    test('8. ZoneStatusRow.fromBareNode sets isEnriching: true and prevents false red alert', () {
+      final bareRow = ZoneStatusRow.fromBareNode(
+        id: 'z-bare',
+        name: 'Aviary',
+        isEnriching: true,
+      );
+
+      expect(bareRow.id, 'z-bare');
+      expect(bareRow.name, 'Aviary');
+      expect(bareRow.isEnriching, isTrue);
+      expect(bareRow.hardwareCount, 0);
+      expect(bareRow.onlineCount, 0);
+      // Even though onlineCount is 0, isAlerted must be false because it is still enriching!
+      expect(bareRow.isAlerted, isFalse);
+    });
+
+    testWidgets('9. TechnicianZoneStatusView renders dashes (—) and subtle loader for enriching rows', (tester) async {
+      final testRows = [
+        ZoneStatusRow.fromBareNode(
+          id: 'z-loading',
+          name: 'Tiger Enclosure',
+          isEnriching: true,
+        ),
+      ];
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            technicianZoneStatusViewModelProvider.overrideWith(
+              () => _FakeZoneStatusViewModel(testRows),
+            ),
+          ],
+          child: const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: TechnicianZoneStatusView(),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('Tiger Enclosure'), findsOneWidget);
+      // Dashes (—) should appear for total, online, offline, and maint cells
+      expect(find.text('—'), findsWidgets);
+      // Subtle progress indicator should appear for the status column
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.text('···'), findsOneWidget);
+    });
+
+    testWidgets('10. SubzoneGridCard in enriching state renders subtle badge, dashes, and responds to tap', (tester) async {
+      var tapped = false;
+      final enrichingNode = TechnicianZoneNode(
+        id: 'z-sub-loading',
+        name: 'Zone A',
+        isEnriching: true,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: SubzoneGridCard(
+              zone: enrichingNode,
+              index: 0,
+              onTap: () => tapped = true,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      expect(find.text('Zone A'), findsOneWidget);
+      expect(find.text('···'), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.text('—'), findsOneWidget);
+
+      await tester.tap(find.text('Zone A'));
+      expect(tapped, isTrue);
     });
   });
 }

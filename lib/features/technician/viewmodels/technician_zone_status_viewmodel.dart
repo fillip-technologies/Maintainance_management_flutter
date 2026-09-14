@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../devices/models/technician_zone_node.dart';
 import '../../devices/repositories/zone_repository.dart';
 import '../../issues/issues.dart';
 import '../../realtime/realtime.dart';
@@ -16,6 +17,7 @@ class TechnicianZoneStatusViewModel extends AsyncNotifier<List<ZoneStatusRow>> {
   StreamSubscription? _issueCreatedSub;
   StreamSubscription? _issueUpdatedSub;
   Timer? _debounceTimer;
+  int _loadGeneration = 0;
 
   /// Deferred refresh flag if real-time events arrive while the technician is in another tab.
   bool _pendingRealtimeRefresh = false;
@@ -66,14 +68,40 @@ class TechnicianZoneStatusViewModel extends AsyncNotifier<List<ZoneStatusRow>> {
     });
   }
 
-  /// Loads root zones assigned to the technician and sums their sub-tree breakdown and issue counts.
+  /// Loads root zones assigned to the technician and immediately renders bare rows,
+  /// streaming breakdown and defect metrics in the background zone-by-zone.
   Future<List<ZoneStatusRow>> _loadZoneStatuses() async {
     final zoneRepo = ref.read(zoneRepositoryProvider);
+    final rawRoots = await zoneRepo.getMyZones();
+    final topLevelRoots = rawRoots.where((z) => z.isTopLevel).toList();
+    final roots = topLevelRoots.isNotEmpty ? topLevelRoots : rawRoots;
+
+    final initialRows = roots
+        .map((root) => ZoneStatusRow.fromBareNode(
+              id: root.id,
+              name: root.name,
+              imageUrl: root.imageUrl,
+              isEnriching: true,
+            ))
+        .toList();
+
+    final generation = ++_loadGeneration;
+    unawaited(_streamEnrichStatusRows(roots, generation));
+
+    return initialRows;
+  }
+
+  /// Progressively enriches each zone row with live hardware breakdown and issues.
+  Future<void> _streamEnrichStatusRows(
+    List<TechnicianZoneNode> roots,
+    int generation,
+  ) async {
+    final zoneRepo = ref.read(zoneRepositoryProvider);
     final issueRepo = ref.read(issueRepositoryProvider);
-    final roots = await zoneRepo.getMyZones();
-    final rows = <ZoneStatusRow>[];
 
     for (final root in roots) {
+      if (_loadGeneration != generation) return;
+
       try {
         final breakdownFuture = zoneRepo.getZoneBreakdown(root.id);
         final issuesFuture = issueRepo.getIssues(
@@ -84,6 +112,7 @@ class TechnicianZoneStatusViewModel extends AsyncNotifier<List<ZoneStatusRow>> {
         );
 
         final breakdownMap = await breakdownFuture;
+        if (_loadGeneration != generation) return;
 
         var unresolvedCount = 0;
         try {
@@ -94,29 +123,51 @@ class TechnicianZoneStatusViewModel extends AsyncNotifier<List<ZoneStatusRow>> {
           AppLogger.w('⚠️ [TechnicianZoneStatusViewModel] Issues lookup failed for ${root.name}: $e');
         }
 
-        rows.add(ZoneStatusRow.fromBreakdown(
+        final enrichedRow = ZoneStatusRow.fromBreakdown(
           id: root.id,
           name: root.name,
           imageUrl: root.imageUrl,
           breakdownMap: breakdownMap,
           openIssuesCount: unresolvedCount,
-        ));
+        );
+
+        if (_loadGeneration != generation) return;
+        final currentRows = state.value;
+        if (currentRows != null) {
+          final updated = List<ZoneStatusRow>.from(currentRows);
+          final idx = updated.indexWhere((r) => r.id == root.id);
+          if (idx != -1) {
+            updated[idx] = enrichedRow;
+            state = AsyncValue.data(updated);
+          }
+        }
       } catch (err) {
         AppLogger.w('⚠️ [TechnicianZoneStatusViewModel] Breakdown failed for ${root.name}: $err');
-        rows.add(ZoneStatusRow(
-          id: root.id,
-          name: root.name,
-          imageUrl: root.imageUrl,
-          dataLoadFailed: true,
-        ));
+        final currentRows = state.value;
+        if (currentRows != null) {
+          final updated = List<ZoneStatusRow>.from(currentRows);
+          final idx = updated.indexWhere((r) => r.id == root.id);
+          if (idx != -1) {
+            updated[idx] = ZoneStatusRow(
+              id: root.id,
+              name: root.name,
+              imageUrl: root.imageUrl,
+              dataLoadFailed: true,
+              isEnriching: false,
+            );
+            state = AsyncValue.data(updated);
+          }
+        }
       }
-    }
 
-    return rows;
+      // Courteous 60ms gap between zones to keep network smooth and avoid rate limits
+      await Future.delayed(const Duration(milliseconds: 60));
+    }
   }
 
   /// Triggers a full table reload (used by pull-to-refresh & retry button).
   Future<void> refresh() async {
+    _loadGeneration++;
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(_loadZoneStatuses);
   }

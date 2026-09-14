@@ -42,7 +42,7 @@ class DailyLogRepository {
         throw Exception(msg);
       }
     } on DioException catch (e) {
-      final message = e.response?.data?['message'] as String? ?? e.message ?? 'Network error submitting log';
+      final message = e.extractErrorMessage('Network error submitting log');
       AppLogger.e('❌ [DailyLogRepository] DioException: $message', e);
       throw Exception(message);
     } catch (e, st) {
@@ -89,7 +89,7 @@ class DailyLogRepository {
         throw Exception(msg);
       }
     } on DioException catch (e) {
-      final message = e.response?.data?['message'] as String? ?? e.message ?? 'Network error fetching daily logs';
+      final message = e.extractErrorMessage('Network error fetching daily logs');
       AppLogger.e('❌ [DailyLogRepository] DioException: $message', e);
       throw Exception(message);
     } catch (e) {

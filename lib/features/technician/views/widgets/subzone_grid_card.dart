@@ -28,6 +28,11 @@ class SubzoneGridCard extends StatelessWidget {
     }
 
     final gradientColors = AppColors.subzoneGradients[index % AppColors.subzoneGradients.length];
+
+    // Progressive streaming: bare zone card rendered immediately with subtle loading badge
+    if (zone.isEnriching) {
+      return _buildEnrichingCard(l10n, gradientColors);
+    }
     final totalDevices = zone.deviceCount;
     final needsFix = (totalDevices - zone.workingCount).clamp(0, totalDevices);
     final hasIssues = needsFix > 0 || zone.hasIssues;
@@ -282,6 +287,149 @@ class SubzoneGridCard extends StatelessWidget {
                       color: AppColors.textSecondary,
                     ),
                   ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEnrichingCard(AppLocalizations l10n, List<Color> gradientColors) {
+    final hasZoneImage = zone.imageUrl != null && zone.imageUrl!.isNotEmpty;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: AppColors.card,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: AppColors.border,
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: hasZoneImage ? AppColors.border.withValues(alpha: 0.1) : null,
+                    gradient: hasZoneImage
+                        ? null
+                        : LinearGradient(
+                            colors: gradientColors,
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: hasZoneImage
+                      ? Image.network(
+                          zone.imageUrl!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, _, _) => Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: gradientColors,
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                            ),
+                            child: Icon(
+                              Icons.location_on_rounded,
+                              color: AppColors.white,
+                              size: 22,
+                            ),
+                          ),
+                        )
+                      : Icon(
+                          Icons.location_on_rounded,
+                          color: AppColors.white,
+                          size: 22,
+                        ),
+                ),
+                // Subtle loading badge
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: 9,
+                        height: 9,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 1.5,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '···',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              zone.name,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+                color: AppColors.textPrimary,
+                height: 1.15,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(Icons.inventory_2_outlined, size: 13, color: AppColors.textSecondary),
+                const SizedBox(width: 3),
+                Text(
+                  '—',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const Spacer(),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 13,
+                  color: AppColors.textSecondary,
                 ),
               ],
             ),

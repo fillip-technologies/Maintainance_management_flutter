@@ -198,3 +198,29 @@ class ApiClient {
     );
   }
 }
+
+extension DioExceptionExt on DioException {
+  /// Safely extracts the error message from a DioException, gracefully handling
+  /// Map responses, plain String responses (e.g. HTTP 429 rate limit or 502/503 HTML),
+  /// and network disconnects.
+  String extractErrorMessage([String fallback = 'An unexpected error occurred']) {
+    final data = response?.data;
+    if (data is Map) {
+      final msg = data['message'] ?? data['error'];
+      if (msg != null && msg.toString().trim().isNotEmpty) {
+        return msg.toString().trim();
+      }
+    } else if (data is String && data.trim().isNotEmpty) {
+      final trimmed = data.trim();
+      if (trimmed.startsWith('<') && trimmed.contains('</')) {
+        return response?.statusMessage ?? fallback;
+      }
+      return trimmed;
+    }
+    if (response?.statusCode == 429) {
+      return 'Too many requests. Please wait a moment and try again.';
+    }
+    return message ?? fallback;
+  }
+}
+

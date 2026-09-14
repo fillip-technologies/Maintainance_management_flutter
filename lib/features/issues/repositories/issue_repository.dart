@@ -23,9 +23,10 @@ class IssueRepository {
     int limit = 50,
   }) async {
     try {
+      final safeLimit = limit.clamp(1, 100);
       final queryParams = <String, dynamic>{
         'page': page,
-        'limit': limit,
+        'limit': safeLimit,
         if (includeSubzones) 'includeSubzones': 'true',
         if (zoneId != null && zoneId.isNotEmpty) 'zoneId': zoneId,
         if (status != null && status.isNotEmpty) 'status': status,
@@ -59,7 +60,7 @@ class IssueRepository {
         throw Exception(msg);
       }
     } on DioException catch (e) {
-      final message = e.response?.data?['message'] as String? ?? e.message ?? 'Network error fetching issues';
+      final message = e.extractErrorMessage('Network error fetching issues');
       AppLogger.e('❌ [IssueRepository] DioException: $message', e);
       throw Exception(message);
     } catch (e, st) {
@@ -83,7 +84,7 @@ class IssueRepository {
         throw Exception(msg);
       }
     } on DioException catch (e) {
-      final message = e.response?.data?['message'] as String? ?? e.message ?? 'Network error';
+      final message = e.extractErrorMessage('Network error');
       AppLogger.e('❌ [IssueRepository] DioException in getIssueById: $message', e);
       throw Exception(message);
     } catch (e) {
@@ -115,7 +116,7 @@ class IssueRepository {
         throw Exception(msg);
       }
     } on DioException catch (e) {
-      final message = e.response?.data?['message'] as String? ?? e.message ?? 'Network error';
+      final message = e.extractErrorMessage('Network error');
       AppLogger.e('❌ [IssueRepository] DioException in getIssueHistory: $message', e);
       return [];
     } catch (e) {
@@ -183,7 +184,7 @@ class IssueRepository {
         throw Exception(msg);
       }
     } on DioException catch (e) {
-      final message = e.response?.data?['message'] as String? ?? e.message ?? 'Network error creating issue';
+      final message = e.extractErrorMessage('Network error creating issue');
       AppLogger.e('❌ [IssueRepository] DioException in createIssue: $message', e);
       throw Exception(message);
     } catch (e, st) {
@@ -227,7 +228,7 @@ class IssueRepository {
         throw Exception(msg);
       }
     } on DioException catch (e) {
-      final message = e.response?.data?['message'] as String? ?? e.message ?? 'Network error creating bulk issues';
+      final message = e.extractErrorMessage('Network error creating bulk issues');
       AppLogger.e('❌ [IssueRepository] DioException in createBulkIssues: $message', e);
       throw Exception(message);
     } catch (e, st) {
@@ -281,7 +282,7 @@ class IssueRepository {
         throw Exception(msg);
       }
     } on DioException catch (e) {
-      final message = e.response?.data?['message'] as String? ?? e.message ?? 'Network error updating bulk issues';
+      final message = e.extractErrorMessage('Network error updating bulk issues');
       AppLogger.e('❌ [IssueRepository] DioException in bulkUpdateStatus: $message', e);
       throw Exception(message);
     } catch (e, st) {
@@ -401,7 +402,7 @@ class IssueRepository {
         throw Exception(msg);
       }
     } on DioException catch (e) {
-      final message = e.response?.data?['message'] as String? ?? e.message ?? 'Network error';
+      final message = e.extractErrorMessage('Network error');
       AppLogger.e('❌ [IssueRepository] DioException in updateIssueStatus: $message', e);
       throw Exception(message);
     } catch (e, st) {

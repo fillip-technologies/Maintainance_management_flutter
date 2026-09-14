@@ -1,16 +1,19 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import '../lib/core/theme/colors.dart';
-import '../lib/features/devices/devices.dart';
-import '../lib/features/issues/issues.dart';
-import '../lib/features/technician/models/technician_queue_state.dart';
-import '../lib/features/technician/models/technician_zone_tree_state.dart';
-import '../lib/features/technician/viewmodels/technician_view_mode_provider.dart';
-import '../lib/features/technician/views/widgets/subzone_grid_card.dart';
-import '../lib/features/technician/views/widgets/technician_search_filter_bar.dart';
-import '../lib/features/technician/views/widgets/zone_device_card.dart';
-import '../lib/l10n/app_localizations.dart';
+import 'package:equipment_management_system/core/network/api_client.dart';
+import 'package:equipment_management_system/core/storage/storage_service.dart';
+import 'package:equipment_management_system/core/theme/colors.dart';
+import 'package:equipment_management_system/features/devices/devices.dart';
+import 'package:equipment_management_system/features/issues/issues.dart';
+import 'package:equipment_management_system/features/technician/models/technician_queue_state.dart';
+import 'package:equipment_management_system/features/technician/models/technician_zone_tree_state.dart';
+import 'package:equipment_management_system/features/technician/viewmodels/technician_view_mode_provider.dart';
+import 'package:equipment_management_system/features/technician/views/widgets/subzone_grid_card.dart';
+import 'package:equipment_management_system/features/technician/views/widgets/technician_search_filter_bar.dart';
+import 'package:equipment_management_system/features/technician/views/widgets/zone_device_card.dart';
+import 'package:equipment_management_system/l10n/app_localizations.dart';
 
 /// Wraps a technician widget with the localization delegates it now needs.
 Widget _localized(Widget child) => MaterialApp(
@@ -355,7 +358,68 @@ void main() {
       expect(find.text('Sensor misaligned'), findsNothing);
     });
 
-    test('filters devices strictly to only those with unresolved issues in spatial view', () {
+    testWidgets('working device taps onInspectDevice callback', (tester) async {
+      const device = DeviceModel(
+        id: 'dev-ok',
+        zoneId: 'zone-1',
+        zoneName: 'South Zone',
+        name: 'Gate Scanner',
+        serialNumber: 'GAT-001',
+        hardwareTypeName: 'Scanner',
+        status: DeviceStatus.active,
+      );
+
+      DeviceModel? inspectedDevice;
+
+      await tester.pumpWidget(
+        _localized(
+          ZoneDeviceCard(
+            device: device,
+            activeIssues: const [],
+            onInspectDevice: (d) => inspectedDevice = d,
+          ),
+        ),
+      );
+
+      expect(find.text('Gate Scanner'), findsOneWidget);
+      expect(find.text('ALL OK'), findsOneWidget);
+
+      await tester.tap(find.text('Gate Scanner'));
+      expect(inspectedDevice?.id, 'dev-ok');
+    });
+
+    testWidgets('device with faulty status without open issues shows defective styling and callout', (tester) async {
+      const device = DeviceModel(
+        id: 'dev-faulty',
+        zoneId: 'zone-1',
+        zoneName: 'South Zone',
+        name: 'Defective Sensor',
+        serialNumber: 'SEN-001',
+        hardwareTypeName: 'Sensor',
+        status: DeviceStatus.faulty,
+      );
+
+      bool inspected = false;
+
+      await tester.pumpWidget(
+        _localized(
+          ZoneDeviceCard(
+            device: device,
+            activeIssues: const [],
+            onInspectDevice: (_) => inspected = true,
+          ),
+        ),
+      );
+
+      expect(find.text('Defective Sensor'), findsOneWidget);
+      expect(find.text('Faulty Unit • Needs Action'), findsOneWidget);
+      expect(find.text('ALL OK'), findsNothing);
+
+      await tester.tap(find.text('Faulty Unit • Needs Action'));
+      expect(inspected, isTrue);
+    });
+
+    test('separates devices into defective (sorted first) and operational in spatial view, showing all devices', () {
       const d1 = DeviceModel(id: 'd1', zoneId: 'z1', zoneName: 'Z', name: 'D1', serialNumber: '1', hardwareTypeName: 'H');
       const d2 = DeviceModel(id: 'd2', zoneId: 'z1', zoneName: 'Z', name: 'D2', serialNumber: '2', hardwareTypeName: 'H');
       const d3 = DeviceModel(id: 'd3', zoneId: 'z1', zoneName: 'Z', name: 'D3', serialNumber: '3', hardwareTypeName: 'H');
@@ -422,13 +486,19 @@ void main() {
           .where((i) => i.status != IssueStatus.resolved && i.status != IssueStatus.closed)
           .toList();
 
-      // Only show devices that have unresolved issues
-      final displayedDevices = allDevices.where((d) {
-        return activeIssues.any((iss) => iss.deviceId == d.id);
-      }).toList();
+      bool isDefective(DeviceModel d) =>
+          activeIssues.any((iss) => iss.deviceId == d.id) ||
+          d.status == DeviceStatus.faulty ||
+          d.status == DeviceStatus.underMaintenance;
 
-      expect(displayedDevices.length, 2);
-      expect(displayedDevices.map((d) => d.id).toList(), ['d1', 'd2']);
+      final defective = allDevices.where(isDefective).toList();
+      final operational = allDevices.where((d) => !isDefective(d)).toList();
+      final displayedDevices = [...defective, ...operational];
+
+      expect(displayedDevices.length, 4);
+      expect(defective.map((d) => d.id).toList(), ['d1', 'd2']);
+      expect(operational.map((d) => d.id).toList(), ['d3', 'd4']);
+      expect(displayedDevices.map((d) => d.id).toList(), ['d1', 'd2', 'd3', 'd4']);
     });
 
     testWidgets('SubzoneGridCard shows yellow border on partial issue (some devices defective)', (tester) async {
@@ -597,7 +667,73 @@ void main() {
       expect(subtreeFaulty, 1);
       expect(subtreeMaintenance, 0);
     });
+
+    test('extractErrorMessage safely handles 429 string payload without type error', () {
+      final dioException429 = DioException(
+        requestOptions: RequestOptions(path: '/zones'),
+        response: Response(
+          requestOptions: RequestOptions(path: '/zones'),
+          statusCode: 429,
+          data: 'Too many requests, please try again later.',
+        ),
+      );
+
+      final msg = dioException429.extractErrorMessage('Failed to load subzones');
+      expect(msg, contains('Too many requests'));
+      // Verifies that extracting error does NOT throw "String is not a subtype of int of index"
+      expect(msg, isA<String>());
+    });
+
+    test('extractErrorMessage safely extracts JSON Map error messages', () {
+      final dioExceptionMap = DioException(
+        requestOptions: RequestOptions(path: '/zones'),
+        response: Response(
+          requestOptions: RequestOptions(path: '/zones'),
+          statusCode: 400,
+          data: {'message': 'Invalid zone id parameter'},
+        ),
+      );
+
+      final msg = dioExceptionMap.extractErrorMessage('Fallback error');
+      expect(msg, 'Invalid zone id parameter');
+    });
+
+    test('IssueRepository.getIssues clamps limit to max 100 to prevent backend 400 validation error', () async {
+      final storage = _FakeStorageService();
+      final apiClient = ApiClient(storage: storage);
+      RequestOptions? capturedOptions;
+      apiClient.dio.interceptors.add(InterceptorsWrapper(
+        onRequest: (options, handler) {
+          capturedOptions = options;
+          handler.resolve(Response(
+            requestOptions: options,
+            statusCode: 200,
+            data: {
+              'success': true,
+              'data': {'items': []},
+            },
+          ));
+        },
+      ));
+
+      final issueRepo = IssueRepository(apiClient: apiClient);
+
+      await issueRepo.getIssues(limit: 200);
+      expect(capturedOptions?.queryParameters['limit'], 100);
+
+      await issueRepo.getIssues(limit: 0);
+      expect(capturedOptions?.queryParameters['limit'], 1);
+    });
   });
+}
+
+class _FakeStorageService extends Fake implements StorageService {
+  @override
+  String? getBaseUrl() => 'https://mock.api';
+  @override
+  String? getAccessToken() => 'fake-token';
+  @override
+  String? getRefreshToken() => 'fake-refresh';
 }
 
 

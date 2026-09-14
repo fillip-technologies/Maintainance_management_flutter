@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/theme/colors.dart';
-import '../../../../core/utils/app_snackbar.dart';
-import '../../../../l10n/app_localizations.dart';
+import '../../../core/theme/colors.dart';
+import '../../../core/utils/app_snackbar.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../issues/issues.dart';
 import '../../location/location_helper.dart';
 import '../../realtime/realtime.dart';

@@ -51,7 +51,7 @@ class DeviceRepository {
         throw Exception(msg);
       }
     } on DioException catch (e) {
-      final message = e.response?.data?['message'] as String? ?? e.message ?? 'Network error fetching devices';
+      final message = e.extractErrorMessage('Network error fetching devices');
       AppLogger.e('❌ [DeviceRepository] DioException in getDevices: $message', e);
       throw Exception(message);
     } catch (e, st) {

@@ -17,6 +17,7 @@ class ZoneDeviceCard extends StatelessWidget {
   final List<IssueModel> activeIssues;
   final VoidCallback? onTap;
   final ValueChanged<IssueModel>? onInspectIssue;
+  final ValueChanged<DeviceModel>? onInspectDevice;
   final void Function(IssueModel issue, IssueStatus newStatus)? onUpdateIssueStatus;
 
   const ZoneDeviceCard({
@@ -25,6 +26,7 @@ class ZoneDeviceCard extends StatelessWidget {
     this.activeIssues = const [],
     this.onTap,
     this.onInspectIssue,
+    this.onInspectDevice,
     this.onUpdateIssueStatus,
   });
 
@@ -51,7 +53,9 @@ class ZoneDeviceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final topIssue = _topIssue;
-    final isDefective = topIssue != null;
+    final isDefective = topIssue != null ||
+        device.status == DeviceStatus.faulty ||
+        device.status == DeviceStatus.underMaintenance;
 
     final isDark = Theme.of(context).brightness == Brightness.dark || AppColors.isDark;
 
@@ -71,7 +75,9 @@ class ZoneDeviceCard extends StatelessWidget {
 
     return InkWell(
       onTap: onTap ??
-          (topIssue != null ? () => onInspectIssue?.call(topIssue) : null),
+          (topIssue != null
+              ? () => onInspectIssue?.call(topIssue)
+              : () => onInspectDevice?.call(device)),
       borderRadius: BorderRadius.circular(18),
       child: Container(
         padding: const EdgeInsets.all(12),
@@ -158,7 +164,9 @@ class ZoneDeviceCard extends StatelessWidget {
                                   height: 1,
                                 ),
                               )
-                            : const Icon(Icons.check, size: 10, color: Colors.white),
+                            : (isDefective
+                                ? const Icon(Icons.priority_high_rounded, size: 10, color: Colors.white)
+                                : const Icon(Icons.check, size: 10, color: Colors.white)),
                       ),
                     ),
                   ],
@@ -235,6 +243,11 @@ class ZoneDeviceCard extends StatelessWidget {
                       ? IssueStatus.resolved
                       : IssueStatus.inProgress,
                 ),
+              )
+            else if (isDefective)
+              _StatusIssueCallout(
+                device: device,
+                onTap: () => onInspectDevice?.call(device),
               )
             else
               _OkStrip(label: l10n.techBadgeAllOk),
@@ -348,3 +361,58 @@ class _OkStrip extends StatelessWidget {
     );
   }
 }
+
+class _StatusIssueCallout extends StatelessWidget {
+  final DeviceModel device;
+  final VoidCallback? onTap;
+
+  const _StatusIssueCallout({
+    required this.device,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isFaulty = device.status == DeviceStatus.faulty;
+    final color = isFaulty ? AppColors.error : AppColors.warning;
+    final text = isFaulty ? 'Faulty Unit • Needs Action' : 'Under Maintenance';
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              isFaulty ? Icons.warning_amber_rounded : Icons.build_circle_rounded,
+              size: 15,
+              color: AppColors.white,
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                text,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.white,
+                  height: 1.1,
+                ),
+              ),
+            ),
+            Icon(Icons.arrow_forward_ios_rounded, size: 10, color: AppColors.white),
+          ],
+        ),
+      ),
+    );
+  }
+}
+

@@ -18,6 +18,7 @@ class ZoneRepository {
       final response = await apiClient.dio.get('/technicians/me/zones');
 
       if ((response.statusCode == 200 || response.statusCode == 201) &&
+          response.data is Map &&
           response.data['success'] == true) {
         final items = (response.data['data'] as List<dynamic>?) ?? [];
         final list = items
@@ -28,7 +29,7 @@ class ZoneRepository {
       }
       return const [];
     } on DioException catch (e) {
-      final msg = e.response?.data?['message'] as String? ?? e.message ?? 'Failed to load technician zones';
+      final msg = e.extractErrorMessage('Failed to load technician zones');
       AppLogger.e('❌ [ZoneRepository] DioException in getMyZones: $msg', e);
       throw Exception(msg);
     } catch (e, st) {
@@ -44,13 +45,14 @@ class ZoneRepository {
       final response = await apiClient.dio.get('/technicians/me/zones/$zoneId');
 
       if ((response.statusCode == 200 || response.statusCode == 201) &&
+          response.data is Map &&
           response.data['success'] == true) {
         final data = response.data['data'] as Map<String, dynamic>;
         return TechnicianZoneNode.fromJson(data);
       }
       throw Exception('Failed to load zone detail');
     } on DioException catch (e) {
-      final msg = e.response?.data?['message'] as String? ?? e.message ?? 'Failed to load zone detail';
+      final msg = e.extractErrorMessage('Failed to load zone detail');
       AppLogger.e('❌ [ZoneRepository] DioException in getZoneDetail: $msg', e);
       throw Exception(msg);
     } catch (e, st) {
@@ -69,6 +71,7 @@ class ZoneRepository {
       );
 
       if ((response.statusCode == 200 || response.statusCode == 201) &&
+          response.data is Map &&
           response.data['success'] == true) {
         final data = response.data['data'] as Map<String, dynamic>;
         final items = (data['items'] as List<dynamic>?) ?? [];
@@ -78,7 +81,7 @@ class ZoneRepository {
       }
       return const [];
     } on DioException catch (e) {
-      final msg = e.response?.data?['message'] as String? ?? e.message ?? 'Failed to load subzones';
+      final msg = e.extractErrorMessage('Failed to load subzones');
       AppLogger.e('❌ [ZoneRepository] DioException in getSubzones: $msg', e);
       throw Exception(msg);
     } catch (e, st) {
@@ -102,6 +105,7 @@ class ZoneRepository {
 
       final result = <String, Map<String, int>>{};
       if ((response.statusCode == 200 || response.statusCode == 201) &&
+          response.data is Map &&
           response.data['success'] == true) {
         final data = response.data['data'] as Map<String, dynamic>;
         final zones = (data['zones'] as List<dynamic>?) ?? [];
@@ -120,7 +124,7 @@ class ZoneRepository {
       }
       return result;
     } on DioException catch (e) {
-      final msg = e.response?.data?['message'] as String? ?? e.message ?? 'Failed to load zone breakdown';
+      final msg = e.extractErrorMessage('Failed to load zone breakdown');
       AppLogger.e('❌ [ZoneRepository] DioException in getZoneBreakdown: $msg', e);
       throw Exception(msg);
     } catch (e, st) {
@@ -143,6 +147,7 @@ class ZoneRepository {
       );
 
       if ((response.statusCode == 200 || response.statusCode == 201) &&
+          response.data is Map &&
           response.data['success'] == true) {
         final data = response.data['data'] as Map<String, dynamic>;
         final items = (data['items'] as List<dynamic>?) ?? [];

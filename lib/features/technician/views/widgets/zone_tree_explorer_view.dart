@@ -4,15 +4,20 @@ import '../../../../core/theme/colors.dart';
 import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/widgets/empty_state_view.dart';
 import '../../../../core/widgets/app_shimmer.dart';
+import '../../../../core/widgets/app_filter_chip.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../devices/models/device_model.dart';
 import '../../../issues/issues.dart';
 import '../../viewmodels/technician_action_viewmodel.dart';
 import '../../viewmodels/technician_zone_tree_viewmodel.dart';
 import 'subzone_grid_card.dart';
 import 'technician_breadcrumb_bar.dart';
+import 'technician_device_detail_sheet.dart';
 import 'technician_issue_card.dart';
 import 'zone_device_card.dart';
 import 'zone_health_hero_card.dart';
+
+enum _DeviceFilter { all, issues, operational }
 
 /// Complete Spatial Explorer view providing zone-tree breadcrumb navigation,
 /// visual health cards, and tactile 2-column CARD grids (not lists) with prominent
@@ -25,6 +30,7 @@ class ZoneTreeExplorerView extends ConsumerStatefulWidget {
 }
 
 class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
+  _DeviceFilter _selectedFilter = _DeviceFilter.all;
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -73,11 +79,29 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                 i.status != IssueStatus.closed)
             .toList();
 
-        // Spatial Explorer: ONLY show devices that have UNRESOLVED issues!
         final deviceIdsInZone = {for (final d in devices) d.id};
-        final displayedDevices = devices
-            .where((d) => issues.any((iss) => iss.deviceId == d.id))
-            .toList();
+
+        bool isDeviceDefective(DeviceModel d) {
+          return issues.any((iss) => iss.deviceId == d.id) ||
+              d.status == DeviceStatus.faulty ||
+              d.status == DeviceStatus.underMaintenance;
+        }
+
+        final defectiveDevices = devices.where(isDeviceDefective).toList();
+        final operationalDevices = devices.where((d) => !isDeviceDefective(d)).toList();
+
+        final List<DeviceModel> displayedDevices;
+        switch (_selectedFilter) {
+          case _DeviceFilter.issues:
+            displayedDevices = defectiveDevices;
+            break;
+          case _DeviceFilter.operational:
+            displayedDevices = operationalDevices;
+            break;
+          case _DeviceFilter.all:
+            displayedDevices = [...defectiveDevices, ...operationalDevices];
+            break;
+        }
 
         // Facility incidents: every active issue in this subtree that isn't
         // pinned to one of the devices shown above — device-less area incidents
@@ -202,70 +226,204 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                       ),
                     ],
 
-                    // 3. Hardware Units: Visual 2-Column Card Grid (NOT a list)
-                    // Spatial Explorer: Only show devices that have unresolved issues
-                    if (!isAtRoot && displayedDevices.isNotEmpty) ...[
+                    // Empty state if leaf zone with 0 devices and 0 incidents
+                    if (!isAtRoot && displayedSubzones.isEmpty && devices.isEmpty && facilityIncidents.isEmpty) ...[
+                      const Padding(
+                        padding: EdgeInsets.only(top: 40),
+                        child: EmptyStateView(
+                          icon: Icons.devices_other_outlined,
+                          title: 'No Hardware Registered',
+                          subtitle: 'There is currently no equipment assigned to this zone.',
+                        ),
+                      ),
+                    ],
+
+                    // 3. Hardware Units: Visual 2-Column Card Grid (Working = Green, Defective = Red)
+                    if (!isAtRoot && devices.isNotEmpty) ...[
                       Padding(
                         padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                        child: Row(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(
-                              Icons.build_circle_outlined,
-                              size: 14,
-                              color: AppColors.error,
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.devices_other_rounded,
+                                  size: 15,
+                                  color: AppColors.textSecondary,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'HARDWARE IN ZONE (${devices.length})',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.textSecondary,
+                                    letterSpacing: 0.8,
+                                  ),
+                                ),
+                                const Spacer(),
+                                if (defectiveDevices.isNotEmpty) ...[
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.error.withValues(alpha: 0.12),
+                                      borderRadius: BorderRadius.circular(6),
+                                      border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.warning_amber_rounded, size: 11, color: AppColors.error),
+                                        const SizedBox(width: 3),
+                                        Text(
+                                          '${defectiveDevices.length}',
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w900,
+                                            color: AppColors.error,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                ],
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.success.withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.check_circle_rounded, size: 11, color: AppColors.successText),
+                                      const SizedBox(width: 3),
+                                      Text(
+                                        '${operationalDevices.length}',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w900,
+                                          color: AppColors.successText,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(width: 6),
-                            Text(
-                              l10n.techUnresolvedHardwareCount(displayedDevices.length),
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.error,
-                                letterSpacing: 0.8,
+                            const SizedBox(height: 8),
+                            // Filter chips row: All | Issues | Working
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: [
+                                  AppFilterChip(
+                                    label: 'All',
+                                    badgeText: '${devices.length}',
+                                    isSelected: _selectedFilter == _DeviceFilter.all,
+                                    onTap: () => setState(() => _selectedFilter = _DeviceFilter.all),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  AppFilterChip(
+                                    label: 'Issues',
+                                    badgeText: '${defectiveDevices.length}',
+                                    badgeColor: defectiveDevices.isNotEmpty ? AppColors.error : null,
+                                    isSelected: _selectedFilter == _DeviceFilter.issues,
+                                    activeColor: AppColors.error,
+                                    onTap: () => setState(() => _selectedFilter = _DeviceFilter.issues),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  AppFilterChip(
+                                    label: 'Working',
+                                    badgeText: '${operationalDevices.length}',
+                                    badgeColor: operationalDevices.isNotEmpty ? AppColors.success : null,
+                                    isSelected: _selectedFilter == _DeviceFilter.operational,
+                                    activeColor: AppColors.success,
+                                    onTap: () => setState(() => _selectedFilter = _DeviceFilter.operational),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: _TwoColumnGrid(
-                          children: [
-                            for (final dev in displayedDevices)
-                              ZoneDeviceCard(
-                                device: dev,
-                                activeIssues:
-                                    issues.where((iss) => iss.deviceId == dev.id).toList(),
-                                onInspectIssue: (issue) =>
-                                    IssueDetailSheet.show(context, issue),
-                                onUpdateIssueStatus: (issue, newStatus) {
-                                  final issueId = issue.id;
-                                  UpdateStatusSheet.show(
+                      if (displayedDevices.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: AppColors.cardAlt,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: AppColors.border),
+                            ),
+                            child: Center(
+                              child: Text(
+                                _selectedFilter == _DeviceFilter.issues
+                                    ? 'No equipment with open issues in this zone.'
+                                    : 'No equipment matches this filter.',
+                                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                              ),
+                            ),
+                          ),
+                        )
+                      else
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: _TwoColumnGrid(
+                            children: [
+                              for (final dev in displayedDevices)
+                                ZoneDeviceCard(
+                                  device: dev,
+                                  activeIssues:
+                                      issues.where((iss) => iss.deviceId == dev.id).toList(),
+                                  onInspectIssue: (issue) =>
+                                      IssueDetailSheet.show(context, issue),
+                                  onInspectDevice: (device) =>
+                                      TechnicianDeviceDetailSheet.show(
                                     context,
-                                    issue: issue,
-                                    initialTargetStatus: newStatus,
-                                    onStatusUpdated: (status, comment, photo, [latitude, longitude]) async {
-                                      try {
-                                        await actionNotifier.updateStatus(
-                                          issueId: issueId,
-                                          toStatus: status,
-                                          notes: comment,
-                                          attachments: photo != null ? [photo] : null,
-                                          latitude: latitude,
-                                          longitude: longitude,
-                                        );
-                                        viewModel.refresh();
-                                      } catch (e) {
-                                        AppSnackbar.error('Failed to update status: $e');
-                                        rethrow;
-                                      }
+                                    device: device,
+                                    onReportIssue: () {
+                                      RaiseIssueSheet.show(
+                                        context,
+                                        devices: devices,
+                                        initialDevice: device,
+                                        onIssueCreated: (_) => viewModel.refresh(),
+                                      );
                                     },
-                                  );
-                                },
-                              ),
-                          ],
+                                  ),
+                                  onUpdateIssueStatus: (issue, newStatus) {
+                                    final issueId = issue.id;
+                                    UpdateStatusSheet.show(
+                                      context,
+                                      issue: issue,
+                                      initialTargetStatus: newStatus,
+                                      onStatusUpdated: (status, comment, photo, [latitude, longitude]) async {
+                                        try {
+                                          await actionNotifier.updateStatus(
+                                            issueId: issueId,
+                                            toStatus: status,
+                                            notes: comment,
+                                            attachments: photo != null ? [photo] : null,
+                                            latitude: latitude,
+                                            longitude: longitude,
+                                          );
+                                          viewModel.refresh();
+                                        } catch (e) {
+                                          AppSnackbar.error('Failed to update status: $e');
+                                          rethrow;
+                                        }
+                                      },
+                                    );
+                                  },
+                                ),
+                            ],
+                          ),
                         ),
-                      ),
                     ],
 
                     // 4. Area-Level Incidents (Only shown if defects exist that are NOT tied to any known device above)
