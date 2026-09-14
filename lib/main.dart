@@ -6,6 +6,7 @@ import 'core/config/app_config.dart';
 import 'core/services/push_service.dart';
 import 'core/storage/storage_service.dart';
 import 'core/theme/theme.dart';
+import 'core/utils/app_logger.dart';
 import 'core/utils/app_snackbar.dart';
 import 'features/auth/auth.dart';
 import 'features/home/home.dart';
@@ -17,8 +18,18 @@ void main() async {
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  await initPushBackground();
+  try {
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  } catch (e, st) {
+    AppLogger.e('⚠️ [main] Firebase initialization error: $e', e, st);
+  }
+
+  try {
+    await initPushBackground();
+  } catch (e, st) {
+    AppLogger.e('⚠️ [main] Push background initialization error: $e', e, st);
+  }
+
   final storageService = await StorageService.init();
 
   runApp(

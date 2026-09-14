@@ -14,28 +14,51 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 final _localNotifications = FlutterLocalNotificationsPlugin();
 
-/// Call once from main() before runApp, after Firebase.initializeApp().
 Future<void> initPushBackground() async {
-  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  try {
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
-  // Android channel for high-priority foreground notifications.
-  const androidChannel = AndroidNotificationChannel(
-    'fixly_high',
-    'Fixly Alerts',
-    description: 'Issue and device alerts from Fixly',
-    importance: Importance.high,
-  );
+    // Android channel for high-priority foreground notifications.
+    const androidChannel = AndroidNotificationChannel(
+      'fixly_high',
+      'Fixly Alerts',
+      description: 'Issue and device alerts from Fixly',
+      importance: Importance.high,
+    );
 
-  await _localNotifications
-      .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
-      ?.createNotificationChannel(androidChannel);
+    await _localNotifications
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(androidChannel);
 
-  await _localNotifications.initialize(
-    const InitializationSettings(
-      android: AndroidInitializationSettings('@mipmap/ic_launcher'),
-      iOS: DarwinInitializationSettings(),
-    ),
-  );
+    bool initialized = false;
+    for (final iconName in [
+      '@mipmap/launcher_icon',
+      '@mipmap/ic_launcher',
+      'launcher_icon',
+      'ic_launcher',
+      'ic_notification',
+    ]) {
+      try {
+        await _localNotifications.initialize(
+          InitializationSettings(
+            android: AndroidInitializationSettings(iconName),
+            iOS: const DarwinInitializationSettings(),
+          ),
+        );
+        initialized = true;
+        AppLogger.i('🔔 [Push] Local notifications initialized with icon: $iconName');
+        break;
+      } catch (e) {
+        AppLogger.w('⚠️ [Push] Notification icon "$iconName" not resolved: $e');
+      }
+    }
+
+    if (!initialized) {
+      AppLogger.w('⚠️ [Push] Could not initialize local notifications with any icon');
+    }
+  } catch (e, st) {
+    AppLogger.e('⚠️ [Push] initPushBackground failed: $e', e, st);
+  }
 }
 
 class PushService {
