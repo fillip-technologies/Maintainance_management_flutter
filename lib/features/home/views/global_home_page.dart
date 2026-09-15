@@ -224,20 +224,7 @@ class GlobalHomePage extends ConsumerWidget {
                 ),
               ),
             )
-          : FloatingActionButton.extended(
-              onPressed: () => RaiseBulkIssueSheet.show(context),
-              backgroundColor: AppColors.error,
-              foregroundColor: AppColors.textWhite,
-              elevation: 4,
-              icon: const Icon(Icons.playlist_add_rounded),
-              label: Text(
-                l10n?.btnBulkDefect ?? 'Bulk Defect',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.3,
-                ),
-              ),
-            ),
+          : null,
       ),
     );
   }

@@ -168,6 +168,21 @@ class _StaffHomePageState extends ConsumerState<StaffHomePage>
     );
   }
 
+  void _openRaiseBulkIssueSheet(List<DeviceModel> selectedDevices) {
+    final liveDevices = ref.read(staffDevicesProvider).value ?? [];
+
+    RaiseBulkIssueSheet.show(
+      context,
+      devices: liveDevices,
+      initialSelectedDevices: selectedDevices,
+      onIssuesCreated: (newIssues) {
+        final dashboardVm = ref.read(staffDashboardViewModelProvider);
+        dashboardVm.refreshIssues();
+        dashboardVm.refreshDevices();
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -280,10 +295,12 @@ class _StaffHomePageState extends ConsumerState<StaffHomePage>
           child: switch (_currentTabIndex) {
             0 => StaffDevicesDirectoryTab(
                 devices: devices,
+                issues: staffIssuesAsync.value ?? const [],
                 isLoading: staffDevicesAsync.isLoading,
                 hasError: staffDevicesAsync.hasError,
                 onRefresh: () async => dashboardVm.refreshDevices(),
                 onOpenRaiseIssue: _openRaiseIssueSheet,
+                onOpenRaiseBulkIssue: _openRaiseBulkIssueSheet,
               ),
             1 => StaffDailyChecklistTab(
                 allDevices: devices,

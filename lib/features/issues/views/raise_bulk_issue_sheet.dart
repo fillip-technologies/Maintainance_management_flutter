@@ -20,11 +20,13 @@ import 'widgets/raise_bulk/raise_bulk_submit_button.dart';
 /// using the backend `POST /api/v1/issues/bulk` endpoint.
 class RaiseBulkIssueSheet extends ConsumerStatefulWidget {
   final List<DeviceModel>? devices;
+  final List<DeviceModel>? initialSelectedDevices;
   final Function(List<IssueModel> newIssues)? onIssuesCreated;
 
   const RaiseBulkIssueSheet({
     super.key,
     this.devices,
+    this.initialSelectedDevices,
     this.onIssuesCreated,
   });
 
@@ -32,6 +34,7 @@ class RaiseBulkIssueSheet extends ConsumerStatefulWidget {
   static Future<List<IssueModel>?> show(
     BuildContext context, {
     List<DeviceModel>? devices,
+    List<DeviceModel>? initialSelectedDevices,
     Function(List<IssueModel> newIssues)? onIssuesCreated,
   }) {
     return showModalBottomSheet<List<IssueModel>>(
@@ -41,6 +44,7 @@ class RaiseBulkIssueSheet extends ConsumerStatefulWidget {
       backgroundColor: AppColors.transparent,
       builder: (_) => RaiseBulkIssueSheet(
         devices: devices,
+        initialSelectedDevices: initialSelectedDevices,
         onIssuesCreated: onIssuesCreated,
       ),
     );
@@ -59,6 +63,9 @@ class _RaiseBulkIssueSheetState extends ConsumerState<RaiseBulkIssueSheet> {
   void initState() {
     super.initState();
     _controller = RaiseBulkIssueController(
+      initialState: RaiseBulkIssueState(
+        selectedDeviceIds: widget.initialSelectedDevices?.map((d) => d.id).toSet() ?? const {},
+      ),
       onStateChanged: _onStateChanged,
     );
     _descriptionController.addListener(() {
