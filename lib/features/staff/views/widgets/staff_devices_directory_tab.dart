@@ -344,7 +344,7 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
     bool isSelectionMode,
   ) {
     if (widget.isLoading) {
-      return const _StaffDeviceGridSkeleton();
+      return const EquipmentCategoryGridSkeleton();
     }
     if (widget.hasError) {
       return ListView(
@@ -535,37 +535,3 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
   }
 }
 
-class _StaffDeviceGridSkeleton extends StatelessWidget {
-  const _StaffDeviceGridSkeleton();
-
-  @override
-  Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final crossAxisCount = screenWidth > 900 ? 6 : (screenWidth > 600 ? 4 : 3);
-
-    return AppShimmer(
-      child: GridView.builder(
-        physics: const NeverScrollableScrollPhysics(),
-        shrinkWrap: true,
-        padding: const EdgeInsets.all(12),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: crossAxisCount,
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 10,
-          childAspectRatio: 1.0,
-        ),
-        itemCount: 15,
-        itemBuilder: (context, index) => Container(
-          decoration: BoxDecoration(
-            color: AppColors.card,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.border),
-          ),
-          child: const Center(
-            child: ShimmerBox(width: 42, height: 42, borderRadius: 12),
-          ),
-        ),
-      ),
-    );
-  }
-}

@@ -2,10 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/theme/colors.dart';
-import '../../../../core/utils/app_snackbar.dart';
-import '../../../../core/widgets/status_badge.dart';
-import '../../../../l10n/app_localizations.dart';
+import '../../../core/theme/colors.dart';
+import '../../../core/utils/app_snackbar.dart';
+import '../../../core/widgets/status_badge.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../daily_logs/daily_logs.dart';
 import '../../devices/devices.dart';
 import '../../issues/issues.dart';

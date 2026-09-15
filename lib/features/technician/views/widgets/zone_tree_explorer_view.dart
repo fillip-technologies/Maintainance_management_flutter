@@ -2,35 +2,131 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/utils/app_snackbar.dart';
-import '../../../../core/widgets/empty_state_view.dart';
-import '../../../../core/widgets/app_shimmer.dart';
 import '../../../../core/widgets/app_filter_chip.dart';
+import '../../../../core/widgets/app_shimmer.dart';
+import '../../../../core/widgets/empty_state_view.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../devices/models/device_model.dart';
 import '../../../issues/issues.dart';
+import '../../models/technician_zone_map_data.dart';
 import '../../viewmodels/technician_action_viewmodel.dart';
 import '../../viewmodels/technician_zone_tree_viewmodel.dart';
 import 'subzone_grid_card.dart';
 import 'technician_breadcrumb_bar.dart';
 import 'technician_device_detail_sheet.dart';
 import 'technician_issue_card.dart';
+import 'technician_top_level_zone_card.dart';
 import 'zone_device_card.dart';
 import 'zone_health_hero_card.dart';
 
 enum _DeviceFilter { all, issues, operational }
 
-/// Complete Spatial Explorer view providing zone-tree breadcrumb navigation,
-/// visual health cards, and tactile 2-column CARD grids (not lists) with prominent
-/// RED backgrounds for defective units and GREEN for healthy ones.
+/// Complete Spatial Explorer view:
+/// - At Root: High-fidelity web-parity Big Cards view (matching http://localhost:5173/clientadmin/products)
+///   with issue-first sorting, health rings, visual device blocks, and 2-column subzone cards.
+/// - When Drilled Down: Breadcrumb-guided hierarchy explorer for focused inspection.
 class ZoneTreeExplorerView extends ConsumerStatefulWidget {
   const ZoneTreeExplorerView({super.key});
 
   @override
-  ConsumerState<ZoneTreeExplorerView> createState() => _ZoneTreeExplorerViewState();
+  ConsumerState<ZoneTreeExplorerView> createState() =>
+      _ZoneTreeExplorerViewState();
 }
 
 class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
   _DeviceFilter _selectedFilter = _DeviceFilter.all;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  /// Filters top-level zone Big Cards according to search query and status chip.
+  List<TechnicianTopLevelZoneItem> _getFilteredSections(
+    List<TechnicianTopLevelZoneItem> sections,
+    String query,
+    _DeviceFilter filter,
+  ) {
+    final cleanQuery = query.trim().toLowerCase();
+
+    final result = <TechnicianTopLevelZoneItem>[];
+    for (final section in sections) {
+      // 1. Filter direct devices
+      final filteredDirect = section.directDevices.where((d) {
+        if (filter == _DeviceFilter.issues && !section.isDeviceDefective(d)) {
+          return false;
+        }
+        if (filter == _DeviceFilter.operational &&
+            section.isDeviceDefective(d)) {
+          return false;
+        }
+        if (cleanQuery.isNotEmpty) {
+          final matchesName = d.name.toLowerCase().contains(cleanQuery);
+          final matchesCode = d.code.toLowerCase().contains(cleanQuery);
+          final matchesLoc = d.location.toLowerCase().contains(cleanQuery);
+          final matchesZone =
+              section.zone.name.toLowerCase().contains(cleanQuery);
+          if (!matchesName && !matchesCode && !matchesLoc && !matchesZone) {
+            return false;
+          }
+        }
+        return true;
+      }).toList();
+
+      // 2. Filter nested subzones
+      final filteredSubzones = <TechnicianSubzoneItem>[];
+      for (final sz in section.subzones) {
+        final filteredSzDevices = sz.devices.where((d) {
+          if (filter == _DeviceFilter.issues && !sz.isDeviceDefective(d)) {
+            return false;
+          }
+          if (filter == _DeviceFilter.operational && sz.isDeviceDefective(d)) {
+            return false;
+          }
+          if (cleanQuery.isNotEmpty) {
+            final matchesName = d.name.toLowerCase().contains(cleanQuery);
+            final matchesCode = d.code.toLowerCase().contains(cleanQuery);
+            final matchesLoc = d.location.toLowerCase().contains(cleanQuery);
+            final matchesSz = sz.zone.name.toLowerCase().contains(cleanQuery);
+            final matchesZone =
+                section.zone.name.toLowerCase().contains(cleanQuery);
+            if (!matchesName &&
+                !matchesCode &&
+                !matchesLoc &&
+                !matchesSz &&
+                !matchesZone) {
+              return false;
+            }
+          }
+          return true;
+        }).toList();
+
+        final szNameMatches = cleanQuery.isNotEmpty &&
+            sz.zone.name.toLowerCase().contains(cleanQuery);
+        if (filteredSzDevices.isNotEmpty ||
+            (szNameMatches && filter == _DeviceFilter.all)) {
+          filteredSubzones.add(sz.copyWith(devices: filteredSzDevices));
+        }
+      }
+
+      final zoneNameMatches = cleanQuery.isNotEmpty &&
+          section.zone.name.toLowerCase().contains(cleanQuery);
+      if (filteredDirect.isNotEmpty ||
+          filteredSubzones.isNotEmpty ||
+          (zoneNameMatches && filter == _DeviceFilter.all)) {
+        result.add(section.copyWith(
+          directDevices: filteredDirect,
+          subzones: filteredSubzones,
+        ));
+      }
+    }
+
+    return result;
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -46,7 +142,8 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.error_outline_rounded, size: 48, color: AppColors.error),
+              Icon(Icons.error_outline_rounded,
+                  size: 48, color: AppColors.error),
               const SizedBox(height: 12),
               Text(
                 l10n.techFailedToLoadZones('$err'),
@@ -69,10 +166,266 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
       ),
       data: (state) {
         final isAtRoot = state.isAtRoot;
+
+        // ════════════════════════════════════════════════════════════════════
+        // 1. ROOT VIEW: High-Fidelity Web-Parity Big Cards View
+        // ════════════════════════════════════════════════════════════════════
+        if (isAtRoot) {
+          final filteredSections = _getFilteredSections(
+            state.zoneSections,
+            _searchQuery,
+            _selectedFilter,
+          );
+
+          var totalDevices = 0;
+          var totalOnline = 0;
+          var totalOffline = 0;
+          for (final sec in state.zoneSections) {
+            totalDevices += sec.totalDevices;
+            totalOnline += sec.onlineDevices;
+            totalOffline += sec.offlineDevices;
+          }
+          final fleetHealthPct = totalDevices > 0
+              ? ((totalOnline / totalDevices) * 100).toStringAsFixed(0)
+              : '100';
+
+          return RefreshIndicator(
+            color: AppColors.primary,
+            onRefresh: () => viewModel.refresh(),
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
+              ),
+              slivers: [
+                // Top Search & Filter Bar
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Search Bar
+                        Container(
+                          decoration: BoxDecoration(
+                            color: AppColors.card,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: AppColors.border),
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Row(
+                            children: [
+                              Icon(Icons.search_rounded,
+                                  size: 18, color: AppColors.textSecondary),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: TextField(
+                                  controller: _searchController,
+                                  onChanged: (val) =>
+                                      setState(() => _searchQuery = val),
+                                  style: TextStyle(
+                                      fontSize: 13,
+                                      color: AppColors.textPrimary),
+                                  decoration: InputDecoration(
+                                    hintText:
+                                        'Search equipment by code, name, or subzone...',
+                                    hintStyle: TextStyle(
+                                        fontSize: 12,
+                                        color: AppColors.textSecondary),
+                                    border: InputBorder.none,
+                                    isDense: true,
+                                    contentPadding:
+                                        const EdgeInsets.symmetric(vertical: 11),
+                                  ),
+                                ),
+                              ),
+                              if (_searchQuery.isNotEmpty)
+                                GestureDetector(
+                                  onTap: () {
+                                    _searchController.clear();
+                                    setState(() => _searchQuery = '');
+                                  },
+                                  child: Icon(Icons.close_rounded,
+                                      size: 16, color: AppColors.textSecondary),
+                                ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+
+                        // Filter Chips & Fleet Health Indicator
+                        Row(
+                          children: [
+                            Expanded(
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  children: [
+                                    AppFilterChip(
+                                      label: 'All',
+                                      badgeText: '$totalDevices',
+                                      isSelected:
+                                          _selectedFilter == _DeviceFilter.all,
+                                      onTap: () => setState(() =>
+                                          _selectedFilter = _DeviceFilter.all),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    AppFilterChip(
+                                      label: 'Active',
+                                      badgeText: '$totalOnline',
+                                      badgeColor: totalOnline > 0
+                                          ? AppColors.success
+                                          : null,
+                                      isSelected: _selectedFilter ==
+                                          _DeviceFilter.operational,
+                                      activeColor: AppColors.success,
+                                      onTap: () => setState(() =>
+                                          _selectedFilter =
+                                              _DeviceFilter.operational),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    AppFilterChip(
+                                      label: 'Issues',
+                                      badgeText: '$totalOffline',
+                                      badgeColor: totalOffline > 0
+                                          ? AppColors.error
+                                          : null,
+                                      isSelected: _selectedFilter ==
+                                          _DeviceFilter.issues,
+                                      activeColor: AppColors.error,
+                                      onTap: () => setState(() =>
+                                          _selectedFilter =
+                                              _DeviceFilter.issues),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: totalOffline > 0
+                                    ? AppColors.error.withValues(alpha: 0.1)
+                                    : AppColors.success.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: totalOffline > 0
+                                      ? AppColors.error.withValues(alpha: 0.3)
+                                      : AppColors.success.withValues(alpha: 0.3),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 6,
+                                    height: 6,
+                                    decoration: BoxDecoration(
+                                      color: totalOffline > 0
+                                          ? AppColors.error
+                                          : AppColors.success,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    '$fleetHealthPct% Health',
+                                    style: TextStyle(
+                                      fontSize: 10.5,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'monospace',
+                                      color: totalOffline > 0
+                                          ? AppColors.error
+                                          : AppColors.success,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Error banner if any
+                if (state.errorMessage != null)
+                  SliverToBoxAdapter(
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: AppColors.error.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                            color: AppColors.error.withValues(alpha: 0.3)),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.info_outline_rounded,
+                              size: 16, color: AppColors.error),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              state.errorMessage!,
+                              style: TextStyle(
+                                  fontSize: 11, color: AppColors.error),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                // Big Cards List (Issue-First Sorted)
+                if (filteredSections.isNotEmpty)
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          return TechnicianTopLevelZoneCard(
+                            zoneItem: filteredSections[index],
+                          );
+                        },
+                        childCount: filteredSections.length,
+                      ),
+                    ),
+                  )
+                else
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 32, vertical: 40),
+                      child: EmptyStateView(
+                        icon: state.zoneSections.isEmpty
+                            ? Icons.map_outlined
+                            : Icons.search_off_rounded,
+                        title: state.zoneSections.isEmpty
+                            ? l10n.techNoAssignedZones
+                            : 'No Matching Equipment',
+                        subtitle: state.zoneSections.isEmpty
+                            ? l10n.techNoAssignedZonesSub
+                            : 'No zones or equipment match your current search and filter criteria.',
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          );
+        }
+
+        // ════════════════════════════════════════════════════════════════════
+        // 2. DRILLED DOWN VIEW: Focused Breadcrumb Navigation
+        // ════════════════════════════════════════════════════════════════════
         final currentZone = state.currentZone;
-        final displayedSubzones = isAtRoot ? state.rootZones : state.currentSubzones;
+        final displayedSubzones = state.currentSubzones;
         final devices = state.currentDevices;
-        // Spatial Explorer: Active issues only (never show resolved in spatial explore)
         final issues = state.currentIssues
             .where((i) =>
                 i.status != IssueStatus.resolved &&
@@ -88,7 +441,8 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
         }
 
         final defectiveDevices = devices.where(isDeviceDefective).toList();
-        final operationalDevices = devices.where((d) => !isDeviceDefective(d)).toList();
+        final operationalDevices =
+            devices.where((d) => !isDeviceDefective(d)).toList();
 
         final List<DeviceModel> displayedDevices;
         switch (_selectedFilter) {
@@ -103,12 +457,6 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
             break;
         }
 
-        // Facility incidents: every active issue in this subtree that isn't
-        // pinned to one of the devices shown above — device-less area incidents
-        // AND issues on devices that live in a deeper sub-zone. Previously these
-        // were filtered to `iss.zoneId == currentZone.id` and silently vanished
-        // at every level when they belonged to a nested zone. The card still
-        // shows each issue's own zone name so the technician sees where it is.
         final facilityIncidents = issues
             .where((iss) =>
                 iss.deviceId.isEmpty || !deviceIdsInZone.contains(iss.deviceId))
@@ -151,21 +499,26 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                     // Optional Error Banner
                     if (state.errorMessage != null) ...[
                       Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
                         decoration: BoxDecoration(
                           color: AppColors.error.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
+                          border: Border.all(
+                              color: AppColors.error.withValues(alpha: 0.3)),
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.info_outline_rounded, size: 16, color: AppColors.error),
+                            Icon(Icons.info_outline_rounded,
+                                size: 16, color: AppColors.error),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 state.errorMessage!,
-                                style: TextStyle(fontSize: 11, color: AppColors.error),
+                                style: TextStyle(
+                                    fontSize: 11, color: AppColors.error),
                               ),
                             ),
                           ],
@@ -173,7 +526,7 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                       ),
                     ],
 
-                    // 2. Sub-zones: Visual 2-Column Card Grid (NOT a list)
+                    // 2. Sub-zones Grid
                     if (displayedSubzones.isNotEmpty) ...[
                       Padding(
                         padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
@@ -186,9 +539,7 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              isAtRoot
-                                  ? l10n.techAssignedZonesCount(displayedSubzones.length)
-                                  : l10n.techSubZonesCount(displayedSubzones.length),
+                              l10n.techSubZonesCount(displayedSubzones.length),
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
@@ -207,39 +558,31 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                               SubzoneGridCard(
                                 zone: displayedSubzones[i],
                                 index: i,
-                                onTap: () => viewModel.drillDown(displayedSubzones[i]),
+                                onTap: () =>
+                                    viewModel.drillDown(displayedSubzones[i]),
                               ),
                           ],
                         ),
                       ),
                     ],
 
-                    // Empty state if root with 0 assigned zones
-                    if (isAtRoot && displayedSubzones.isEmpty) ...[
-                      Padding(
-                        padding: const EdgeInsets.only(top: 40),
-                        child: EmptyStateView(
-                          icon: Icons.map_outlined,
-                          title: l10n.techNoAssignedZones,
-                          subtitle: l10n.techNoAssignedZonesSub,
-                        ),
-                      ),
-                    ],
-
                     // Empty state if leaf zone with 0 devices and 0 incidents
-                    if (!isAtRoot && displayedSubzones.isEmpty && devices.isEmpty && facilityIncidents.isEmpty) ...[
+                    if (displayedSubzones.isEmpty &&
+                        devices.isEmpty &&
+                        facilityIncidents.isEmpty) ...[
                       const Padding(
                         padding: EdgeInsets.only(top: 40),
                         child: EmptyStateView(
                           icon: Icons.devices_other_outlined,
                           title: 'No Hardware Registered',
-                          subtitle: 'There is currently no equipment assigned to this zone.',
+                          subtitle:
+                              'There is currently no equipment assigned to this zone.',
                         ),
                       ),
                     ],
 
-                    // 3. Hardware Units: Visual 2-Column Card Grid (Working = Green, Defective = Red)
-                    if (!isAtRoot && devices.isNotEmpty) ...[
+                    // 3. Hardware Units: Visual 2-Column Card Grid
+                    if (devices.isNotEmpty) ...[
                       Padding(
                         padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                         child: Column(
@@ -265,16 +608,21 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                                 const Spacer(),
                                 if (defectiveDevices.isNotEmpty) ...[
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 6, vertical: 2),
                                     decoration: BoxDecoration(
-                                      color: AppColors.error.withValues(alpha: 0.12),
+                                      color: AppColors.error
+                                          .withValues(alpha: 0.12),
                                       borderRadius: BorderRadius.circular(6),
-                                      border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
+                                      border: Border.all(
+                                          color: AppColors.error
+                                              .withValues(alpha: 0.3)),
                                     ),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Icon(Icons.warning_amber_rounded, size: 11, color: AppColors.error),
+                                        Icon(Icons.warning_amber_rounded,
+                                            size: 11, color: AppColors.error),
                                         const SizedBox(width: 3),
                                         Text(
                                           '${defectiveDevices.length}',
@@ -290,16 +638,22 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                                   const SizedBox(width: 6),
                                 ],
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 6, vertical: 2),
                                   decoration: BoxDecoration(
-                                    color: AppColors.success.withValues(alpha: 0.12),
+                                    color: AppColors.success
+                                        .withValues(alpha: 0.12),
                                     borderRadius: BorderRadius.circular(6),
-                                    border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
+                                    border: Border.all(
+                                        color: AppColors.success
+                                            .withValues(alpha: 0.3)),
                                   ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Icon(Icons.check_circle_rounded, size: 11, color: AppColors.successText),
+                                      Icon(Icons.check_circle_rounded,
+                                          size: 11,
+                                          color: AppColors.successText),
                                       const SizedBox(width: 3),
                                       Text(
                                         '${operationalDevices.length}',
@@ -315,7 +669,6 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                               ],
                             ),
                             const SizedBox(height: 8),
-                            // Filter chips row: All | Issues | Working
                             SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
                               child: Row(
@@ -323,26 +676,36 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                                   AppFilterChip(
                                     label: 'All',
                                     badgeText: '${devices.length}',
-                                    isSelected: _selectedFilter == _DeviceFilter.all,
-                                    onTap: () => setState(() => _selectedFilter = _DeviceFilter.all),
+                                    isSelected:
+                                        _selectedFilter == _DeviceFilter.all,
+                                    onTap: () => setState(() =>
+                                        _selectedFilter = _DeviceFilter.all),
                                   ),
                                   const SizedBox(width: 8),
                                   AppFilterChip(
                                     label: 'Issues',
                                     badgeText: '${defectiveDevices.length}',
-                                    badgeColor: defectiveDevices.isNotEmpty ? AppColors.error : null,
-                                    isSelected: _selectedFilter == _DeviceFilter.issues,
+                                    badgeColor: defectiveDevices.isNotEmpty
+                                        ? AppColors.error
+                                        : null,
+                                    isSelected:
+                                        _selectedFilter == _DeviceFilter.issues,
                                     activeColor: AppColors.error,
-                                    onTap: () => setState(() => _selectedFilter = _DeviceFilter.issues),
+                                    onTap: () => setState(() =>
+                                        _selectedFilter = _DeviceFilter.issues),
                                   ),
                                   const SizedBox(width: 8),
                                   AppFilterChip(
                                     label: 'Working',
                                     badgeText: '${operationalDevices.length}',
-                                    badgeColor: operationalDevices.isNotEmpty ? AppColors.success : null,
-                                    isSelected: _selectedFilter == _DeviceFilter.operational,
+                                    badgeColor: operationalDevices.isNotEmpty
+                                        ? AppColors.success
+                                        : null,
+                                    isSelected: _selectedFilter ==
+                                        _DeviceFilter.operational,
                                     activeColor: AppColors.success,
-                                    onTap: () => setState(() => _selectedFilter = _DeviceFilter.operational),
+                                    onTap: () => setState(() => _selectedFilter =
+                                        _DeviceFilter.operational),
                                   ),
                                 ],
                               ),
@@ -352,7 +715,8 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                       ),
                       if (displayedDevices.isEmpty)
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
                           child: Container(
                             width: double.infinity,
                             padding: const EdgeInsets.all(14),
@@ -366,7 +730,9 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                                 _selectedFilter == _DeviceFilter.issues
                                     ? 'No equipment with open issues in this zone.'
                                     : 'No equipment matches this filter.',
-                                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                                style: TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.textSecondary),
                               ),
                             ),
                           ),
@@ -379,8 +745,9 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                               for (final dev in displayedDevices)
                                 ZoneDeviceCard(
                                   device: dev,
-                                  activeIssues:
-                                      issues.where((iss) => iss.deviceId == dev.id).toList(),
+                                  activeIssues: issues
+                                      .where((iss) => iss.deviceId == dev.id)
+                                      .toList(),
                                   onInspectIssue: (issue) =>
                                       IssueDetailSheet.show(context, issue),
                                   onInspectDevice: (device) =>
@@ -392,7 +759,8 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                                         context,
                                         devices: devices,
                                         initialDevice: device,
-                                        onIssueCreated: (_) => viewModel.refresh(),
+                                        onIssueCreated: (_) =>
+                                            viewModel.refresh(),
                                       );
                                     },
                                   ),
@@ -402,19 +770,22 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                                       context,
                                       issue: issue,
                                       initialTargetStatus: newStatus,
-                                      onStatusUpdated: (status, comment, photo, [latitude, longitude]) async {
+                                      onStatusUpdated: (status, comment, photo,
+                                          [latitude, longitude]) async {
                                         try {
                                           await actionNotifier.updateStatus(
                                             issueId: issueId,
                                             toStatus: status,
                                             notes: comment,
-                                            attachments: photo != null ? [photo] : null,
+                                            attachments:
+                                                photo != null ? [photo] : null,
                                             latitude: latitude,
                                             longitude: longitude,
                                           );
                                           viewModel.refresh();
                                         } catch (e) {
-                                          AppSnackbar.error('Failed to update status: $e');
+                                          AppSnackbar.error(
+                                              'Failed to update status: $e');
                                           rethrow;
                                         }
                                       },
@@ -426,8 +797,8 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                         ),
                     ],
 
-                    // 4. Area-Level Incidents (Only shown if defects exist that are NOT tied to any known device above)
-                    if (!isAtRoot && facilityIncidents.isNotEmpty) ...[
+                    // 4. Area-Level Incidents
+                    if (facilityIncidents.isNotEmpty) ...[
                       Padding(
                         padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                         child: Row(
@@ -442,7 +813,8 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              l10n.techFacilityIncidentsCount(facilityIncidents.length),
+                              l10n.techFacilityIncidentsCount(
+                                  facilityIncidents.length),
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
@@ -460,32 +832,37 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                             for (final issue in facilityIncidents)
                               TechnicianIssueCard(
                                 issue: issue,
-                                onTap: () => IssueDetailSheet.show(context, issue),
+                                onTap: () =>
+                                    IssueDetailSheet.show(context, issue),
                                 onUpdateStatus: (newStatus) {
                                   final issueId = issue.id;
                                   UpdateStatusSheet.show(
                                     context,
                                     issue: issue,
                                     initialTargetStatus: newStatus,
-                                    onStatusUpdated: (status, comment, photo, [latitude, longitude]) async {
+                                    onStatusUpdated: (status, comment, photo,
+                                        [latitude, longitude]) async {
                                       try {
                                         await actionNotifier.updateStatus(
                                           issueId: issueId,
                                           toStatus: status,
                                           notes: comment,
-                                          attachments: photo != null ? [photo] : null,
+                                          attachments:
+                                              photo != null ? [photo] : null,
                                           latitude: latitude,
                                           longitude: longitude,
                                         );
                                         viewModel.refresh();
                                       } catch (e) {
-                                        AppSnackbar.error('Failed to update status: $e');
+                                        AppSnackbar.error(
+                                            'Failed to update status: $e');
                                         rethrow;
                                       }
                                     },
                                   );
                                 },
-                                onOpenTimeline: () => IssueDetailSheet.show(context, issue),
+                                onOpenTimeline: () =>
+                                    IssueDetailSheet.show(context, issue),
                               ),
                           ],
                         ),
@@ -493,7 +870,9 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                     ],
 
                     // 5. Empty state if leaf zone with 0 subzones and 0 unresolved items
-                    if (!isAtRoot && displayedSubzones.isEmpty && displayedDevices.isEmpty && facilityIncidents.isEmpty) ...[
+                    if (displayedSubzones.isEmpty &&
+                        displayedDevices.isEmpty &&
+                        facilityIncidents.isEmpty) ...[
                       Padding(
                         padding: const EdgeInsets.only(top: 40),
                         child: EmptyStateView(
@@ -521,9 +900,7 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
   }
 }
 
-/// Two-column card grid whose rows size to their tallest card instead of a fixed
-/// aspect ratio. A fixed `childAspectRatio` GridView either overflowed the taller
-/// device cards or left dead space under the shorter zone cards.
+/// Two-column card grid whose rows size to their tallest card instead of a fixed aspect ratio.
 class _TwoColumnGrid extends StatelessWidget {
   final List<Widget> children;
   const _TwoColumnGrid({required this.children});

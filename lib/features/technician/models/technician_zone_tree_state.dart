@@ -1,6 +1,7 @@
 import '../../devices/models/device_model.dart';
 import '../../devices/models/technician_zone_node.dart';
 import '../../issues/models/issue_model.dart';
+import 'technician_zone_map_data.dart';
 
 /// Active viewing mode for the technician home interface.
 ///
@@ -16,6 +17,9 @@ enum TechnicianViewMode {
 class TechnicianZoneTreeState {
   /// Top-level zones assigned to this technician.
   final List<TechnicianZoneNode> rootZones;
+
+  /// Top-level zone Big Cards containing nested subzones and visual device blocks.
+  final List<TechnicianTopLevelZoneItem> zoneSections;
 
   /// Navigation path trail (breadcrumbs). Empty list means at root overview.
   final List<TechnicianZoneNode> currentPath;
@@ -41,6 +45,7 @@ class TechnicianZoneTreeState {
 
   const TechnicianZoneTreeState({
     this.rootZones = const [],
+    this.zoneSections = const [],
     this.currentPath = const [],
     this.currentSubzones = const [],
     this.currentDevices = const [],
@@ -62,6 +67,7 @@ class TechnicianZoneTreeState {
 
   TechnicianZoneTreeState copyWith({
     List<TechnicianZoneNode>? rootZones,
+    List<TechnicianTopLevelZoneItem>? zoneSections,
     List<TechnicianZoneNode>? currentPath,
     List<TechnicianZoneNode>? currentSubzones,
     List<DeviceModel>? currentDevices,
@@ -74,6 +80,7 @@ class TechnicianZoneTreeState {
   }) {
     return TechnicianZoneTreeState(
       rootZones: rootZones ?? this.rootZones,
+      zoneSections: zoneSections ?? this.zoneSections,
       currentPath: currentPath ?? this.currentPath,
       currentSubzones: currentSubzones ?? this.currentSubzones,
       currentDevices: currentDevices ?? this.currentDevices,

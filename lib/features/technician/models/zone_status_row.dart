@@ -1,3 +1,6 @@
+import '../../devices/models/device_model.dart';
+import 'technician_zone_map_data.dart';
+
 /// Visual health state for the overall zone status indicator pill.
 enum ZoneOverallStatus {
   online,
@@ -112,6 +115,40 @@ class ZoneStatusRow {
       offlineCount: faulty,
       maintenanceCount: maintenance,
       openIssuesCount: openIssuesCount,
+      dataLoadFailed: false,
+      isEnriching: false,
+    );
+  }
+
+  /// Creates a fully enriched row directly from a [TechnicianTopLevelZoneItem],
+  /// sharing the exact same in-memory data as the Zone Map view without extra network calls.
+  factory ZoneStatusRow.fromTopLevelZoneItem(TechnicianTopLevelZoneItem sec) {
+    final allDevices = [
+      ...sec.directDevices,
+      for (final sz in sec.subzones) ...sz.devices,
+    ];
+    final total = allDevices.length;
+    final maintenance = allDevices
+        .where((d) => d.status == DeviceStatus.underMaintenance)
+        .length;
+    final faulty = allDevices
+        .where((d) =>
+            d.status == DeviceStatus.faulty ||
+            (sec.isDeviceDefective(d) && d.status != DeviceStatus.underMaintenance))
+        .length;
+    final working = allDevices
+        .where((d) => !sec.isDeviceDefective(d) && d.status == DeviceStatus.active)
+        .length;
+
+    return ZoneStatusRow(
+      id: sec.zone.id,
+      name: sec.zone.name,
+      imageUrl: sec.zone.imageUrl,
+      hardwareCount: total,
+      onlineCount: working,
+      offlineCount: faulty,
+      maintenanceCount: maintenance,
+      openIssuesCount: sec.unresolvedIssuesCount,
       dataLoadFailed: false,
       isEnriching: false,
     );

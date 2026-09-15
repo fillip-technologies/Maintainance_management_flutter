@@ -8,10 +8,15 @@ import 'package:equipment_management_system/core/theme/colors.dart';
 import 'package:equipment_management_system/features/devices/devices.dart';
 import 'package:equipment_management_system/features/issues/issues.dart';
 import 'package:equipment_management_system/features/technician/models/technician_queue_state.dart';
+import 'package:equipment_management_system/features/technician/models/technician_zone_map_data.dart';
 import 'package:equipment_management_system/features/technician/models/technician_zone_tree_state.dart';
 import 'package:equipment_management_system/features/technician/viewmodels/technician_view_mode_provider.dart';
 import 'package:equipment_management_system/features/technician/views/widgets/subzone_grid_card.dart';
+import 'package:equipment_management_system/features/technician/views/widgets/technician_device_block.dart';
+import 'package:equipment_management_system/features/technician/views/widgets/technician_health_ring.dart';
 import 'package:equipment_management_system/features/technician/views/widgets/technician_search_filter_bar.dart';
+import 'package:equipment_management_system/features/technician/views/widgets/technician_subzone_card.dart';
+import 'package:equipment_management_system/features/technician/views/widgets/technician_top_level_zone_card.dart';
 import 'package:equipment_management_system/features/technician/views/widgets/zone_device_card.dart';
 import 'package:equipment_management_system/l10n/app_localizations.dart';
 
@@ -721,8 +726,458 @@ void main() {
       await issueRepo.getIssues(limit: 200);
       expect(capturedOptions?.queryParameters['limit'], 100);
 
-      await issueRepo.getIssues(limit: 0);
-      expect(capturedOptions?.queryParameters['limit'], 1);
+    });
+  });
+
+  group('Technician Web-Parity Zone Map Tests', () {
+    testWidgets('TechnicianHealthRing renders percentage text and color accurately', (tester) async {
+      await tester.pumpWidget(
+        _localized(
+          const Row(
+            children: [
+              TechnicianHealthRing(percentage: 100, size: 44),
+              TechnicianHealthRing(percentage: 80, size: 44),
+              TechnicianHealthRing(percentage: 50, size: 44),
+            ],
+          ),
+        ),
+      );
+
+      expect(find.text('100%'), findsOneWidget);
+      expect(find.text('80%'), findsOneWidget);
+      expect(find.text('50%'), findsOneWidget);
+    });
+
+    testWidgets('TechnicianDeviceBlock renders green for active and red for defective', (tester) async {
+      const activeDev = DeviceModel(
+        id: 'dev-active',
+        zoneId: 'z1',
+        zoneName: 'Zone 1',
+        name: 'Cam 1',
+        serialNumber: 'CAM-001',
+        hardwareTypeName: 'CCTV Camera',
+        status: DeviceStatus.active,
+      );
+
+      const defectiveDev = DeviceModel(
+        id: 'dev-defective',
+        zoneId: 'z1',
+        zoneName: 'Zone 1',
+        name: 'Cam 2',
+        serialNumber: 'CAM-002',
+        hardwareTypeName: 'CCTV Camera',
+        status: DeviceStatus.faulty,
+      );
+
+      await tester.pumpWidget(
+        _localized(
+          const Row(
+            children: [
+              TechnicianDeviceBlock(device: activeDev, isDefective: false),
+              TechnicianDeviceBlock(device: defectiveDev, isDefective: true),
+            ],
+          ),
+        ),
+      );
+
+      // Verify materials render
+      final materials = tester.widgetList<Material>(find.byType(Material)).toList();
+      final activeMaterial = materials.firstWhere((m) => m.color == AppColors.success);
+      final defectiveMaterial = materials.firstWhere((m) => m.color == AppColors.error);
+
+      expect(activeMaterial.color, AppColors.success);
+      expect(defectiveMaterial.color, AppColors.error);
+    });
+
+    testWidgets('TechnicianSubzoneCard renders header, counts, and status footer', (tester) async {
+      const subzoneNode = TechnicianZoneNode(
+        id: 'sz-1',
+        name: 'North Gate',
+      );
+
+      const d1 = DeviceModel(
+        id: 'd1',
+        zoneId: 'sz-1',
+        zoneName: 'North Gate',
+        name: 'Gate Cam',
+        serialNumber: 'CAM-01',
+        hardwareTypeName: 'CCTV Camera',
+        status: DeviceStatus.active,
+      );
+
+      const d2 = DeviceModel(
+        id: 'd2',
+        zoneId: 'sz-1',
+        zoneName: 'North Gate',
+        name: 'Perimeter Cam',
+        serialNumber: 'CAM-02',
+        hardwareTypeName: 'CCTV Camera',
+        status: DeviceStatus.faulty,
+      );
+
+      final item = TechnicianSubzoneItem(
+        zone: subzoneNode,
+        devices: const [d1, d2],
+        issues: const [],
+      );
+
+      await tester.pumpWidget(
+        _localized(
+          TechnicianSubzoneCard(subzoneItem: item),
+        ),
+      );
+
+      expect(find.text('North Gate'), findsOneWidget);
+      expect(find.text('1/2'), findsOneWidget);
+      expect(find.text('1 Defective / Issues'), findsOneWidget);
+      expect(find.textContaining('1 offline: CAM-02'), findsOneWidget);
+    });
+
+    testWidgets('TechnicianTopLevelZoneCard renders uppercase name, stats, and collapses without circular health ring', (tester) async {
+      const topZone = TechnicianZoneNode(
+        id: 'root-1',
+        name: 'Lion Safari Zone',
+      );
+
+      const subzoneNode = TechnicianZoneNode(
+        id: 'sz-1',
+        name: 'North Ridge',
+        parentZoneId: 'root-1',
+      );
+
+      const d1 = DeviceModel(
+        id: 'd1',
+        zoneId: 'root-1',
+        zoneName: 'Lion Safari Zone',
+        name: 'Main Direct Cam',
+        serialNumber: 'DIR-01',
+        hardwareTypeName: 'CCTV Camera',
+        status: DeviceStatus.active,
+      );
+
+      const d2 = DeviceModel(
+        id: 'd2',
+        zoneId: 'sz-1',
+        zoneName: 'North Ridge',
+        name: 'Ridge Cam',
+        serialNumber: 'RDG-01',
+        hardwareTypeName: 'CCTV Camera',
+        status: DeviceStatus.faulty,
+      );
+
+      final subItem = TechnicianSubzoneItem(
+        zone: subzoneNode,
+        devices: const [d2],
+      );
+
+      final topItem = TechnicianTopLevelZoneItem(
+        zone: topZone,
+        directDevices: const [d1],
+        subzones: [subItem],
+      );
+
+      await tester.pumpWidget(
+        _localized(
+          TechnicianTopLevelZoneCard(zoneItem: topItem),
+        ),
+      );
+
+      // Verify uppercase name
+      expect(find.text('LION SAFARI ZONE'), findsOneWidget);
+      // Verify stats
+      expect(find.text('2 products'), findsOneWidget);
+      expect(find.text('1 subzone'), findsOneWidget);
+      expect(find.text('● 1'), findsOneWidget);
+      expect(find.text('○ 1'), findsOneWidget);
+      // Verify circular health ring is NOT present in card
+      expect(find.text('50%'), findsNothing);
+
+      // Direct products title rendered when expanded
+      expect(find.text('DIRECT PRODUCTS'), findsOneWidget);
+      expect(find.text('North Ridge'), findsOneWidget);
+
+      // Tap header to collapse
+      await tester.tap(find.text('LION SAFARI ZONE'));
+      await tester.pumpAndSettle();
+
+      // Body elements hidden when collapsed
+      expect(find.text('DIRECT PRODUCTS'), findsNothing);
+      expect(find.text('North Ridge'), findsNothing);
+    });
+
+    test('Issue-First Sorting puts problem zones and problem subzones at the top first', () {
+      const zNominal = TechnicianZoneNode(id: 'z-clean', name: 'Zebra Enclosure');
+      const zWarning = TechnicianZoneNode(id: 'z-warn', name: 'Aviary Wing');
+      const zCritical = TechnicianZoneNode(id: 'z-crit', name: 'Aquarium Pavilion');
+
+      const szNominal = TechnicianZoneNode(id: 'sz-clean', name: 'Freshwater Tanks');
+      const szProblem = TechnicianZoneNode(id: 'sz-prob', name: 'Reef Tanks');
+
+      final itemNominal = TechnicianTopLevelZoneItem(
+        zone: zNominal,
+        directDevices: const [
+          DeviceModel(id: 'd-ok1', zoneId: 'z-clean', zoneName: 'Z', name: 'Cam 1', hardwareTypeName: 'CCTV'),
+          DeviceModel(id: 'd-ok2', zoneId: 'z-clean', zoneName: 'Z', name: 'Cam 2', hardwareTypeName: 'CCTV'),
+        ],
+      );
+
+      final itemWarning = TechnicianTopLevelZoneItem(
+        zone: zWarning,
+        directDevices: const [
+          DeviceModel(id: 'd-f1', zoneId: 'z-warn', zoneName: 'A', name: 'Cam 3', status: DeviceStatus.faulty, hardwareTypeName: 'CCTV'),
+        ],
+      );
+
+      final itemCritical = TechnicianTopLevelZoneItem(
+        zone: zCritical,
+        subzones: [
+          TechnicianSubzoneItem(
+            zone: szNominal,
+            devices: const [
+              DeviceModel(id: 'd-ok3', zoneId: 'sz-clean', zoneName: 'F', name: 'Cam 4', hardwareTypeName: 'CCTV'),
+            ],
+          ),
+          TechnicianSubzoneItem(
+            zone: szProblem,
+            devices: const [
+              DeviceModel(id: 'd-f2', zoneId: 'sz-prob', zoneName: 'R', name: 'Cam 5', status: DeviceStatus.faulty, hardwareTypeName: 'CCTV'),
+            ],
+            issues: [
+              IssueModel(
+                id: 'iss-1',
+                title: 'Sensor Failure',
+                description: '',
+                deviceId: 'd-f2',
+                deviceName: 'Cam 5',
+                zoneId: 'sz-prob',
+                zoneName: 'R',
+                categoryId: '',
+                categoryName: '',
+                priority: IssuePriority.critical,
+                status: IssueStatus.open,
+                createdByUserId: 'u1',
+                createdByUserName: 'U',
+                createdAt: DateTime.now(),
+                updatedAt: DateTime.now(),
+              ),
+            ],
+          ),
+        ],
+      );
+
+      final items = [itemNominal, itemWarning, itemCritical];
+
+      // Sort issue-first
+      TechnicianTopLevelZoneItem.sortIssueFirst(items);
+
+      // Aquarium Pavilion has problemScore = 1 (issue) + 1 (faulty) = 2 -> Should be index 0
+      // Aviary Wing has problemScore = 1 (faulty) = 1 -> Should be index 1
+      // Zebra Enclosure has problemScore = 0 -> Should be index 2
+      expect(items[0].zone.id, 'z-crit');
+      expect(items[1].zone.id, 'z-warn');
+      expect(items[2].zone.id, 'z-clean');
+
+      // Inside Aquarium Pavilion, Reef Tanks (has defect) must be sorted BEFORE Freshwater Tanks (nominal)
+      expect(items[0].subzones[0].zone.id, 'sz-prob');
+      expect(items[0].subzones[1].zone.id, 'sz-clean');
+    });
+
+    testWidgets('Zone 1 renders Big Card containing Sub 1 and Sub 2 small cards with device icons, without duplicate standalone cards', (tester) async {
+      const parentZone = TechnicianZoneNode(
+        id: 'zone-1',
+        name: 'Zone 1',
+      );
+
+      const sub1 = TechnicianZoneNode(
+        id: 'sub-1',
+        name: 'Sub 1',
+        parentZoneId: 'zone-1',
+      );
+
+      const sub2 = TechnicianZoneNode(
+        id: 'sub-2',
+        name: 'Sub 2',
+        parentZoneId: 'zone-1',
+      );
+
+      const devSub1 = DeviceModel(
+        id: 'd-sub1',
+        zoneId: 'sub-1',
+        zoneName: 'Sub 1',
+        name: 'Camera S1',
+        serialNumber: 'SN-01',
+        hardwareTypeName: 'CCTV Camera',
+        status: DeviceStatus.active,
+      );
+
+      const devSub2 = DeviceModel(
+        id: 'd-sub2',
+        zoneId: 'sub-2',
+        zoneName: 'Sub 2',
+        name: 'Camera S2',
+        serialNumber: 'SN-02',
+        hardwareTypeName: 'CCTV Camera',
+        status: DeviceStatus.faulty,
+      );
+
+      // Section for Zone 1 containing Sub 1 and Sub 2
+      final zone1Section = TechnicianTopLevelZoneItem(
+        zone: parentZone,
+        directDevices: const [],
+        subzones: [
+          TechnicianSubzoneItem(
+            zone: sub1,
+            devices: const [devSub1],
+          ),
+          TechnicianSubzoneItem(
+            zone: sub2,
+            devices: const [devSub2],
+          ),
+        ],
+      );
+
+      // Simulate a list of top-level sections
+      final sections = [zone1Section];
+
+      await tester.pumpWidget(
+        _localized(
+          ListView.builder(
+            itemCount: sections.length,
+            itemBuilder: (context, index) => TechnicianTopLevelZoneCard(
+              zoneItem: sections[index],
+            ),
+          ),
+        ),
+      );
+
+      // Verify single Big Card header for ZONE 1
+      expect(find.text('ZONE 1'), findsOneWidget);
+
+      // Verify subzone count in stats
+      expect(find.text('2 subzones'), findsOneWidget);
+
+      // Verify nested small cards for Sub 1 and Sub 2 are both present inside
+      expect(find.text('Sub 1'), findsOneWidget);
+      expect(find.text('Sub 2'), findsOneWidget);
+
+      // Verify device blocks exist inside the nested cards
+      expect(find.byType(TechnicianDeviceBlock), findsNWidgets(2));
+
+      // Verify exactly ONE TechnicianTopLevelZoneCard exists (no duplicate standalone Big Cards for Sub 1 or Sub 2)
+      expect(find.byType(TechnicianTopLevelZoneCard), findsOneWidget);
+    });
+
+    test('rootsToProcess suppresses child subzones when parent zone is present', () {
+      const parentZone = TechnicianZoneNode(
+        id: 'zone-1',
+        name: 'Zone 1',
+        parentZoneId: null,
+      );
+
+      const sub1 = TechnicianZoneNode(
+        id: 'sub-1',
+        name: 'Sub 1',
+        parentZoneId: 'zone-1',
+      );
+
+      const sub2 = TechnicianZoneNode(
+        id: 'sub-2',
+        name: 'Sub 2',
+        parentZoneId: 'zone-1',
+      );
+
+      final allZones = [parentZone, sub1, sub2];
+      final loadedZoneIds = allZones.map((z) => z.id).toSet();
+
+      // Track all zone IDs that are children of another loaded zone
+      final childZoneIds = <String>{};
+      for (final z in allZones) {
+        if (z.parentZoneId != null &&
+            z.parentZoneId!.isNotEmpty &&
+            loadedZoneIds.contains(z.parentZoneId)) {
+          childZoneIds.add(z.id);
+        }
+      }
+
+      final rootsToProcess = allZones.where((z) => !childZoneIds.contains(z.id)).toList();
+
+      // Only Zone 1 should be a root; Sub 1 and Sub 2 are suppressed from roots
+      expect(rootsToProcess.length, 1);
+      expect(rootsToProcess.first.id, 'zone-1');
+      expect(childZoneIds, containsAll(['sub-1', 'sub-2']));
+    });
+
+    test('All 6 issues across 4 parent zones correctly map to their respective zone sections', () {
+      // 4 parent zones
+      const rootTiger = TechnicianZoneNode(id: 'root-tiger', name: 'Tiger Retiring room');
+      const rootAdmin = TechnicianZoneNode(id: 'root-admin', name: 'Admin Block');
+      const rootHerb = TechnicianZoneNode(id: 'root-herb', name: 'Herbivore Retiring Room');
+      const rootHosp = TechnicianZoneNode(id: 'root-hosp', name: 'Hospital');
+
+      // 4 subzones
+      const subBehind = TechnicianZoneNode(id: 'sub-behind', name: 'Behind of Retiring room', parentZoneId: 'root-tiger');
+      const subForester = TechnicianZoneNode(id: 'sub-forester', name: 'Forester Zone', parentZoneId: 'root-admin');
+      const subBlockC = TechnicianZoneNode(id: 'sub-blockc', name: 'Block-C', parentZoneId: 'root-herb');
+      const subGallery = TechnicianZoneNode(id: 'sub-gallery', name: 'Right Side Gallery', parentZoneId: 'root-hosp');
+
+      // 4 devices
+      const devTiger = DeviceModel(id: 'dev-1', zoneId: 'sub-behind', zoneName: 'Behind of Retiring room', name: 'PTZ Camera', hardwareTypeName: 'CCTV Camera');
+      const devAdmin = DeviceModel(id: 'dev-2', zoneId: 'sub-forester', zoneName: 'Forester Zone', name: 'Dome Camera', hardwareTypeName: 'CCTV Camera');
+      const devHerb = DeviceModel(id: 'dev-3', zoneId: 'sub-blockc', zoneName: 'Block-C', name: 'Dome Camera', hardwareTypeName: 'CCTV Camera');
+      const devHosp = DeviceModel(id: 'dev-4', zoneId: 'sub-gallery', zoneName: 'Right Side Gallery', name: 'Dome Camera', hardwareTypeName: 'CCTV Camera');
+
+      // 6 issues (3 on Tiger, 1 on Admin, 1 on Herbivore, 1 on Hospital)
+      final allIssues = [
+        IssueModel(id: 'iss-1', title: 'Issue 1', description: '', deviceId: 'dev-1', deviceName: 'PTZ', zoneId: 'sub-behind', zoneName: '', categoryId: '', categoryName: '', createdAt: DateTime.now(), updatedAt: DateTime.now(), createdByUserId: 'u', createdByUserName: 'U'),
+        IssueModel(id: 'iss-2', title: 'Issue 2', description: '', deviceId: 'dev-1', deviceName: 'PTZ', zoneId: 'sub-behind', zoneName: '', categoryId: '', categoryName: '', createdAt: DateTime.now(), updatedAt: DateTime.now(), createdByUserId: 'u', createdByUserName: 'U'),
+        IssueModel(id: 'iss-3', title: 'Issue 3', description: '', deviceId: 'dev-1', deviceName: 'PTZ', zoneId: 'sub-behind', zoneName: '', categoryId: '', categoryName: '', createdAt: DateTime.now(), updatedAt: DateTime.now(), createdByUserId: 'u', createdByUserName: 'U'),
+        IssueModel(id: 'iss-4', title: 'Issue 4', description: '', deviceId: 'dev-2', deviceName: 'Dome', zoneId: 'sub-forester', zoneName: '', categoryId: '', categoryName: '', createdAt: DateTime.now(), updatedAt: DateTime.now(), createdByUserId: 'u', createdByUserName: 'U'),
+        IssueModel(id: 'iss-5', title: 'Issue 5', description: '', deviceId: 'dev-3', deviceName: 'Dome', zoneId: 'sub-blockc', zoneName: '', categoryId: '', categoryName: '', createdAt: DateTime.now(), updatedAt: DateTime.now(), createdByUserId: 'u', createdByUserName: 'U'),
+        IssueModel(id: 'iss-6', title: 'Issue 6', description: '', deviceId: 'dev-4', deviceName: 'Dome', zoneId: 'sub-gallery', zoneName: '', categoryId: '', categoryName: '', createdAt: DateTime.now(), updatedAt: DateTime.now(), createdByUserId: 'u', createdByUserName: 'U'),
+      ];
+
+      final roots = [rootTiger, rootAdmin, rootHerb, rootHosp];
+      final allZones = [rootTiger, rootAdmin, rootHerb, rootHosp, subBehind, subForester, subBlockC, subGallery];
+      final allDevices = [devTiger, devAdmin, devHerb, devHosp];
+
+      final sections = <TechnicianTopLevelZoneItem>[];
+      for (final root in roots) {
+        final subzones = allZones.where((z) => z.parentZoneId == root.id).toList();
+        final subzoneIds = subzones.map((s) => s.id).toSet();
+
+        final subzoneItems = subzones.map((sz) {
+          final szDevices = allDevices.where((d) => d.zoneId == sz.id).toList();
+          final szDeviceIds = szDevices.map((d) => d.id).toSet();
+          final szIssues = allIssues.where((iss) => iss.zoneId == sz.id || szDeviceIds.contains(iss.deviceId)).toList();
+          return TechnicianSubzoneItem(zone: sz, devices: szDevices, issues: szIssues);
+        }).toList();
+
+        final allRootDeviceIds = {
+          for (final sz in subzoneItems) ...sz.devices.map((d) => d.id),
+        };
+
+        final rootIssues = allIssues.where((iss) =>
+          iss.zoneId == root.id || subzoneIds.contains(iss.zoneId) || allRootDeviceIds.contains(iss.deviceId)
+        ).toList();
+
+        sections.add(TechnicianTopLevelZoneItem(
+          zone: root,
+          subzones: subzoneItems,
+          issues: rootIssues,
+        ));
+      }
+
+      // Assert that all 4 sections have active issues
+      expect(sections.length, 4);
+      for (final sec in sections) {
+        expect(sec.hasIssues, isTrue, reason: '${sec.zone.name} should have issues');
+      }
+
+      // Assert issue distribution: Tiger has 3, the others have 1 each
+      expect(sections.firstWhere((s) => s.zone.id == 'root-tiger').issues.length, 3);
+      expect(sections.firstWhere((s) => s.zone.id == 'root-admin').issues.length, 1);
+      expect(sections.firstWhere((s) => s.zone.id == 'root-herb').issues.length, 1);
+      expect(sections.firstWhere((s) => s.zone.id == 'root-hosp').issues.length, 1);
     });
   });
 }

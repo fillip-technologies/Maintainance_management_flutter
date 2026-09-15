@@ -38,6 +38,80 @@ class ZoneRepository {
     }
   }
 
+  /// Fetches all zones accessible to the caller across pagination pages (up to maxPages * 100 items),
+  /// matching the web frontend implementation in src/app/api/zonesApi.js.
+  /// Fetches page 1, then fetches remaining pages concurrently via Future.wait.
+  Future<List<TechnicianZoneNode>> getAllZones({
+    int maxPages = 10,
+    String? clientId,
+  }) async {
+    try {
+      final baseParams = <String, dynamic>{
+        'limit': 100,
+        if (clientId != null && clientId.isNotEmpty) 'clientId': clientId,
+      };
+
+      AppLogger.d('📡 [ZoneRepository] GET /zones?page=1&limit=100');
+      final firstResponse = await apiClient.dio.get(
+        '/zones',
+        queryParameters: {'page': 1, ...baseParams},
+      );
+
+      if ((firstResponse.statusCode != 200 && firstResponse.statusCode != 201) ||
+          firstResponse.data is! Map ||
+          firstResponse.data['success'] != true) {
+        return const [];
+      }
+
+      final data = firstResponse.data['data'] as Map<String, dynamic>;
+      final firstItems = (data['items'] as List<dynamic>?) ?? [];
+      final meta = data['meta'] as Map<String, dynamic>?;
+      final totalPages = (data['totalPages'] as num?)?.toInt() ??
+          (meta?['totalPages'] as num?)?.toInt() ??
+          ((data['totalItems'] as num?) != null ? ((data['totalItems'] as num) / 100).ceil() : 1);
+
+      final allItems = <TechnicianZoneNode>[
+        ...firstItems.map((e) => TechnicianZoneNode.fromJson(e as Map<String, dynamic>)),
+      ];
+
+      if (totalPages > 1) {
+        final lastPage = totalPages > maxPages ? maxPages : totalPages;
+        final remainingPages = [for (var p = 2; p <= lastPage; p++) p];
+
+        final pageFutures = remainingPages.map((p) async {
+          try {
+            AppLogger.d('📡 [ZoneRepository] GET /zones?page=$p&limit=100');
+            final res = await apiClient.dio.get(
+              '/zones',
+              queryParameters: {'page': p, ...baseParams},
+            );
+            if (res.data is Map && res.data['success'] == true) {
+              final pageData = res.data['data'] as Map<String, dynamic>;
+              final pageItems = (pageData['items'] as List<dynamic>?) ?? [];
+              return pageItems
+                  .map((e) => TechnicianZoneNode.fromJson(e as Map<String, dynamic>))
+                  .toList();
+            }
+          } catch (e) {
+            AppLogger.w('⚠️ [ZoneRepository] Error fetching page $p of zones: $e');
+          }
+          return <TechnicianZoneNode>[];
+        });
+
+        final pageResults = await Future.wait(pageFutures);
+        for (final list in pageResults) {
+          allItems.addAll(list);
+        }
+      }
+
+      AppLogger.i('📡 [ZoneRepository] Fetched ${allItems.length} total zones across pages');
+      return allItems;
+    } catch (e) {
+      AppLogger.w('⚠️ [ZoneRepository] Failed to load all zones: $e');
+      return const [];
+    }
+  }
+
   /// Fetches zone detail with devices and open issues for a specific zone.
   Future<TechnicianZoneNode> getZoneDetail(String zoneId) async {
     try {

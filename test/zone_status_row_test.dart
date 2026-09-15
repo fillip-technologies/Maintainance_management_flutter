@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:equipment_management_system/core/theme/colors.dart';
+import 'package:equipment_management_system/features/devices/models/device_model.dart';
 import 'package:equipment_management_system/features/devices/models/technician_zone_node.dart';
+import 'package:equipment_management_system/features/issues/models/issue_model.dart';
+import 'package:equipment_management_system/features/technician/models/technician_zone_map_data.dart';
 import 'package:equipment_management_system/features/technician/technician.dart';
 import 'package:equipment_management_system/l10n/app_localizations.dart';
 
@@ -495,6 +498,141 @@ void main() {
       await tester.tap(find.text('Zone A'));
       expect(tapped, isTrue);
     });
+
+    test('11. ZoneStatusRow.fromTopLevelZoneItem accurately aggregates metrics across direct devices and subzones', () {
+      final item = TechnicianTopLevelZoneItem(
+        zone: TechnicianZoneNode(id: 'z-top', name: 'Tiger Enclosure'),
+        directDevices: [
+          DeviceModel(
+            id: 'd-1',
+            serialNumber: 'CAM-01',
+            name: 'Direct Cam 1',
+            hardwareTypeName: 'CCTV',
+            zoneName: 'Tiger Enclosure',
+            status: DeviceStatus.active,
+            zoneId: 'z-top',
+          ),
+          DeviceModel(
+            id: 'd-2',
+            serialNumber: 'CAM-02',
+            name: 'Direct Cam 2',
+            hardwareTypeName: 'CCTV',
+            zoneName: 'Tiger Enclosure',
+            status: DeviceStatus.underMaintenance,
+            zoneId: 'z-top',
+          ),
+        ],
+        subzones: [
+          TechnicianSubzoneItem(
+            zone: TechnicianZoneNode(id: 'z-sub-1', name: 'Sub 1', parentZoneId: 'z-top'),
+            devices: [
+              DeviceModel(
+                id: 'd-3',
+                serialNumber: 'CAM-03',
+                name: 'Sub Cam 1',
+                hardwareTypeName: 'CCTV',
+                zoneName: 'Sub 1',
+                status: DeviceStatus.active,
+                zoneId: 'z-sub-1',
+              ),
+              DeviceModel(
+                id: 'd-4',
+                serialNumber: 'CAM-04',
+                name: 'Sub Cam 2',
+                hardwareTypeName: 'CCTV',
+                zoneName: 'Sub 1',
+                status: DeviceStatus.faulty,
+                zoneId: 'z-sub-1',
+              ),
+            ],
+            issues: [
+              IssueModel(
+                id: 'iss-1',
+                title: 'Lens broken',
+                description: 'Camera lens shattered',
+                deviceName: 'Sub Cam 2',
+                zoneName: 'Sub 1',
+                categoryId: 'cat-1',
+                categoryName: 'CCTV',
+                createdByUserId: 'u-1',
+                createdByUserName: 'User',
+                status: IssueStatus.open,
+                priority: IssuePriority.high,
+                zoneId: 'z-sub-1',
+                deviceId: 'd-4',
+                createdAt: DateTime.now(),
+                updatedAt: DateTime.now(),
+              ),
+            ],
+          ),
+        ],
+        issues: [
+          IssueModel(
+            id: 'iss-1',
+            title: 'Lens broken',
+            description: 'Camera lens shattered',
+            deviceName: 'Sub Cam 2',
+            zoneName: 'Sub 1',
+            categoryId: 'cat-1',
+            categoryName: 'CCTV',
+            createdByUserId: 'u-1',
+            createdByUserName: 'User',
+            status: IssueStatus.open,
+            priority: IssuePriority.high,
+            zoneId: 'z-sub-1',
+            deviceId: 'd-4',
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
+        ],
+      );
+
+      final row = ZoneStatusRow.fromTopLevelZoneItem(item);
+      expect(row.id, 'z-top');
+      expect(row.name, 'Tiger Enclosure');
+      expect(row.hardwareCount, 4); // 2 direct + 2 subzone
+      expect(row.onlineCount, 2); // d-1, d-3
+      expect(row.offlineCount, 1); // d-4 (faulty + issue)
+      expect(row.maintenanceCount, 1); // d-2 (underMaintenance)
+      expect(row.openIssuesCount, 1);
+      expect(row.isAlerted, isTrue);
+      expect(row.isEnriching, isFalse);
+      expect(row.dataLoadFailed, isFalse);
+    });
+
+    test('12. TechnicianZoneStatusViewModel derives rows directly from technicianZoneTreeViewModelProvider without separate API calls', () async {
+      final container = ProviderContainer(
+        overrides: [
+          technicianZoneTreeViewModelProvider.overrideWith(
+            () => _FakeZoneTreeWithSectionsViewModel([
+              TechnicianTopLevelZoneItem(
+                zone: TechnicianZoneNode(id: 'z-shared', name: 'Lion Safari'),
+                directDevices: [
+                  DeviceModel(
+                    id: 'd-10',
+                    serialNumber: 'CAM-10',
+                    name: 'Shared Cam',
+                    hardwareTypeName: 'CCTV',
+                    zoneName: 'Lion Safari',
+                    status: DeviceStatus.active,
+                    zoneId: 'z-shared',
+                  ),
+                ],
+              ),
+            ]),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final statusRows = await container.read(technicianZoneStatusViewModelProvider.future);
+      expect(statusRows.length, 1);
+      expect(statusRows.first.id, 'z-shared');
+      expect(statusRows.first.name, 'Lion Safari');
+      expect(statusRows.first.hardwareCount, 1);
+      expect(statusRows.first.onlineCount, 1);
+      expect(statusRows.first.offlineCount, 0);
+    });
   });
 }
 
@@ -523,5 +661,20 @@ class _FakeZoneTreeViewModel extends TechnicianZoneTreeViewModel {
   }) async {
     navigatedZoneId = zoneId;
     this.fromZoneStatus = fromZoneStatus;
+  }
+}
+
+class _FakeZoneTreeWithSectionsViewModel extends TechnicianZoneTreeViewModel {
+  final List<TechnicianTopLevelZoneItem> sections;
+
+  _FakeZoneTreeWithSectionsViewModel(this.sections);
+
+  @override
+  Future<TechnicianZoneTreeState> build() async {
+    return TechnicianZoneTreeState(
+      zoneSections: sections,
+      rootZones: sections.map((s) => s.zone).toList(),
+      isLoading: false,
+    );
   }
 }

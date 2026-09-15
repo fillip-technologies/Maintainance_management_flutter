@@ -131,15 +131,20 @@ class TechnicianTopLevelZoneItem {
       return a.zone.name.toLowerCase().compareTo(b.zone.name.toLowerCase());
     });
 
-    for (final item in items) {
-      item.subzones.sort((a, b) {
-        final aProb = a.problemScore;
-        final bProb = b.problemScore;
-        if (aProb > 0 && bProb == 0) return -1;
-        if (aProb == 0 && bProb > 0) return 1;
-        if (aProb != bProb) return bProb.compareTo(aProb);
-        return a.zone.name.toLowerCase().compareTo(b.zone.name.toLowerCase());
-      });
+    for (var i = 0; i < items.length; i++) {
+      final item = items[i];
+      if (item.subzones.length > 1) {
+        final sortedSubzones = List<TechnicianSubzoneItem>.from(item.subzones);
+        sortedSubzones.sort((a, b) {
+          final aProb = a.problemScore;
+          final bProb = b.problemScore;
+          if (aProb > 0 && bProb == 0) return -1;
+          if (aProb == 0 && bProb > 0) return 1;
+          if (aProb != bProb) return bProb.compareTo(aProb);
+          return a.zone.name.toLowerCase().compareTo(b.zone.name.toLowerCase());
+        });
+        items[i] = item.copyWith(subzones: sortedSubzones);
+      }
     }
   }
 }

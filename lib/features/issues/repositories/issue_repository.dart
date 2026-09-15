@@ -21,6 +21,8 @@ class IssueRepository {
     String? assignedTechnicianId,
     int page = 1,
     int limit = 50,
+    bool allPages = false,
+    int maxPages = 10,
   }) async {
     try {
       final safeLimit = limit.clamp(1, 100);
@@ -51,6 +53,43 @@ class IssueRepository {
         final issues = items
             .map((e) => IssueModel.fromJson(e as Map<String, dynamic>))
             .toList();
+
+        if (allPages) {
+          final totalPages = (data['totalPages'] as num?)?.toInt() ??
+              (data['meta']?['totalPages'] as num?)?.toInt() ??
+              ((data['totalItems'] as num?) != null
+                  ? ((data['totalItems'] as num) / safeLimit).ceil()
+                  : 1);
+
+          if (totalPages > 1) {
+            final lastPage = totalPages > maxPages ? maxPages : totalPages;
+            final remainingPages = [for (var p = 2; p <= lastPage; p++) p];
+
+            final pageFutures = remainingPages.map((p) async {
+              try {
+                final pageRes = await apiClient.dio.get(
+                  '/issues',
+                  queryParameters: {...queryParams, 'page': p},
+                );
+                if (pageRes.statusCode == 200 && pageRes.data['success'] == true) {
+                  final pageData = pageRes.data['data'] as Map<String, dynamic>;
+                  final pageItems = (pageData['items'] as List<dynamic>?) ?? [];
+                  return pageItems
+                      .map((e) => IssueModel.fromJson(e as Map<String, dynamic>))
+                      .toList();
+                }
+              } catch (e) {
+                AppLogger.w('⚠️ [IssueRepository] Error fetching page $p of issues: $e');
+              }
+              return <IssueModel>[];
+            });
+
+            final pageResults = await Future.wait(pageFutures);
+            for (final list in pageResults) {
+              issues.addAll(list);
+            }
+          }
+        }
 
         AppLogger.i('🎫 [IssueRepository] Fetched ${issues.length} issues successfully');
         return issues;
