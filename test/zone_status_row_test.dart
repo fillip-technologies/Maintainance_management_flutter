@@ -361,7 +361,7 @@ void main() {
       expect(hasAlertBg, isTrue);
     });
 
-    testWidgets('7. Tapping a zone row switches view mode to spatialExplorer and calls navigateToZone', (tester) async {
+    testWidgets('7. Tapping a zone row opens TechnicianZoneStatusSheet and navigating from it switches to spatialExplorer', (tester) async {
       final testRows = [
         const ZoneStatusRow(
           id: 'z-lion',
@@ -405,7 +405,17 @@ void main() {
 
       // Tap on the row with 'Lion Safari'
       await tester.tap(find.text('Lion Safari'));
-      await tester.pump();
+      await tester.pumpAndSettle();
+
+      // Verify that the TechnicianZoneStatusSheet is opened
+      expect(find.byType(TechnicianZoneStatusSheet), findsOneWidget);
+      expect(find.text('LION SAFARI'), findsOneWidget);
+
+      // Tap on the 'View in Zone Map' action button in the sheet
+      final mapButton = find.byTooltip('View in Zone Map');
+      expect(mapButton, findsOneWidget);
+      await tester.tap(mapButton);
+      await tester.pumpAndSettle();
 
       // Verify that view mode switched to spatialExplorer (Zone Map) and navigateToZone was invoked with the row id
       expect(container.read(technicianViewModeProvider), TechnicianViewMode.spatialExplorer);
@@ -632,6 +642,112 @@ void main() {
       expect(statusRows.first.hardwareCount, 1);
       expect(statusRows.first.onlineCount, 1);
       expect(statusRows.first.offlineCount, 0);
+    });
+
+    testWidgets('13. TechnicianZoneStatusSheet shows only devices directly when no subzones exist', (tester) async {
+      final item = TechnicianTopLevelZoneItem(
+        zone: TechnicianZoneNode(id: 'z-devices-only', name: 'Server Room'),
+        directDevices: [
+          DeviceModel(
+            id: 'd-1',
+            serialNumber: 'SRV-01',
+            name: 'Primary Switch',
+            hardwareTypeName: 'Switch',
+            zoneName: 'Server Room',
+            status: DeviceStatus.active,
+            zoneId: 'z-devices-only',
+          ),
+          DeviceModel(
+            id: 'd-2',
+            serialNumber: 'SRV-02',
+            name: 'Backup Server',
+            hardwareTypeName: 'Server',
+            zoneName: 'Server Room',
+            status: DeviceStatus.faulty,
+            zoneId: 'z-devices-only',
+          ),
+        ],
+        subzones: const [],
+      );
+
+      final row = ZoneStatusRow.fromTopLevelZoneItem(item);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            technicianZoneTreeViewModelProvider.overrideWith(
+              () => _FakeZoneTreeWithSectionsViewModel([item]),
+            ),
+          ],
+          child: MaterialApp(
+            home: Scaffold(
+              body: TechnicianZoneStatusSheet(row: row, zoneSection: item),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Heading for top zone
+      expect(find.text('SERVER ROOM'), findsOneWidget);
+      // Direct devices rendered
+      expect(find.text('Primary Switch'), findsOneWidget);
+      expect(find.text('Backup Server'), findsOneWidget);
+      expect(find.textContaining('SRV-01'), findsOneWidget);
+      expect(find.textContaining('SRV-02'), findsOneWidget);
+      // No subzone headings or subzone cards rendered
+      expect(find.byType(TechnicianSubzoneCard), findsNothing);
+    });
+
+    testWidgets('14. TechnicianZoneStatusSheet shows subzones with subzone name heading and subzone cards when subzones exist', (tester) async {
+      final subzone = TechnicianSubzoneItem(
+        zone: TechnicianZoneNode(id: 'sub-1', name: 'Subzone Alpha', parentZoneId: 'z-parent'),
+        devices: [
+          DeviceModel(
+            id: 'd-sub',
+            serialNumber: 'CAM-SUB-1',
+            name: 'Alpha Camera',
+            hardwareTypeName: 'CCTV',
+            zoneName: 'Subzone Alpha',
+            status: DeviceStatus.active,
+            zoneId: 'sub-1',
+          ),
+        ],
+      );
+
+      final item = TechnicianTopLevelZoneItem(
+        zone: TechnicianZoneNode(id: 'z-parent', name: 'Main Campus'),
+        directDevices: const [],
+        subzones: [subzone],
+      );
+
+      final row = ZoneStatusRow.fromTopLevelZoneItem(item);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            technicianZoneTreeViewModelProvider.overrideWith(
+              () => _FakeZoneTreeWithSectionsViewModel([item]),
+            ),
+          ],
+          child: MaterialApp(
+            home: Scaffold(
+              body: TechnicianZoneStatusSheet(row: row, zoneSection: item),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Heading for top zone
+      expect(find.text('MAIN CAMPUS'), findsOneWidget);
+      // Subzone heading and card rendered
+      expect(find.byType(TechnicianSubzoneCard), findsOneWidget);
+      expect(find.text('Subzone Alpha'), findsOneWidget);
+      // Device inside subzone rendered as block
+      expect(find.byType(TechnicianDeviceBlock), findsOneWidget);
     });
   });
 }

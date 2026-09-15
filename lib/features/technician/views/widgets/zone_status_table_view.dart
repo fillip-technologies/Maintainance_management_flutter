@@ -4,11 +4,9 @@ import '../../../../core/theme/colors.dart';
 import '../../../../core/widgets/empty_state_view.dart';
 import '../../../../core/widgets/app_shimmer.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../models/technician_zone_tree_state.dart';
 import '../../models/zone_status_row.dart';
-import '../../viewmodels/technician_view_mode_provider.dart';
 import '../../viewmodels/technician_zone_status_viewmodel.dart';
-import '../../viewmodels/technician_zone_tree_viewmodel.dart';
+import 'technician_zone_status_sheet.dart';
 
 const double _indexColWidth = 22.0;
 const double _totalColWidth = 44.0;
@@ -217,17 +215,10 @@ class TechnicianZoneStatusView extends ConsumerWidget {
                                         zoneColWidth: zoneColWidth,
                                         l10n: l10n,
                                         onTap: () {
-                                          ref
-                                              .read(technicianViewModeProvider.notifier)
-                                              .setMode(TechnicianViewMode.spatialExplorer);
-                                          ref
-                                              .read(technicianZoneTreeViewModelProvider.notifier)
-                                              .navigateToZone(
-                                                row.id,
-                                                zoneName: row.name,
-                                                imageUrl: row.imageUrl,
-                                                fromZoneStatus: true,
-                                              );
+                                          TechnicianZoneStatusSheet.show(
+                                            context,
+                                            row: row,
+                                          );
                                         },
                                       );
                                     },
