@@ -12,7 +12,6 @@ import '../../viewmodels/technician_view_mode_provider.dart';
 import '../../viewmodels/technician_zone_tree_viewmodel.dart';
 import 'technician_device_block.dart';
 import 'technician_device_detail_sheet.dart';
-import 'technician_subzone_card.dart';
 
 /// Bottom sheet opened when tapping a zone row in the Zone Status table.
 ///
@@ -56,10 +55,7 @@ class TechnicianZoneStatusSheet extends ConsumerWidget {
             .where((s) => s.zone.id == row.id)
             .firstOrNull;
 
-    final directDevices = sec?.directDevices ?? const <DeviceModel>[];
-    final subzones = sec?.subzones ?? const <TechnicianSubzoneItem>[];
-    final hasSubzones = subzones.isNotEmpty;
-    final hasDirect = directDevices.isNotEmpty;
+    final devices = sec?.devices ?? const <DeviceModel>[];
     final hasIssues = row.isAlerted || (sec?.hasIssues ?? false);
 
     final totalHardware = sec?.totalDevices ?? row.hardwareCount;
@@ -151,15 +147,6 @@ class TechnicianZoneStatusSheet extends ConsumerWidget {
                               color: AppColors.textSecondary,
                             ),
                           ),
-                          if (hasSubzones)
-                            Text(
-                              '${subzones.length} subzone${subzones.length != 1 ? 's' : ''}',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontFamily: 'monospace',
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
                           Text(
                             '● $totalOnline',
                             style: TextStyle(
@@ -222,7 +209,7 @@ class TechnicianZoneStatusSheet extends ConsumerWidget {
           Flexible(
             child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-              child: _buildBody(context, sec, directDevices, subzones, hasSubzones, hasDirect),
+              child: _buildBody(context, sec, devices),
             ),
           ),
         ],
@@ -233,103 +220,13 @@ class TechnicianZoneStatusSheet extends ConsumerWidget {
   Widget _buildBody(
     BuildContext context,
     TechnicianTopLevelZoneItem? sec,
-    List<DeviceModel> directDevices,
-    List<TechnicianSubzoneItem> subzones,
-    bool hasSubzones,
-    bool hasDirect,
+    List<DeviceModel> devices,
   ) {
-    // Case 1: ONLY devices are present (no subzones)
-    if (!hasSubzones && hasDirect) {
-      return _buildDevicesOnlyView(context, sec, directDevices);
+    if (devices.isNotEmpty) {
+      return _buildDevicesOnlyView(context, sec, devices);
     }
 
-    // Case 2: Subzones are present (with zone name headings just like in Zone Map)
-    if (hasSubzones) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // If direct devices exist in the parent zone
-          if (hasDirect) ...[
-            Text(
-              'DIRECT PRODUCTS (${directDevices.length})',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.8,
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 6,
-              runSpacing: 6,
-              children: directDevices.map((d) {
-                final isDefective = sec?.isDeviceDefective(d) ?? false;
-                final activeIssue = sec?.issues
-                    .cast<IssueModel?>()
-                    .firstWhere(
-                      (i) =>
-                          i?.deviceId == d.id &&
-                          i?.status != IssueStatus.resolved &&
-                          i?.status != IssueStatus.closed,
-                      orElse: () => null,
-                    );
-                return TechnicianDeviceBlock(
-                  device: d,
-                  isDefective: isDefective,
-                  activeIssue: activeIssue,
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 16),
-            Divider(height: 1, color: AppColors.border),
-            const SizedBox(height: 16),
-          ],
-
-          // Subzones heading
-          Text(
-            'SUBZONES (${subzones.length})',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 0.8,
-              color: AppColors.textSecondary,
-            ),
-          ),
-          const SizedBox(height: 10),
-
-          // 2-column grid of subzone cards matching Zone Map exactly
-          Column(
-            children: [
-              for (var i = 0; i < subzones.length; i += 2) ...[
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: TechnicianSubzoneCard(
-                        subzoneItem: subzones[i],
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    if (i + 1 < subzones.length)
-                      Expanded(
-                        child: TechnicianSubzoneCard(
-                          subzoneItem: subzones[i + 1],
-                        ),
-                      )
-                    else
-                      const Expanded(child: SizedBox.shrink()),
-                  ],
-                ),
-                if (i + 2 < subzones.length) const SizedBox(height: 8),
-              ],
-            ],
-          ),
-        ],
-      );
-    }
-
-    // Case 3: Empty zone (no devices, no subzones)
+    // Empty zone (no devices)
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 36),
       child: Center(
@@ -342,7 +239,7 @@ class TechnicianZoneStatusSheet extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'No products or subzones deployed',
+              'No products deployed in this zone',
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,

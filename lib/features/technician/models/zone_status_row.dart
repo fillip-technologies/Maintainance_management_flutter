@@ -123,10 +123,7 @@ class ZoneStatusRow {
   /// Creates a fully enriched row directly from a [TechnicianTopLevelZoneItem],
   /// sharing the exact same in-memory data as the Zone Map view without extra network calls.
   factory ZoneStatusRow.fromTopLevelZoneItem(TechnicianTopLevelZoneItem sec) {
-    final allDevices = [
-      ...sec.directDevices,
-      for (final sz in sec.subzones) ...sz.devices,
-    ];
+    final allDevices = sec.devices;
     final total = allDevices.length;
     final maintenance = allDevices
         .where((d) => d.status == DeviceStatus.underMaintenance)

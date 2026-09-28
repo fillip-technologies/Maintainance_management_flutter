@@ -476,44 +476,11 @@ void main() {
       expect(find.text('···'), findsOneWidget);
     });
 
-    testWidgets('10. SubzoneGridCard in enriching state renders subtle badge, dashes, and responds to tap', (tester) async {
-      var tapped = false;
-      final enrichingNode = TechnicianZoneNode(
-        id: 'z-sub-loading',
-        name: 'Zone A',
-        isEnriching: true,
-      );
-
-      await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: Scaffold(
-            body: SubzoneGridCard(
-              zone: enrichingNode,
-              index: 0,
-              onTap: () => tapped = true,
-            ),
-          ),
-        ),
-      );
-
-      await tester.pump();
-
-      expect(find.text('Zone A'), findsOneWidget);
-      expect(find.text('···'), findsOneWidget);
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
-      expect(find.text('—'), findsOneWidget);
-
-      await tester.tap(find.text('Zone A'));
-      expect(tapped, isTrue);
-    });
-
-    test('11. ZoneStatusRow.fromTopLevelZoneItem accurately aggregates metrics across direct devices and subzones', () {
+    test('10. ZoneStatusRow.fromTopLevelZoneItem accurately aggregates metrics across devices', () {
       final item = TechnicianTopLevelZoneItem(
-        zone: TechnicianZoneNode(id: 'z-top', name: 'Tiger Enclosure'),
-        directDevices: [
-          DeviceModel(
+        zone: const TechnicianZoneNode(id: 'z-top', name: 'Tiger Enclosure'),
+        devices: [
+          const DeviceModel(
             id: 'd-1',
             serialNumber: 'CAM-01',
             name: 'Direct Cam 1',
@@ -522,7 +489,7 @@ void main() {
             status: DeviceStatus.active,
             zoneId: 'z-top',
           ),
-          DeviceModel(
+          const DeviceModel(
             id: 'd-2',
             serialNumber: 'CAM-02',
             name: 'Direct Cam 2',
@@ -531,49 +498,23 @@ void main() {
             status: DeviceStatus.underMaintenance,
             zoneId: 'z-top',
           ),
-        ],
-        subzones: [
-          TechnicianSubzoneItem(
-            zone: TechnicianZoneNode(id: 'z-sub-1', name: 'Sub 1', parentZoneId: 'z-top'),
-            devices: [
-              DeviceModel(
-                id: 'd-3',
-                serialNumber: 'CAM-03',
-                name: 'Sub Cam 1',
-                hardwareTypeName: 'CCTV',
-                zoneName: 'Sub 1',
-                status: DeviceStatus.active,
-                zoneId: 'z-sub-1',
-              ),
-              DeviceModel(
-                id: 'd-4',
-                serialNumber: 'CAM-04',
-                name: 'Sub Cam 2',
-                hardwareTypeName: 'CCTV',
-                zoneName: 'Sub 1',
-                status: DeviceStatus.faulty,
-                zoneId: 'z-sub-1',
-              ),
-            ],
-            issues: [
-              IssueModel(
-                id: 'iss-1',
-                title: 'Lens broken',
-                description: 'Camera lens shattered',
-                deviceName: 'Sub Cam 2',
-                zoneName: 'Sub 1',
-                categoryId: 'cat-1',
-                categoryName: 'CCTV',
-                createdByUserId: 'u-1',
-                createdByUserName: 'User',
-                status: IssueStatus.open,
-                priority: IssuePriority.high,
-                zoneId: 'z-sub-1',
-                deviceId: 'd-4',
-                createdAt: DateTime.now(),
-                updatedAt: DateTime.now(),
-              ),
-            ],
+          const DeviceModel(
+            id: 'd-3',
+            serialNumber: 'CAM-03',
+            name: 'Sub Cam 1',
+            hardwareTypeName: 'CCTV',
+            zoneName: 'Sub 1',
+            status: DeviceStatus.active,
+            zoneId: 'z-sub-1',
+          ),
+          const DeviceModel(
+            id: 'd-4',
+            serialNumber: 'CAM-04',
+            name: 'Sub Cam 2',
+            hardwareTypeName: 'CCTV',
+            zoneName: 'Sub 1',
+            status: DeviceStatus.faulty,
+            zoneId: 'z-sub-1',
           ),
         ],
         issues: [
@@ -600,10 +541,10 @@ void main() {
       final row = ZoneStatusRow.fromTopLevelZoneItem(item);
       expect(row.id, 'z-top');
       expect(row.name, 'Tiger Enclosure');
-      expect(row.hardwareCount, 4); // 2 direct + 2 subzone
-      expect(row.onlineCount, 2); // d-1, d-3
-      expect(row.offlineCount, 1); // d-4 (faulty + issue)
-      expect(row.maintenanceCount, 1); // d-2 (underMaintenance)
+      expect(row.hardwareCount, 4);
+      expect(row.onlineCount, 2);
+      expect(row.offlineCount, 1);
+      expect(row.maintenanceCount, 1);
       expect(row.openIssuesCount, 1);
       expect(row.isAlerted, isTrue);
       expect(row.isEnriching, isFalse);
@@ -667,7 +608,6 @@ void main() {
             zoneId: 'z-devices-only',
           ),
         ],
-        subzones: const [],
       );
 
       final row = ZoneStatusRow.fromTopLevelZoneItem(item);
@@ -696,30 +636,22 @@ void main() {
       expect(find.text('Backup Server'), findsOneWidget);
       expect(find.textContaining('SRV-01'), findsOneWidget);
       expect(find.textContaining('SRV-02'), findsOneWidget);
-      // No subzone headings or subzone cards rendered
-      expect(find.byType(TechnicianSubzoneCard), findsNothing);
     });
 
-    testWidgets('14. TechnicianZoneStatusSheet shows subzones with subzone name heading and subzone cards when subzones exist', (tester) async {
-      final subzone = TechnicianSubzoneItem(
-        zone: TechnicianZoneNode(id: 'sub-1', name: 'Subzone Alpha', parentZoneId: 'z-parent'),
-        devices: [
-          DeviceModel(
-            id: 'd-sub',
-            serialNumber: 'CAM-SUB-1',
-            name: 'Alpha Camera',
-            hardwareTypeName: 'CCTV',
-            zoneName: 'Subzone Alpha',
-            status: DeviceStatus.active,
-            zoneId: 'sub-1',
-          ),
-        ],
+    testWidgets('14. TechnicianZoneStatusSheet shows devices directly with blocks and cards', (tester) async {
+      final cam = DeviceModel(
+        id: 'd-sub',
+        serialNumber: 'CAM-SUB-1',
+        name: 'Alpha Camera',
+        hardwareTypeName: 'CCTV',
+        zoneName: 'Main Campus',
+        status: DeviceStatus.active,
+        zoneId: 'z-parent',
       );
 
       final item = TechnicianTopLevelZoneItem(
-        zone: TechnicianZoneNode(id: 'z-parent', name: 'Main Campus'),
-        directDevices: const [],
-        subzones: [subzone],
+        zone: const TechnicianZoneNode(id: 'z-parent', name: 'Main Campus'),
+        devices: [cam],
       );
 
       final row = ZoneStatusRow.fromTopLevelZoneItem(item);
@@ -743,11 +675,9 @@ void main() {
 
       // Heading for top zone
       expect(find.text('MAIN CAMPUS'), findsOneWidget);
-      // Subzone heading and card rendered
-      expect(find.byType(TechnicianSubzoneCard), findsOneWidget);
-      expect(find.text('Subzone Alpha'), findsOneWidget);
-      // Device inside subzone rendered as block
+      // Device rendered as block and name
       expect(find.byType(TechnicianDeviceBlock), findsOneWidget);
+      expect(find.text('Alpha Camera'), findsOneWidget);
     });
   });
 }

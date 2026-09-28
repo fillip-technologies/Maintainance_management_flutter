@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../issues/models/issue_model.dart';
+import '../../../issues/views/issue_detail_sheet.dart';
 import '../../models/technician_zone_map_data.dart';
 import 'technician_device_block.dart';
-import 'technician_subzone_card.dart';
+import 'technician_health_ring.dart';
 
-/// Replicates TopLevelZoneCard from the web UI (http://localhost:5173/clientadmin/products).
-/// Big Card for top-level facility zone with:
-/// - Colored left vertical accent bar (Red if issues exist, Blue/Green if nominal).
-/// - Bold uppercase zone name and summary stats.
-/// - Expand/collapse toggle.
-/// - Direct device blocks + 2-column grid of TechnicianSubzoneCards.
+/// Replicates TopLevelZoneCard from the web UI (http://localhost:5173/clientadmin/cameras).
+/// Big Card for top-level facility zone showcasing:
+/// - Colored left vertical accent bar (Red if issues exist, Blue/Emerald if nominal).
+/// - Uppercase bold zone name and hardware telemetry stats.
+/// - Circular health ring.
+/// - Collapsible camera grid containing all descendant cameras.
+/// - Status footer (Faulty callout + Alerts button or All Cameras Working banner).
 class TechnicianTopLevelZoneCard extends StatefulWidget {
   final TechnicianTopLevelZoneItem zoneItem;
   final VoidCallback? onAlertTap;
@@ -51,10 +53,9 @@ class _TechnicianTopLevelZoneCardState
     final total = item.totalDevices;
     final online = item.onlineDevices;
     final offline = item.offlineDevices;
-    final subzones = item.subzones;
-    final directDevices = item.directDevices;
-    final hasDirect = directDevices.isNotEmpty;
-    final hasSubzones = subzones.isNotEmpty;
+    final cameras = item.devices;
+    final hasCameras = cameras.isNotEmpty;
+    final offlineCams = item.offlineDeviceList;
 
     final borderColor = hasIssues
         ? AppColors.error.withValues(alpha: 0.5)
@@ -70,7 +71,7 @@ class _TechnicianTopLevelZoneCardState
           if (hasIssues)
             BoxShadow(
               color: AppColors.error.withValues(alpha: 0.08),
-              blurRadius: 12,
+              blurRadius: 14,
               offset: const Offset(0, 3),
             )
           else
@@ -86,18 +87,18 @@ class _TechnicianTopLevelZoneCardState
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Header
+          // ── Header ──────────────────────────────────────────────────────────
           Material(
             color: Colors.transparent,
             child: InkWell(
-              onTap: (hasDirect || hasSubzones)
+              onTap: hasCameras
                   ? () => setState(() => _isCollapsed = !_isCollapsed)
                   : null,
               child: Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 decoration: BoxDecoration(
                   color: hasIssues
-                      ? AppColors.error.withValues(alpha: 0.04)
+                      ? AppColors.error.withValues(alpha: 0.05)
                       : AppColors.surface,
                   border: Border(
                     bottom: BorderSide(
@@ -118,7 +119,18 @@ class _TechnicianTopLevelZoneCardState
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 8),
+
+                    // Expand / Collapse Chevron
+                    if (hasCameras)
+                      Icon(
+                        _isCollapsed
+                            ? Icons.chevron_right_rounded
+                            : Icons.keyboard_arrow_down_rounded,
+                        size: 20,
+                        color: AppColors.textSecondary,
+                      ),
+                    const SizedBox(width: 4),
 
                     // Zone Name & Stats
                     Expanded(
@@ -128,7 +140,7 @@ class _TechnicianTopLevelZoneCardState
                           Text(
                             item.zone.name.toUpperCase(),
                             style: TextStyle(
-                              fontSize: 13.5,
+                              fontSize: 13,
                               fontWeight: FontWeight.w900,
                               letterSpacing: 0.8,
                               color: hasIssues
@@ -144,22 +156,13 @@ class _TechnicianTopLevelZoneCardState
                             spacing: 8,
                             children: [
                               Text(
-                                '$total products',
+                                '$total ${total == 1 ? 'product' : 'products'}',
                                 style: TextStyle(
                                   fontSize: 10,
                                   fontFamily: 'monospace',
                                   color: AppColors.textSecondary,
                                 ),
                               ),
-                              if (hasSubzones)
-                                Text(
-                                  '${subzones.length} subzone${subzones.length != 1 ? 's' : ''}',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    fontFamily: 'monospace',
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
                               Text(
                                 '● $online',
                                 style: TextStyle(
@@ -186,44 +189,30 @@ class _TechnicianTopLevelZoneCardState
                     ),
                     const SizedBox(width: 8),
 
-                    // Expand / Collapse Chevron
-                    if (hasDirect || hasSubzones)
-                      Icon(
-                        _isCollapsed
-                            ? Icons.chevron_right_rounded
-                            : Icons.keyboard_arrow_down_rounded,
-                        size: 22,
-                        color: AppColors.textSecondary,
-                      ),
+                    // Circular Health Ring
+                    TechnicianHealthRing(
+                      percentage: item.healthPercentage,
+                      size: 34,
+                    ),
                   ],
                 ),
               ),
             ),
           ),
 
-          // Body (Collapsible)
+          // ── Body (Collapsible) ───────────────────────────────────────────────
           if (!_isCollapsed) ...[
-            // Direct equipment (if any)
-            if (hasDirect) ...[
+            if (hasCameras) ...[
               Padding(
-                padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),
+                padding: const EdgeInsets.all(12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'DIRECT PRODUCTS',
-                      style: TextStyle(
-                        fontSize: 9.5,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.8,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
+                    // Grid of camera blocks
                     Wrap(
-                      spacing: 4,
-                      runSpacing: 4,
-                      children: directDevices.map((d) {
+                      spacing: 5,
+                      runSpacing: 5,
+                      children: cameras.map((d) {
                         final isDefective = item.isDeviceDefective(d);
                         final activeIssue = item.issues
                             .cast<IssueModel?>()
@@ -241,56 +230,181 @@ class _TechnicianTopLevelZoneCardState
                         );
                       }).toList(),
                     ),
-                  ],
-                ),
-              ),
-              if (hasSubzones)
-                Divider(height: 1, color: AppColors.divider),
-            ],
 
-            // Nested subzones (2-column grid)
-            if (hasSubzones)
-              Padding(
-                padding: const EdgeInsets.all(10),
-                child: Column(
-                  children: [
-                    for (var i = 0; i < subzones.length; i += 2) ...[
+                    // Offline camera list summary
+                    if (offlineCams.isNotEmpty) ...[
+                      const SizedBox(height: 10),
                       Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            child: TechnicianSubzoneCard(
-                              subzoneItem: subzones[i],
+                          Icon(
+                            Icons.warning_amber_rounded,
+                            size: 12,
+                            color: AppColors.error,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${offlineCams.length} offline: ',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.error,
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          if (i + 1 < subzones.length)
-                            Expanded(
-                              child: TechnicianSubzoneCard(
-                                subzoneItem: subzones[i + 1],
+                          Expanded(
+                            child: Text(
+                              offlineCams
+                                  .take(5)
+                                  .map((c) => c.code.isNotEmpty ? c.code : c.name)
+                                  .join(', ') +
+                                  (offlineCams.length > 5
+                                      ? ' +${offlineCams.length - 5}'
+                                      : ''),
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontFamily: 'monospace',
+                                color: AppColors.error.withValues(alpha: 0.8),
                               ),
-                            )
-                          else
-                            const Expanded(child: SizedBox.shrink()),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                         ],
                       ),
-                      if (i + 2 < subzones.length) const SizedBox(height: 8),
                     ],
                   ],
                 ),
               ),
 
-            if (!hasDirect && !hasSubzones)
+              // ── Status Footer ───────────────────────────────────────────────
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: hasIssues
+                      ? AppColors.error.withValues(alpha: 0.08)
+                      : AppColors.success.withValues(alpha: 0.06),
+                  border: Border(
+                    top: BorderSide(
+                      color: hasIssues
+                          ? AppColors.error.withValues(alpha: 0.2)
+                          : AppColors.success.withValues(alpha: 0.15),
+                    ),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    if (hasIssues) ...[
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.warning_amber_rounded,
+                            size: 13,
+                            color: AppColors.error,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            '$offline Faulty',
+                            style: TextStyle(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.error,
+                            ),
+                          ),
+                        ],
+                      ),
+                      InkWell(
+                        onTap: () {
+                          if (widget.onAlertTap != null) {
+                            widget.onAlertTap!();
+                            return;
+                          }
+                          // Open the first active defect ticket
+                          final firstIssue = item.issues.firstOrNull;
+                          if (firstIssue != null) {
+                            IssueDetailSheet.show(context, firstIssue);
+                          }
+                        },
+                        borderRadius: BorderRadius.circular(6),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: AppColors.warning.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: AppColors.warning.withValues(alpha: 0.35),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.notifications_active_outlined,
+                                size: 10,
+                                color: AppColors.warning,
+                              ),
+                              const SizedBox(width: 3),
+                              Text(
+                                'Alerts',
+                                style: TextStyle(
+                                  fontSize: 9.5,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.warning,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ] else ...[
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.check_circle_outline_rounded,
+                            size: 13,
+                            color: AppColors.success,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            'All Cameras Working',
+                            style: TextStyle(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.success,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ] else ...[
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 20),
                 child: Center(
                   child: Text(
                     'No equipment registered in this zone',
                     style: TextStyle(
-                        fontSize: 11, color: AppColors.textSecondary),
+                      fontSize: 11,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ),
               ),
+            ],
+          ] else ...[
+            // ── Collapsed Label ──────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              child: Text(
+                '$total cameras hidden — click to expand',
+                style: TextStyle(
+                  fontSize: 10.5,
+                  fontStyle: FontStyle.italic,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ),
           ],
         ],
       ),

@@ -11,13 +11,10 @@ import 'package:equipment_management_system/features/technician/models/technicia
 import 'package:equipment_management_system/features/technician/models/technician_zone_map_data.dart';
 import 'package:equipment_management_system/features/technician/models/technician_zone_tree_state.dart';
 import 'package:equipment_management_system/features/technician/viewmodels/technician_view_mode_provider.dart';
-import 'package:equipment_management_system/features/technician/views/widgets/subzone_grid_card.dart';
 import 'package:equipment_management_system/features/technician/views/widgets/technician_device_block.dart';
 import 'package:equipment_management_system/features/technician/views/widgets/technician_health_ring.dart';
 import 'package:equipment_management_system/features/technician/views/widgets/technician_search_filter_bar.dart';
-import 'package:equipment_management_system/features/technician/views/widgets/technician_subzone_card.dart';
 import 'package:equipment_management_system/features/technician/views/widgets/technician_top_level_zone_card.dart';
-import 'package:equipment_management_system/features/technician/views/widgets/zone_device_card.dart';
 import 'package:equipment_management_system/l10n/app_localizations.dart';
 
 /// Wraps a technician widget with the localization delegates it now needs.
@@ -235,8 +232,8 @@ void main() {
     });
   });
 
-  group('ZoneDeviceCard Widget Tests', () {
-    testWidgets('renders device with embedded visual defect strip and inspects on tap', (tester) async {
+  group('TechnicianDeviceBlock Widget Tests', () {
+    testWidgets('renders healthy camera block with success styling', (tester) async {
       const device = DeviceModel(
         id: 'dev-1',
         zoneId: 'zone-1',
@@ -244,186 +241,59 @@ void main() {
         name: 'Main Gate Camera',
         serialNumber: 'CAM-001',
         hardwareTypeName: 'CCTV Camera',
-        location: 'Main Gate',
-        status: DeviceStatus.faulty,
+        status: DeviceStatus.active,
       );
 
-      final issue = IssueModel(
-        id: 'iss-12345678',
-        title: 'Lens cracked',
-        description: 'Camera lens broken',
-        deviceId: 'dev-1',
-        deviceName: 'Main Gate Camera',
-        zoneId: 'zone-1',
-        zoneName: 'South Zone',
-        categoryId: 'cat-1',
-        categoryName: 'Optical Hardware',
-        priority: IssuePriority.critical,
-        status: IssueStatus.open,
-        createdByUserId: 'user-1',
-        createdByUserName: 'Supervisor',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
-
-      bool inspected = false;
+      bool tapped = false;
 
       await tester.pumpWidget(
         _localized(
-          ZoneDeviceCard(
+          TechnicianDeviceBlock(
             device: device,
-            activeIssues: [issue],
-            onInspectIssue: (iss) => inspected = true,
+            isDefective: false,
+            onTap: () => tapped = true,
           ),
         ),
       );
 
-      // Verify device info rendered
-      expect(find.text('Main Gate Camera'), findsOneWidget);
-      expect(find.text('CAM-001'), findsOneWidget);
-      expect(find.text('CCTV Camera'), findsOneWidget);
+      expect(find.byType(TechnicianDeviceBlock), findsOneWidget);
+      expect(find.byType(Tooltip), findsOneWidget);
 
-      // Verify visual defect strip rendered (priority is shown by colour, not text)
-      expect(find.text('Lens cracked'), findsOneWidget);
-      expect(find.text('Open'), findsOneWidget);
-
-      // Tap defect strip to inspect
-      await tester.tap(find.text('Lens cracked'));
-      expect(inspected, isTrue);
+      await tester.tap(find.byType(TechnicianDeviceBlock));
+      expect(tapped, isTrue);
     });
 
-    testWidgets('renders healthy device cleanly without defect strip', (tester) async {
+    testWidgets('renders defective camera block with error styling and responds to tap', (tester) async {
       const device = DeviceModel(
         id: 'dev-2',
         zoneId: 'zone-1',
         zoneName: 'South Zone',
-        name: 'Corridor Dome Camera',
+        name: 'Corridor Camera',
         serialNumber: 'CAM-002',
         hardwareTypeName: 'CCTV Camera',
-        status: DeviceStatus.active,
-      );
-
-      await tester.pumpWidget(
-        _localized(
-          const ZoneDeviceCard(
-            device: device,
-            activeIssues: [],
-          ),
-        ),
-      );
-
-      expect(find.text('Corridor Dome Camera'), findsOneWidget);
-      expect(find.text('CAM-002'), findsOneWidget);
-      expect(find.text('Active'), findsOneWidget);
-      // Ensure zero defect banners rendered
-      expect(find.text('CRITICAL'), findsNothing);
-    });
-
-    testWidgets('device whose only issue is resolved shows the ALL OK safety strip, no red callout', (tester) async {
-      const device = DeviceModel(
-        id: 'dev-res',
-        zoneId: 'zone-1',
-        zoneName: 'South Zone',
-        name: 'Turnstile A',
-        serialNumber: 'TRN-001',
-        hardwareTypeName: 'Turnstile',
-        status: DeviceStatus.active,
-      );
-
-      final resolvedIssue = IssueModel(
-        id: 'iss-999',
-        title: 'Sensor misaligned',
-        description: 'Sensor replaced and calibrated',
-        deviceId: 'dev-res',
-        deviceName: 'Turnstile A',
-        zoneId: 'zone-1',
-        zoneName: 'South Zone',
-        categoryId: 'cat-1',
-        categoryName: 'Hardware',
-        priority: IssuePriority.critical,
-        status: IssueStatus.resolved,
-        createdByUserId: 'user-1',
-        createdByUserName: 'Supervisor',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
-
-      await tester.pumpWidget(
-        _localized(
-          ZoneDeviceCard(
-            device: device,
-            activeIssues: [resolvedIssue],
-          ),
-        ),
-      );
-
-      expect(find.text('Turnstile A'), findsOneWidget);
-      expect(find.text('ALL OK'), findsOneWidget);
-      // No red defect callout for a device with no unresolved issue
-      expect(find.text('Sensor misaligned'), findsNothing);
-    });
-
-    testWidgets('working device taps onInspectDevice callback', (tester) async {
-      const device = DeviceModel(
-        id: 'dev-ok',
-        zoneId: 'zone-1',
-        zoneName: 'South Zone',
-        name: 'Gate Scanner',
-        serialNumber: 'GAT-001',
-        hardwareTypeName: 'Scanner',
-        status: DeviceStatus.active,
-      );
-
-      DeviceModel? inspectedDevice;
-
-      await tester.pumpWidget(
-        _localized(
-          ZoneDeviceCard(
-            device: device,
-            activeIssues: const [],
-            onInspectDevice: (d) => inspectedDevice = d,
-          ),
-        ),
-      );
-
-      expect(find.text('Gate Scanner'), findsOneWidget);
-      expect(find.text('ALL OK'), findsOneWidget);
-
-      await tester.tap(find.text('Gate Scanner'));
-      expect(inspectedDevice?.id, 'dev-ok');
-    });
-
-    testWidgets('device with faulty status without open issues shows defective styling and callout', (tester) async {
-      const device = DeviceModel(
-        id: 'dev-faulty',
-        zoneId: 'zone-1',
-        zoneName: 'South Zone',
-        name: 'Defective Sensor',
-        serialNumber: 'SEN-001',
-        hardwareTypeName: 'Sensor',
         status: DeviceStatus.faulty,
       );
 
-      bool inspected = false;
+      bool tapped = false;
 
       await tester.pumpWidget(
         _localized(
-          ZoneDeviceCard(
+          TechnicianDeviceBlock(
             device: device,
-            activeIssues: const [],
-            onInspectDevice: (_) => inspected = true,
+            isDefective: true,
+            onTap: () => tapped = true,
           ),
         ),
       );
 
-      expect(find.text('Defective Sensor'), findsOneWidget);
-      expect(find.text('Faulty Unit • Needs Action'), findsOneWidget);
-      expect(find.text('ALL OK'), findsNothing);
+      expect(find.byType(TechnicianDeviceBlock), findsOneWidget);
 
-      await tester.tap(find.text('Faulty Unit • Needs Action'));
-      expect(inspected, isTrue);
+      await tester.tap(find.byType(TechnicianDeviceBlock));
+      expect(tapped, isTrue);
     });
+  });
 
+  group('Spatial Explorer & Utility Tests', () {
     test('separates devices into defective (sorted first) and operational in spatial view, showing all devices', () {
       const d1 = DeviceModel(id: 'd1', zoneId: 'z1', zoneName: 'Z', name: 'D1', serialNumber: '1', hardwareTypeName: 'H');
       const d2 = DeviceModel(id: 'd2', zoneId: 'z1', zoneName: 'Z', name: 'D2', serialNumber: '2', hardwareTypeName: 'H');
@@ -504,74 +374,6 @@ void main() {
       expect(defective.map((d) => d.id).toList(), ['d1', 'd2']);
       expect(operational.map((d) => d.id).toList(), ['d3', 'd4']);
       expect(displayedDevices.map((d) => d.id).toList(), ['d1', 'd2', 'd3', 'd4']);
-    });
-
-    testWidgets('SubzoneGridCard shows yellow border on partial issue (some devices defective)', (tester) async {
-      const zone = TechnicianZoneNode(
-        id: 'z-nested',
-        name: 'Surgical Wing',
-        deviceCount: 10,
-        workingCount: 8, // 2 units need a fix (partial issue -> YELLOW border)
-        subzoneCount: 3,
-      );
-
-      await tester.pumpWidget(
-        _localized(SubzoneGridCard(zone: zone, onTap: () {})),
-      );
-
-      expect(find.text('Surgical Wing'), findsOneWidget);
-      expect(find.text('2'), findsOneWidget); // badge = units needing fix
-      expect(find.text('3'), findsOneWidget); // nested sub-zone count
-
-      final inkWell = tester.widget<InkWell>(find.byType(InkWell).first);
-      final container = inkWell.child as Container;
-      final decoration = container.decoration as BoxDecoration;
-      expect((decoration.border as Border).top.color, AppColors.warning);
-    });
-
-    testWidgets('SubzoneGridCard shows red border only when ALL devices in zone are under issue', (tester) async {
-      const zone = TechnicianZoneNode(
-        id: 'z-critical',
-        name: 'ICU Ward',
-        deviceCount: 4,
-        workingCount: 0, // All 4 units broken -> RED border
-        subzoneCount: 0,
-      );
-
-      await tester.pumpWidget(
-        _localized(SubzoneGridCard(zone: zone, onTap: () {})),
-      );
-
-      expect(find.text('ICU Ward'), findsOneWidget);
-      expect(find.text('4'), findsNWidgets(2)); // badge = 4 broken & inventory = 4 total
-
-      final inkWell = tester.widget<InkWell>(find.byType(InkWell).first);
-      final container = inkWell.child as Container;
-      final decoration = container.decoration as BoxDecoration;
-      expect((decoration.border as Border).top.color, AppColors.error);
-    });
-
-    testWidgets('SubzoneGridCard shows green border and OK badge when every unit is working', (tester) async {
-      const zone = TechnicianZoneNode(
-        id: 'z-clean',
-        name: 'Radiology Area',
-        deviceCount: 8,
-        workingCount: 8,
-        subzoneCount: 1,
-      );
-
-      await tester.pumpWidget(
-        _localized(SubzoneGridCard(zone: zone, onTap: () {})),
-      );
-
-      expect(find.text('Radiology Area'), findsOneWidget);
-      expect(find.text('OK'), findsOneWidget);
-      expect(find.text('1'), findsOneWidget); // nested sub-zone count
-
-      final inkWell = tester.widget<InkWell>(find.byType(InkWell).first);
-      final container = inkWell.child as Container;
-      final decoration = container.decoration as BoxDecoration;
-      expect((decoration.border as Border).top.color, AppColors.success);
     });
 
     test('Spatial Explorer excludes resolved issues from active defects list', () {
@@ -789,60 +591,10 @@ void main() {
       expect(defectiveMaterial.color, AppColors.error);
     });
 
-    testWidgets('TechnicianSubzoneCard renders header, counts, and status footer', (tester) async {
-      const subzoneNode = TechnicianZoneNode(
-        id: 'sz-1',
-        name: 'North Gate',
-      );
-
-      const d1 = DeviceModel(
-        id: 'd1',
-        zoneId: 'sz-1',
-        zoneName: 'North Gate',
-        name: 'Gate Cam',
-        serialNumber: 'CAM-01',
-        hardwareTypeName: 'CCTV Camera',
-        status: DeviceStatus.active,
-      );
-
-      const d2 = DeviceModel(
-        id: 'd2',
-        zoneId: 'sz-1',
-        zoneName: 'North Gate',
-        name: 'Perimeter Cam',
-        serialNumber: 'CAM-02',
-        hardwareTypeName: 'CCTV Camera',
-        status: DeviceStatus.faulty,
-      );
-
-      final item = TechnicianSubzoneItem(
-        zone: subzoneNode,
-        devices: const [d1, d2],
-        issues: const [],
-      );
-
-      await tester.pumpWidget(
-        _localized(
-          TechnicianSubzoneCard(subzoneItem: item),
-        ),
-      );
-
-      expect(find.text('North Gate'), findsOneWidget);
-      expect(find.text('1/2'), findsOneWidget);
-      expect(find.text('1 Defective / Issues'), findsOneWidget);
-      expect(find.textContaining('1 offline: CAM-02'), findsOneWidget);
-    });
-
-    testWidgets('TechnicianTopLevelZoneCard renders uppercase name, stats, and collapses without circular health ring', (tester) async {
+    testWidgets('TechnicianTopLevelZoneCard renders uppercase name, stats, health ring, and collapses', (tester) async {
       const topZone = TechnicianZoneNode(
         id: 'root-1',
         name: 'Lion Safari Zone',
-      );
-
-      const subzoneNode = TechnicianZoneNode(
-        id: 'sz-1',
-        name: 'North Ridge',
-        parentZoneId: 'root-1',
       );
 
       const d1 = DeviceModel(
@@ -865,15 +617,9 @@ void main() {
         status: DeviceStatus.faulty,
       );
 
-      final subItem = TechnicianSubzoneItem(
-        zone: subzoneNode,
-        devices: const [d2],
-      );
-
       final topItem = TechnicianTopLevelZoneItem(
         zone: topZone,
-        directDevices: const [d1],
-        subzones: [subItem],
+        devices: const [d1, d2],
       );
 
       await tester.pumpWidget(
@@ -886,36 +632,34 @@ void main() {
       expect(find.text('LION SAFARI ZONE'), findsOneWidget);
       // Verify stats
       expect(find.text('2 products'), findsOneWidget);
-      expect(find.text('1 subzone'), findsOneWidget);
       expect(find.text('● 1'), findsOneWidget);
       expect(find.text('○ 1'), findsOneWidget);
-      // Verify circular health ring is NOT present in card
-      expect(find.text('50%'), findsNothing);
+      // Verify circular health ring is present in card
+      expect(find.byType(TechnicianHealthRing), findsOneWidget);
+      expect(find.text('50%'), findsOneWidget);
 
-      // Direct products title rendered when expanded
-      expect(find.text('DIRECT PRODUCTS'), findsOneWidget);
-      expect(find.text('North Ridge'), findsOneWidget);
+      // Camera blocks and offline summary rendered when expanded
+      expect(find.byType(TechnicianDeviceBlock), findsNWidgets(2));
+      expect(find.textContaining('1 offline:'), findsOneWidget);
+      expect(find.textContaining('RDG-01'), findsOneWidget);
 
       // Tap header to collapse
       await tester.tap(find.text('LION SAFARI ZONE'));
       await tester.pumpAndSettle();
 
-      // Body elements hidden when collapsed
-      expect(find.text('DIRECT PRODUCTS'), findsNothing);
-      expect(find.text('North Ridge'), findsNothing);
+      // Camera blocks hidden when collapsed, collapsed notice shown
+      expect(find.byType(TechnicianDeviceBlock), findsNothing);
+      expect(find.text('2 cameras hidden — click to expand'), findsOneWidget);
     });
 
-    test('Issue-First Sorting puts problem zones and problem subzones at the top first', () {
+    test('Issue-First Sorting puts problem zones at the top first', () {
       const zNominal = TechnicianZoneNode(id: 'z-clean', name: 'Zebra Enclosure');
       const zWarning = TechnicianZoneNode(id: 'z-warn', name: 'Aviary Wing');
       const zCritical = TechnicianZoneNode(id: 'z-crit', name: 'Aquarium Pavilion');
 
-      const szNominal = TechnicianZoneNode(id: 'sz-clean', name: 'Freshwater Tanks');
-      const szProblem = TechnicianZoneNode(id: 'sz-prob', name: 'Reef Tanks');
-
       final itemNominal = TechnicianTopLevelZoneItem(
         zone: zNominal,
-        directDevices: const [
+        devices: const [
           DeviceModel(id: 'd-ok1', zoneId: 'z-clean', zoneName: 'Z', name: 'Cam 1', hardwareTypeName: 'CCTV'),
           DeviceModel(id: 'd-ok2', zoneId: 'z-clean', zoneName: 'Z', name: 'Cam 2', hardwareTypeName: 'CCTV'),
         ],
@@ -923,44 +667,34 @@ void main() {
 
       final itemWarning = TechnicianTopLevelZoneItem(
         zone: zWarning,
-        directDevices: const [
+        devices: const [
           DeviceModel(id: 'd-f1', zoneId: 'z-warn', zoneName: 'A', name: 'Cam 3', status: DeviceStatus.faulty, hardwareTypeName: 'CCTV'),
         ],
       );
 
       final itemCritical = TechnicianTopLevelZoneItem(
         zone: zCritical,
-        subzones: [
-          TechnicianSubzoneItem(
-            zone: szNominal,
-            devices: const [
-              DeviceModel(id: 'd-ok3', zoneId: 'sz-clean', zoneName: 'F', name: 'Cam 4', hardwareTypeName: 'CCTV'),
-            ],
-          ),
-          TechnicianSubzoneItem(
-            zone: szProblem,
-            devices: const [
-              DeviceModel(id: 'd-f2', zoneId: 'sz-prob', zoneName: 'R', name: 'Cam 5', status: DeviceStatus.faulty, hardwareTypeName: 'CCTV'),
-            ],
-            issues: [
-              IssueModel(
-                id: 'iss-1',
-                title: 'Sensor Failure',
-                description: '',
-                deviceId: 'd-f2',
-                deviceName: 'Cam 5',
-                zoneId: 'sz-prob',
-                zoneName: 'R',
-                categoryId: '',
-                categoryName: '',
-                priority: IssuePriority.critical,
-                status: IssueStatus.open,
-                createdByUserId: 'u1',
-                createdByUserName: 'U',
-                createdAt: DateTime.now(),
-                updatedAt: DateTime.now(),
-              ),
-            ],
+        devices: const [
+          DeviceModel(id: 'd-ok3', zoneId: 'z-crit', zoneName: 'F', name: 'Cam 4', hardwareTypeName: 'CCTV'),
+          DeviceModel(id: 'd-f2', zoneId: 'z-crit', zoneName: 'R', name: 'Cam 5', status: DeviceStatus.faulty, hardwareTypeName: 'CCTV'),
+        ],
+        issues: [
+          IssueModel(
+            id: 'iss-1',
+            title: 'Sensor Failure',
+            description: '',
+            deviceId: 'd-f2',
+            deviceName: 'Cam 5',
+            zoneId: 'z-crit',
+            zoneName: 'R',
+            categoryId: '',
+            categoryName: '',
+            priority: IssuePriority.critical,
+            status: IssueStatus.open,
+            createdByUserId: 'u1',
+            createdByUserName: 'U',
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
           ),
         ],
       );
@@ -976,28 +710,12 @@ void main() {
       expect(items[0].zone.id, 'z-crit');
       expect(items[1].zone.id, 'z-warn');
       expect(items[2].zone.id, 'z-clean');
-
-      // Inside Aquarium Pavilion, Reef Tanks (has defect) must be sorted BEFORE Freshwater Tanks (nominal)
-      expect(items[0].subzones[0].zone.id, 'sz-prob');
-      expect(items[0].subzones[1].zone.id, 'sz-clean');
     });
 
-    testWidgets('Zone 1 renders Big Card containing Sub 1 and Sub 2 small cards with device icons, without duplicate standalone cards', (tester) async {
+    testWidgets('Zone 1 renders Big Card containing all descendant cameras as blocks, without subzone cards', (tester) async {
       const parentZone = TechnicianZoneNode(
         id: 'zone-1',
         name: 'Zone 1',
-      );
-
-      const sub1 = TechnicianZoneNode(
-        id: 'sub-1',
-        name: 'Sub 1',
-        parentZoneId: 'zone-1',
-      );
-
-      const sub2 = TechnicianZoneNode(
-        id: 'sub-2',
-        name: 'Sub 2',
-        parentZoneId: 'zone-1',
       );
 
       const devSub1 = DeviceModel(
@@ -1020,20 +738,10 @@ void main() {
         status: DeviceStatus.faulty,
       );
 
-      // Section for Zone 1 containing Sub 1 and Sub 2
+      // Section for Zone 1 containing all descendant devices directly
       final zone1Section = TechnicianTopLevelZoneItem(
         zone: parentZone,
-        directDevices: const [],
-        subzones: [
-          TechnicianSubzoneItem(
-            zone: sub1,
-            devices: const [devSub1],
-          ),
-          TechnicianSubzoneItem(
-            zone: sub2,
-            devices: const [devSub2],
-          ),
-        ],
+        devices: const [devSub1, devSub2],
       );
 
       // Simulate a list of top-level sections
@@ -1053,17 +761,18 @@ void main() {
       // Verify single Big Card header for ZONE 1
       expect(find.text('ZONE 1'), findsOneWidget);
 
-      // Verify subzone count in stats
-      expect(find.text('2 subzones'), findsOneWidget);
+      // Verify stats
+      expect(find.text('2 products'), findsOneWidget);
+      expect(find.text('● 1'), findsOneWidget);
+      expect(find.text('○ 1'), findsOneWidget);
 
-      // Verify nested small cards for Sub 1 and Sub 2 are both present inside
-      expect(find.text('Sub 1'), findsOneWidget);
-      expect(find.text('Sub 2'), findsOneWidget);
-
-      // Verify device blocks exist inside the nested cards
+      // Verify device blocks exist directly inside the Big Card
       expect(find.byType(TechnicianDeviceBlock), findsNWidgets(2));
 
-      // Verify exactly ONE TechnicianTopLevelZoneCard exists (no duplicate standalone Big Cards for Sub 1 or Sub 2)
+      // Verify status footer indicates faulty unit
+      expect(find.text('1 Faulty'), findsOneWidget);
+
+      // Verify exactly ONE TechnicianTopLevelZoneCard exists
       expect(find.byType(TechnicianTopLevelZoneCard), findsOneWidget);
     });
 
@@ -1144,25 +853,16 @@ void main() {
       for (final root in roots) {
         final subzones = allZones.where((z) => z.parentZoneId == root.id).toList();
         final subzoneIds = subzones.map((s) => s.id).toSet();
-
-        final subzoneItems = subzones.map((sz) {
-          final szDevices = allDevices.where((d) => d.zoneId == sz.id).toList();
-          final szDeviceIds = szDevices.map((d) => d.id).toSet();
-          final szIssues = allIssues.where((iss) => iss.zoneId == sz.id || szDeviceIds.contains(iss.deviceId)).toList();
-          return TechnicianSubzoneItem(zone: sz, devices: szDevices, issues: szIssues);
-        }).toList();
-
-        final allRootDeviceIds = {
-          for (final sz in subzoneItems) ...sz.devices.map((d) => d.id),
-        };
+        final rootDevices = allDevices.where((d) => d.zoneId == root.id || subzoneIds.contains(d.zoneId)).toList();
+        final rootDeviceIds = rootDevices.map((d) => d.id).toSet();
 
         final rootIssues = allIssues.where((iss) =>
-          iss.zoneId == root.id || subzoneIds.contains(iss.zoneId) || allRootDeviceIds.contains(iss.deviceId)
+          iss.zoneId == root.id || subzoneIds.contains(iss.zoneId) || rootDeviceIds.contains(iss.deviceId)
         ).toList();
 
         sections.add(TechnicianTopLevelZoneItem(
           zone: root,
-          subzones: subzoneItems,
+          devices: rootDevices,
           issues: rootIssues,
         ));
       }

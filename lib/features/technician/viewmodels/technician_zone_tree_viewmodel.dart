@@ -192,117 +192,59 @@ class TechnicianZoneTreeViewModel extends AsyncNotifier<TechnicianZoneTreeState>
         }
       }
       final allZones = zoneMap.values.toList();
-      final loadedZoneIds = allZones.map((z) => z.id).toSet();
 
-      // Track all zone IDs that are children of another loaded zone
-      final childZoneIds = <String>{};
-      for (final z in allZones) {
-        if (z.parentZoneId != null &&
-            z.parentZoneId!.isNotEmpty &&
-            loadedZoneIds.contains(z.parentZoneId)) {
-          childZoneIds.add(z.id);
+      // Helper to climb parentZoneId hierarchy up to the top-level root zone
+      String? getRootZoneId(String? zId) {
+        if (zId == null || zId.isEmpty) return null;
+        var curr = zoneMap[zId];
+        if (curr == null) return null;
+        final visited = <String>{};
+        while (curr!.parentZoneId != null &&
+            curr.parentZoneId!.isNotEmpty &&
+            visited.add(curr.id)) {
+          final parent = zoneMap[curr.parentZoneId!];
+          if (parent == null) break;
+          curr = parent;
         }
+        return curr.id;
       }
 
-      // Discover subzones for all candidate top-level zones (only query network if not already loaded)
-      final candidateRoots = allZones.where((z) => !childZoneIds.contains(z.id)).toList();
-      final subzonesMap = <String, List<TechnicianZoneNode>>{};
-
-      final subzoneFutures = candidateRoots.map((r) async {
-        final existingChildren = allZones.where((z) => z.parentZoneId == r.id).toList();
-        if (existingChildren.isNotEmpty || r.subzoneCount == 0) {
-          return MapEntry(r.id, existingChildren);
-        }
-        try {
-          final subs = await zoneRepo.getSubzones(r.id);
-          return MapEntry(r.id, subs);
-        } catch (e) {
-          AppLogger.w('⚠️ [TechnicianZoneTreeViewModel] Failed to get subzones for ${r.name}: $e');
-          return MapEntry(r.id, <TechnicianZoneNode>[]);
-        }
-      }).toList();
-
-      final subzoneResults = await Future.wait(subzoneFutures);
-      for (final entry in subzoneResults) {
-        subzonesMap[entry.key] = entry.value;
-        for (final child in entry.value) {
-          childZoneIds.add(child.id);
-        }
-      }
-
-      // Final top-level roots: ONLY zones that are NOT children of another loaded zone!
-      var rootsToProcess = allZones.where((z) => !childZoneIds.contains(z.id)).toList();
+      // 3. Top-level zones: zones with no parent or whose parent is not among loaded zones
+      var rootsToProcess = allZones.where((z) =>
+          z.parentZoneId == null ||
+          z.parentZoneId!.isEmpty ||
+          !zoneMap.containsKey(z.parentZoneId)).toList();
       if (rootsToProcess.isEmpty && allZones.isNotEmpty) {
         rootsToProcess = allZones;
       }
 
+      // 4. Map devices to their root top-level zone
+      final devicesByRootZone = <String, List<DeviceModel>>{};
+      for (final d in allDevices) {
+        final rootId = getRootZoneId(d.zoneId) ?? d.zoneId;
+        devicesByRootZone.putIfAbsent(rootId, () => []).add(d);
+      }
+
+      // 5. Build TopLevelZoneItems aggregating all descendant cameras directly
       final sections = <TechnicianTopLevelZoneItem>[];
       for (final root in rootsToProcess) {
-        final subzones = subzonesMap[root.id] ??
-            allZones.where((z) => z.parentZoneId == root.id).toList();
+        final rootDevices = devicesByRootZone[root.id] ?? <DeviceModel>[];
+        final rootDeviceIds = rootDevices.map((d) => d.id).toSet();
 
-        // Deduplicate subzones by ID
-        final seenSubIds = <String>{};
-        final uniqueSubzones = <TechnicianZoneNode>[];
-        for (final sz in subzones) {
-          if (sz.id != root.id && seenSubIds.add(sz.id)) {
-            uniqueSubzones.add(sz);
+        // Collect all descendant subzone IDs for this root to capture relevant zone-level issues
+        final descendantZoneIds = <String>{root.id};
+        for (final z in allZones) {
+          if (getRootZoneId(z.id) == root.id) {
+            descendantZoneIds.add(z.id);
           }
         }
 
-        final subzoneIds = uniqueSubzones.map((s) => s.id).toSet();
+        final rootIssues = allIssues.where((iss) =>
+            descendantZoneIds.contains(iss.zoneId) ||
+            rootDeviceIds.contains(iss.deviceId)).toList();
 
-        final directDevices = allDevices.where((d) => d.zoneId == root.id).toList();
-        final directDeviceIds = directDevices.map((d) => d.id).toSet();
-
-        final subzoneItems = <TechnicianSubzoneItem>[];
-        for (final sz in uniqueSubzones) {
-          final szDevices = allDevices.where((d) => d.zoneId == sz.id).toList();
-          final szDeviceIds = szDevices.map((d) => d.id).toSet();
-          final szIssues = allIssues
-              .where((iss) => iss.zoneId == sz.id || szDeviceIds.contains(iss.deviceId))
-              .toList();
-
-          // Sort devices inside subzone: defective/maintenance first, then by name
-          szDevices.sort((a, b) {
-            final aDef = szIssues.any((iss) =>
-                    iss.deviceId == a.id &&
-                    iss.status != IssueStatus.resolved &&
-                    iss.status != IssueStatus.closed) ||
-                a.status == DeviceStatus.faulty ||
-                a.status == DeviceStatus.underMaintenance;
-            final bDef = szIssues.any((iss) =>
-                    iss.deviceId == b.id &&
-                    iss.status != IssueStatus.resolved &&
-                    iss.status != IssueStatus.closed) ||
-                b.status == DeviceStatus.faulty ||
-                b.status == DeviceStatus.underMaintenance;
-            if (aDef && !bDef) return -1;
-            if (!aDef && bDef) return 1;
-            return a.name.toLowerCase().compareTo(b.name.toLowerCase());
-          });
-
-          subzoneItems.add(TechnicianSubzoneItem(
-            zone: sz,
-            devices: szDevices,
-            issues: szIssues,
-          ));
-        }
-
-        final allRootDeviceIds = {
-          ...directDeviceIds,
-          for (final sz in subzoneItems) ...sz.devices.map((d) => d.id),
-        };
-
-        final rootIssues = allIssues
-            .where((iss) =>
-                iss.zoneId == root.id ||
-                subzoneIds.contains(iss.zoneId) ||
-                allRootDeviceIds.contains(iss.deviceId))
-            .toList();
-
-        // Sort direct devices: defective first, then by name
-        directDevices.sort((a, b) {
+        // Sort devices inside root zone: defective/offline first, then by name
+        rootDevices.sort((a, b) {
           final aDef = rootIssues.any((iss) =>
                   iss.deviceId == a.id &&
                   iss.status != IssueStatus.resolved &&
@@ -322,20 +264,38 @@ class TechnicianZoneTreeViewModel extends AsyncNotifier<TechnicianZoneTreeState>
 
         sections.add(TechnicianTopLevelZoneItem(
           zone: root,
-          directDevices: directDevices,
-          subzones: subzoneItems,
+          devices: rootDevices,
           issues: rootIssues,
         ));
       }
 
-      // ISSUE-FIRST SORTING: zones with issues/problems at the top first!
+      // 6. Handle unassigned or orphan devices
+      final assignedDeviceIds = {
+        for (final sec in sections)
+          for (final d in sec.devices) d.id,
+      };
+      final orphanDevices = allDevices.where((d) => !assignedDeviceIds.contains(d.id)).toList();
+      if (orphanDevices.isNotEmpty) {
+        final orphanDeviceIds = orphanDevices.map((d) => d.id).toSet();
+        final orphanIssues = allIssues.where((iss) => orphanDeviceIds.contains(iss.deviceId)).toList();
+        sections.add(TechnicianTopLevelZoneItem(
+          zone: const TechnicianZoneNode(
+            id: 'unassigned',
+            name: 'General / Unassigned',
+          ),
+          devices: orphanDevices,
+          issues: orphanIssues,
+        ));
+      }
+
+      // 7. ISSUE-FIRST SORTING: zones with issues/problems at the top first!
       TechnicianTopLevelZoneItem.sortIssueFirst(sections);
 
       // Legacy rootNodes enriched with real counts from sections
       final initialNodes = sections.map((sec) {
         return sec.zone.copyWith(
           deviceCount: sec.totalDevices,
-          subzoneCount: sec.subzones.length,
+          subzoneCount: 0,
           workingCount: sec.onlineDevices,
           notWorkingCount: sec.offlineDevices,
           openIssuesCount: sec.unresolvedIssuesCount,
