@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../issues/issues.dart';
 import '../models/technician_queue_filter.dart';
 import '../models/technician_queue_state.dart';
+import 'technician_org_filter_provider.dart';
 
 /// Manages filtering state for the technician queue.
 class TechnicianQueueFilterNotifier extends Notifier<TechnicianQueueFilter> {
@@ -58,8 +59,11 @@ List<IssueModel> filterIssues(
 final technicianQueueStateProvider = Provider.autoDispose<TechnicianQueueState>((ref) {
   final issuesAsync = ref.watch(technicianIssuesProvider);
   final filter = ref.watch(technicianQueueFilterProvider);
+  final orgId = ref.watch(technicianActiveOrgProvider);
 
-  final allIssues = issuesAsync.value ?? const <IssueModel>[];
+  final allIssues = (issuesAsync.value ?? const <IssueModel>[])
+      .where((i) => orgId == null || i.clientId == orgId)
+      .toList();
 
   // Pure categorization
   final rawActive = allIssues.where((i) =>

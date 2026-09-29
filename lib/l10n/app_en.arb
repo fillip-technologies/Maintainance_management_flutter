@@ -50,6 +50,7 @@
   "tabResolvedHistory": "Resolved",
   "searchTickets": "Search ticket ID or device...",
   "filterPriority": "Filter Priority",
+  "techOrgAll": "All",
   "priorityAll": "All",
   "btnStartWork": "Start Work",
   "btnHold": "Hold",

@@ -67,39 +67,39 @@ class _TechnicianSearchFilterBarState extends State<TechnicianSearchFilterBar> {
     final resolvedCount = widget.stats?.resolved ?? 0;
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
       color: AppColors.surface,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           TextField(
             controller: _searchController,
-            style: TextStyle(fontSize: 13, color: AppColors.textPrimary),
+            style: TextStyle(fontSize: 15, color: AppColors.textPrimary),
             decoration: InputDecoration(
               hintText: searchHint,
-              hintStyle: TextStyle(fontSize: 13, color: AppColors.textMuted),
-              prefixIcon: Icon(Icons.search, size: 20, color: AppColors.icon),
+              hintStyle: TextStyle(fontSize: 14, color: AppColors.textMuted),
+              prefixIcon: Icon(Icons.search_rounded, size: 22, color: AppColors.icon),
               suffixIcon: widget.searchQuery.isNotEmpty
                   ? IconButton(
-                      icon: Icon(Icons.clear, size: 16, color: AppColors.icon),
+                      icon: Icon(Icons.close_rounded, size: 20, color: AppColors.icon),
                       onPressed: () {
                         _searchController.clear();
                         widget.onSearchChanged('');
                       },
                     )
                   : null,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
               filled: true,
               fillColor: AppColors.background,
               isDense: true,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(14),
                 borderSide: BorderSide.none,
               ),
             ),
             onChanged: widget.onSearchChanged,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -112,7 +112,7 @@ class _TechnicianSearchFilterBarState extends State<TechnicianSearchFilterBar> {
                     count: activeCount,
                     activeColor: AppColors.primary,
                   ),
-                  const SizedBox(width: 6),
+                  const SizedBox(width: 8),
                   _buildStatusChip(
                     index: 1,
                     icon: Icons.pause_circle_outline,
@@ -120,7 +120,7 @@ class _TechnicianSearchFilterBarState extends State<TechnicianSearchFilterBar> {
                     count: onHoldCount,
                     activeColor: AppColors.purple,
                   ),
-                  const SizedBox(width: 6),
+                  const SizedBox(width: 8),
                   _buildStatusChip(
                     index: 2,
                     icon: Icons.task_alt,
@@ -129,17 +129,17 @@ class _TechnicianSearchFilterBarState extends State<TechnicianSearchFilterBar> {
                     activeColor: AppColors.success,
                   ),
                   const SizedBox(width: 10),
-                  Container(height: 18, width: 1, color: AppColors.border),
+                  Container(height: 24, width: 1, color: AppColors.border),
                   const SizedBox(width: 10),
                 ],
                 _buildPriorityFilterChip(allLabel, null),
-                const SizedBox(width: 6),
+                const SizedBox(width: 8),
                 _buildPriorityFilterChip(criticalLabel, IssuePriority.critical),
-                const SizedBox(width: 6),
+                const SizedBox(width: 8),
                 _buildPriorityFilterChip(highLabel, IssuePriority.high),
-                const SizedBox(width: 6),
+                const SizedBox(width: 8),
                 _buildPriorityFilterChip(mediumLabel, IssuePriority.medium),
-                const SizedBox(width: 6),
+                const SizedBox(width: 8),
                 _buildPriorityFilterChip(lowLabel, IssuePriority.low),
               ],
             ),
@@ -156,59 +156,14 @@ class _TechnicianSearchFilterBarState extends State<TechnicianSearchFilterBar> {
     required int count,
     required Color activeColor,
   }) {
-    final isSelected = widget.selectedTabIndex == index;
-    return InkWell(
+    return AppFilterChip(
+      label: label,
+      icon: icon,
+      badgeText: '$count',
+      badgeColor: activeColor,
+      isSelected: widget.selectedTabIndex == index,
+      activeColor: activeColor,
       onTap: () => widget.onTabSelected?.call(index),
-      borderRadius: BorderRadius.circular(20),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        decoration: BoxDecoration(
-          color: isSelected ? activeColor : AppColors.cardAlt,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? activeColor : AppColors.border,
-            width: isSelected ? 1.5 : 1.0,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 13,
-              color: isSelected ? AppColors.white : AppColors.textSecondary,
-            ),
-            const SizedBox(width: 5),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                color: isSelected ? AppColors.white : AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(width: 5),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? AppColors.white.withValues(alpha: 0.25)
-                    : AppColors.border.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
-                '$count',
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  color: isSelected ? AppColors.white : AppColors.textSecondary,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 

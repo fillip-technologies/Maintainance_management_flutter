@@ -129,6 +129,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get filterPriority => 'Filter Priority';
 
   @override
+  String get techOrgAll => 'All';
+
+  @override
   String get priorityAll => 'All';
 
   @override

@@ -206,6 +206,8 @@ class IssueModel {
   final String deviceName;
   final String zoneId;
   final String zoneName;
+  final String? clientId;
+  final String? clientName;
   final String categoryId;
   final String categoryName;
   final IssuePriority priority;
@@ -236,6 +238,8 @@ class IssueModel {
     this.deviceCode,
     required this.zoneId,
     required this.zoneName,
+    this.clientId,
+    this.clientName,
     required this.categoryId,
     required this.categoryName,
     this.priority = IssuePriority.medium,
@@ -258,6 +262,7 @@ class IssueModel {
   factory IssueModel.fromJson(Map<String, dynamic> json) {
     final deviceObj = json['device'] as Map<String, dynamic>?;
     final zoneObj = deviceObj?['zone'] as Map<String, dynamic>?;
+    final clientObj = zoneObj?['client'] as Map<String, dynamic>?;
     final categoryObj = json['category'] as Map<String, dynamic>?;
     final raisedByObj = (json['raisedBy'] ?? json['raised_by']) as Map<String, dynamic>?;
     final techObj = (json['assignedTechnician'] ?? json['assigned_technician']) as Map<String, dynamic>?;
@@ -303,6 +308,8 @@ class IssueModel {
       deviceCode: (json['deviceCode'] ?? json['device_code'] ?? deviceObj?['code']) as String?,
       zoneId: (json['zoneId'] ?? json['zone_id'] ?? deviceObj?['zoneId'] ?? zoneObj?['id']) as String? ?? '',
       zoneName: (json['zoneName'] ?? json['zone_name'] ?? zoneObj?['name']) as String? ?? 'Unknown Zone',
+      clientId: (json['clientId'] ?? json['client_id'] ?? zoneObj?['clientId'] ?? clientObj?['id']) as String?,
+      clientName: (json['clientName'] ?? json['client_name'] ?? clientObj?['name']) as String?,
       categoryId: (json['categoryId'] ?? json['category_id'] ?? categoryObj?['id']) as String? ?? '',
       categoryName: catName,
       priority: IssuePriority.fromString((json['priority']) as String?),
@@ -367,6 +374,8 @@ class IssueModel {
     String? deviceCode,
     String? zoneId,
     String? zoneName,
+    String? clientId,
+    String? clientName,
     String? categoryId,
     String? categoryName,
     IssuePriority? priority,
@@ -395,6 +404,8 @@ class IssueModel {
       deviceCode: deviceCode ?? this.deviceCode,
       zoneId: zoneId ?? this.zoneId,
       zoneName: zoneName ?? this.zoneName,
+      clientId: clientId ?? this.clientId,
+      clientName: clientName ?? this.clientName,
       categoryId: categoryId ?? this.categoryId,
       categoryName: categoryName ?? this.categoryName,
       priority: priority ?? this.priority,

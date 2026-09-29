@@ -45,7 +45,8 @@ class TechnicianIssueList extends StatelessWidget {
       onRefresh: onRefresh,
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(16),
+        // Extra bottom room so the last card clears the Bulk Resolve FAB.
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
         itemCount: (hasError || issues.isEmpty) ? 1 : issues.length,
         itemBuilder: (context, index) {
           if (hasError) {

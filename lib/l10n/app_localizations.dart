@@ -338,6 +338,12 @@ abstract class AppLocalizations {
   /// **'Filter Priority'**
   String get filterPriority;
 
+  /// No description provided for @techOrgAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get techOrgAll;
+
   /// No description provided for @priorityAll.
   ///
   /// In en, this message translates to:

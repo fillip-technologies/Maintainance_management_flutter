@@ -4,13 +4,12 @@ import '../../../issues/models/issue_model.dart';
 import '../../../issues/views/issue_detail_sheet.dart';
 import '../../models/technician_zone_map_data.dart';
 import 'technician_device_block.dart';
-import 'technician_health_ring.dart';
+import 'technician_org_badge.dart';
 
 /// Replicates TopLevelZoneCard from the web UI (http://localhost:5173/clientadmin/cameras).
 /// Big Card for top-level facility zone showcasing:
 /// - Colored left vertical accent bar (Red if issues exist, Blue/Emerald if nominal).
 /// - Uppercase bold zone name and hardware telemetry stats.
-/// - Circular health ring.
 /// - Collapsible camera grid containing all descendant cameras.
 /// - Status footer (Faulty callout + Alerts button or All Cameras Working banner).
 class TechnicianTopLevelZoneCard extends StatefulWidget {
@@ -150,6 +149,7 @@ class _TechnicianTopLevelZoneCardState
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
+                          TechnicianOrgBadge(name: item.zone.clientName),
                           const SizedBox(height: 3),
                           Wrap(
                             crossAxisAlignment: WrapCrossAlignment.center,
@@ -186,13 +186,6 @@ class _TechnicianTopLevelZoneCardState
                           ),
                         ],
                       ),
-                    ),
-                    const SizedBox(width: 8),
-
-                    // Circular Health Ring
-                    TechnicianHealthRing(
-                      percentage: item.healthPercentage,
-                      size: 34,
                     ),
                   ],
                 ),

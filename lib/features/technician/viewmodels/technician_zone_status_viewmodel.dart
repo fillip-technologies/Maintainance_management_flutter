@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/zone_status_row.dart';
+import 'technician_org_filter_provider.dart';
 import 'technician_zone_tree_viewmodel.dart';
 
 /// Manages data loading and health aggregation for the Technician Zone Status table overview.
@@ -13,6 +14,7 @@ class TechnicianZoneStatusViewModel extends AsyncNotifier<List<ZoneStatusRow>> {
   Future<List<ZoneStatusRow>> build() async {
     // Watch the zone tree viewmodel so any updates or reloads automatically cascade here
     final treeState = await ref.watch(technicianZoneTreeViewModelProvider.future);
+    final orgId = ref.watch(technicianActiveOrgProvider);
 
     if (treeState.zoneSections.isEmpty) {
       // If tree is still loading or fell back to bare roots
@@ -31,6 +33,7 @@ class TechnicianZoneStatusViewModel extends AsyncNotifier<List<ZoneStatusRow>> {
 
     // Fast in-memory transformation: maps zoneSections directly to ZoneStatusRow!
     return treeState.zoneSections
+        .where((sec) => orgId == null || sec.zone.clientId == orgId)
         .map((sec) => ZoneStatusRow.fromTopLevelZoneItem(sec))
         .toList();
   }

@@ -187,7 +187,12 @@ class TechnicianZoneTreeViewModel extends AsyncNotifier<TechnicianZoneTreeState>
       for (final z in rawMyZones) {
         if (!zoneMap.containsKey(z.id)) {
           zoneMap[z.id] = z;
-        } else if (zoneMap[z.id]!.parentZoneId == null && z.parentZoneId != null) {
+        } else if (zoneMap[z.id]!.clientId == null ||
+            zoneMap[z.id]!.clientName == null) {
+          zoneMap[z.id] = zoneMap[z.id]!
+              .copyWith(clientId: z.clientId, clientName: z.clientName);
+        }
+        if (zoneMap[z.id]!.parentZoneId == null && z.parentZoneId != null) {
           zoneMap[z.id] = zoneMap[z.id]!.copyWith(parentZoneId: z.parentZoneId);
         }
       }
@@ -262,8 +267,18 @@ class TechnicianZoneTreeViewModel extends AsyncNotifier<TechnicianZoneTreeState>
           return a.name.toLowerCase().compareTo(b.name.toLowerCase());
         });
 
+        // Fallback: a root without client info borrows it from its tickets.
+        var sectionZone = root;
+        if (root.clientId == null) {
+          final withClient = rootIssues.where((i) => i.clientId != null).firstOrNull;
+          if (withClient != null) {
+            sectionZone = root.copyWith(
+                clientId: withClient.clientId, clientName: withClient.clientName);
+          }
+        }
+
         sections.add(TechnicianTopLevelZoneItem(
-          zone: root,
+          zone: sectionZone,
           devices: rootDevices,
           issues: rootIssues,
         ));

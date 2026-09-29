@@ -43,7 +43,10 @@ class AppFilterChip extends StatelessWidget {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
           curve: Curves.easeInOut,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          // 40dp tall: a comfortable thumb target for chips in scrolling rows.
+          constraints: const BoxConstraints(minHeight: 40),
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
           decoration: BoxDecoration(
             color: isSelected ? effectiveActiveColor : effectiveInactiveColor,
             borderRadius: BorderRadius.circular(20),
@@ -58,15 +61,15 @@ class AppFilterChip extends StatelessWidget {
               if (icon != null) ...[
                 Icon(
                   icon,
-                  size: 14,
+                  size: 16,
                   color: isSelected ? effectiveActiveTextColor : effectiveInactiveTextColor,
                 ),
-                const SizedBox(width: 5),
+                const SizedBox(width: 6),
               ],
               Text(
                 label,
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 13.5,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                   color: isSelected ? effectiveActiveTextColor : effectiveInactiveTextColor,
                 ),
@@ -84,7 +87,7 @@ class AppFilterChip extends StatelessWidget {
                   child: Text(
                     badgeText!,
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: 11.5,
                       fontWeight: FontWeight.bold,
                       color: isSelected
                           ? effectiveActiveTextColor

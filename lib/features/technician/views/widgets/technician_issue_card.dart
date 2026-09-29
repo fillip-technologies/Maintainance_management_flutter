@@ -4,6 +4,7 @@ import '../../../../core/widgets/status_badge.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../devices/devices.dart';
 import '../../../issues/issues.dart';
+import 'technician_org_badge.dart';
 
 class TechnicianIssueCard extends StatelessWidget {
   final IssueModel issue;
@@ -224,6 +225,7 @@ class TechnicianIssueCard extends StatelessWidget {
                             color: AppColors.textPrimary,
                           ),
                         ),
+                        TechnicianOrgBadge(name: issue.clientName),
                         Text(
                           '${issue.zoneName}${issue.categoryName.isNotEmpty ? " • ${issue.categoryName}" : ""}',
                           overflow: TextOverflow.ellipsis,

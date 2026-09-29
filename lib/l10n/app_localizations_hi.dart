@@ -129,6 +129,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get filterPriority => 'प्राथमिकता फ़िल्टर';
 
   @override
+  String get techOrgAll => 'सभी संस्थाएं';
+
+  @override
   String get priorityAll => 'सभी';
 
   @override

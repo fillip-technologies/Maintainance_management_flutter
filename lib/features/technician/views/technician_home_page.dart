@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/colors.dart';
 import '../../../core/utils/app_snackbar.dart';
+import '../../../core/widgets/status_badge.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../issues/issues.dart';
 import '../../location/location_helper.dart';
@@ -154,6 +155,36 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage> {
     );
   }
 
+  bool _allSelected(List<IssueModel> list) =>
+      list.isNotEmpty && list.every((i) => _selectedIssueIds.contains(i.id));
+
+  ButtonStyle _selectRowButtonStyle(Color color) => TextButton.styleFrom(
+    foregroundColor: color,
+    minimumSize: const Size(0, 44),
+    padding: const EdgeInsets.symmetric(horizontal: 10),
+  );
+
+  List<_BulkOption> _bulkOptions(BuildContext context) => [
+    _BulkOption(
+      IssueStatus.resolved,
+      Icons.check_circle_rounded,
+      AppColors.success,
+      IssueStatus.resolved.localized(context),
+    ),
+    _BulkOption(
+      IssueStatus.inProgress,
+      Icons.build_circle_rounded,
+      AppColors.warning,
+      IssueStatus.inProgress.localized(context),
+    ),
+    _BulkOption(
+      IssueStatus.onHold,
+      Icons.pause_circle_rounded,
+      AppColors.neutral,
+      IssueStatus.onHold.localized(context),
+    ),
+  ];
+
   @override
   Widget build(BuildContext context) {
     // Realtime: Listen for incoming new tickets and show toast + refresh
@@ -230,11 +261,11 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage> {
       children: [
         // 3-Mode View Switcher (Zone Map vs Zone Status vs My Tickets)
         Container(
-          margin: const EdgeInsets.fromLTRB(16, 10, 16, 6),
-          padding: const EdgeInsets.all(3),
+          margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+          padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
             color: AppColors.cardAlt,
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(color: AppColors.border.withValues(alpha: 0.6)),
           ),
           child: Row(
@@ -272,6 +303,8 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage> {
           ),
         ),
 
+        const TechnicianOrgFilterBar(),
+
         if (activeMode == TechnicianViewMode.zoneStatusTable)
           const Expanded(child: TechnicianZoneStatusView())
         else if (activeMode == TechnicianViewMode.spatialExplorer)
@@ -296,57 +329,31 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage> {
                 // Selection mode toggle & select-all row
                 if (currentList.isNotEmpty) ...[
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 6,
-                    ),
+                    constraints: const BoxConstraints(minHeight: 48),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
                     color: AppColors.cardAlt,
                     child: Row(
                       children: [
-                        if (_isSelectionMode) ...[
-                          InkWell(
-                            onTap: () => _toggleSelectAll(currentList),
-                            borderRadius: BorderRadius.circular(6),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 4,
-                                horizontal: 4,
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    currentList.isNotEmpty &&
-                                            currentList.every(
-                                              (i) => _selectedIssueIds.contains(
-                                                i.id,
-                                              ),
-                                            )
-                                        ? Icons.check_box
-                                        : Icons.check_box_outline_blank,
-                                    size: 16,
-                                    color: AppColors.primary,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    currentList.isNotEmpty &&
-                                            currentList.every(
-                                              (i) => _selectedIssueIds.contains(
-                                                i.id,
-                                              ),
-                                            )
-                                        ? l10n.clearSelection
-                                        : l10n.selectAll,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.primary,
-                                    ),
-                                  ),
-                                ],
+                        if (_isSelectionMode)
+                          TextButton.icon(
+                            onPressed: () => _toggleSelectAll(currentList),
+                            icon: Icon(
+                              _allSelected(currentList)
+                                  ? Icons.check_box_rounded
+                                  : Icons.check_box_outline_blank_rounded,
+                              size: 22,
+                            ),
+                            label: Text(
+                              _allSelected(currentList)
+                                  ? l10n.clearSelection
+                                  : l10n.selectAll,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
+                            style: _selectRowButtonStyle(AppColors.primary),
                           ),
-                        ],
                         const Spacer(),
                         TextButton.icon(
                           onPressed: () {
@@ -357,22 +364,21 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage> {
                           },
                           icon: Icon(
                             _isSelectionMode
-                                ? Icons.close
+                                ? Icons.close_rounded
                                 : Icons.checklist_rtl_rounded,
-                            size: 16,
+                            size: 22,
                           ),
                           label: Text(
                             _isSelectionMode
                                 ? l10n.doneSelecting
                                 : l10n.selectMode,
                             style: const TextStyle(
-                              fontSize: 12,
+                              fontSize: 14,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          style: TextButton.styleFrom(
-                            visualDensity: VisualDensity.compact,
-                            foregroundColor: _isSelectionMode
+                          style: _selectRowButtonStyle(
+                            _isSelectionMode
                                 ? AppColors.error
                                 : AppColors.primary,
                           ),
@@ -383,120 +389,102 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage> {
                   Divider(height: 1, color: AppColors.divider),
                 ],
 
-                // Bulk Action Bar (matches TicketList.jsx in web frontend)
+                // Bulk Action Bar: count + close on top, status choice, then
+                // one full-width apply button.
                 if (_selectedIssueIds.isNotEmpty) ...[
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    color: AppColors.primaryBg.withValues(alpha: 0.5),
-                    child: Row(
+                    padding: const EdgeInsets.fromLTRB(16, 4, 4, 12),
+                    color: AppColors.primaryBg,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(
-                          Icons.check_circle,
-                          size: 18,
-                          color: AppColors.primary,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '${_selectedIssueIds.length} Selected',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                        const Spacer(),
-                        DropdownButton<IssueStatus>(
-                          value: _bulkStatus,
-                          underline: const SizedBox.shrink(),
-                          isDense: true,
-                          items: [
-                            DropdownMenuItem(
-                              value: IssueStatus.resolved,
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.check_circle_rounded,
+                              size: 22,
+                              color: AppColors.primary,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
                               child: Text(
-                                'Resolved',
+                                l10n.staffNSelected(_selectedIssueIds.length),
                                 style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.successText,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
                                 ),
                               ),
                             ),
-                            DropdownMenuItem(
-                              value: IssueStatus.inProgress,
-                              child: Text(
-                                'In Progress',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.warningText,
-                                ),
+                            IconButton(
+                              icon: Icon(
+                                Icons.close_rounded,
+                                size: 24,
+                                color: AppColors.icon,
                               ),
-                            ),
-                            DropdownMenuItem(
-                              value: IssueStatus.onHold,
-                              child: Text(
-                                'On Hold',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.purpleText,
-                                ),
-                              ),
+                              onPressed: () => setState(() {
+                                _selectedIssueIds.clear();
+                                _isSelectionMode = false;
+                              }),
                             ),
                           ],
-                          onChanged: (val) {
-                            if (val != null) setState(() => _bulkStatus = val);
-                          },
                         ),
-                        const SizedBox(width: 8),
-                        ElevatedButton(
-                          onPressed: _isApplying ? null : _handleBulkApply,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: AppColors.textWhite,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            minimumSize: Size.zero,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: _isApplying
-                              ? SizedBox(
-                                  width: 14,
-                                  height: 14,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: AppColors.white,
-                                  ),
-                                )
-                              : Text(
-                                  l10n.applyToSelected,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
+                        Padding(
+                          padding: const EdgeInsets.only(right: 12),
+                          child: Row(
+                            children: [
+                              for (final (i, option)
+                                  in _bulkOptions(context).indexed) ...[
+                                if (i > 0) const SizedBox(width: 8),
+                                Expanded(
+                                  child: _BulkStatusOption(
+                                    icon: option.icon,
+                                    label: option.label,
+                                    color: option.color,
+                                    isSelected: _bulkStatus == option.status,
+                                    onTap: () => setState(
+                                      () => _bulkStatus = option.status,
+                                    ),
                                   ),
                                 ),
-                        ),
-                        const SizedBox(width: 6),
-                        IconButton(
-                          icon: Icon(
-                            Icons.close,
-                            size: 18,
-                            color: AppColors.icon,
+                              ],
+                            ],
                           ),
-                          onPressed: () => setState(() {
-                            _selectedIssueIds.clear();
-                            _isSelectionMode = false;
-                          }),
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
+                        ),
+                        const SizedBox(height: 10),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 12),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              onPressed: _isApplying ? null : _handleBulkApply,
+                              icon: _isApplying
+                                  ? SizedBox(
+                                      width: 18,
+                                      height: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: AppColors.white,
+                                      ),
+                                    )
+                                  : const Icon(Icons.done_all_rounded, size: 22),
+                              label: Text(
+                                l10n.applyToSelected,
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                foregroundColor: AppColors.textWhite,
+                                minimumSize: const Size(0, 48),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -562,47 +550,122 @@ class _ModeSwitchButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(10),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
-        decoration: BoxDecoration(
-          color: isActive ? AppColors.surface : AppColors.transparent,
-          borderRadius: BorderRadius.circular(10),
-          boxShadow: isActive
-              ? [
-                  BoxShadow(
-                    color: AppColors.cardShadow,
-                    blurRadius: 4,
-                    offset: const Offset(0, 1),
-                  ),
-                ]
-              : null,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 14,
-              color: isActive ? AppColors.primary : AppColors.textSecondary,
-            ),
-            const SizedBox(width: 4),
-            Flexible(
-              child: Text(
+    final color = isActive ? AppColors.primary : AppColors.textSecondary;
+    return Semantics(
+      button: true,
+      selected: isActive,
+      label: label,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          constraints: const BoxConstraints(minHeight: 60),
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+          decoration: BoxDecoration(
+            color: isActive ? AppColors.surface : AppColors.transparent,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: isActive
+                ? [
+                    BoxShadow(
+                      color: AppColors.cardShadow,
+                      blurRadius: 6,
+                      offset: const Offset(0, 1),
+                    ),
+                  ]
+                : null,
+          ),
+          // Icon above label: the icon carries the meaning, the word confirms it.
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 24, color: color),
+              const SizedBox(height: 3),
+              Text(
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: 11.5,
+                  fontSize: 12.5,
                   fontWeight: isActive ? FontWeight.bold : FontWeight.w600,
-                  color: isActive ? AppColors.primary : AppColors.textSecondary,
+                  color: color,
                 ),
               ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BulkOption {
+  final IssueStatus status;
+  final IconData icon;
+  final Color color;
+  final String label;
+
+  const _BulkOption(this.status, this.icon, this.color, this.label);
+}
+
+/// One big tappable status choice in the bulk bar: icon + one word, coloured.
+class _BulkStatusOption extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _BulkStatusOption({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: label,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          constraints: const BoxConstraints(minHeight: 60),
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+          decoration: BoxDecoration(
+            color: isSelected ? color : AppColors.surface,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: isSelected ? color : AppColors.border,
+              width: isSelected ? 2 : 1,
             ),
-          ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 24,
+                color: isSelected ? AppColors.white : color,
+              ),
+              const SizedBox(height: 3),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.bold,
+                  color: isSelected ? AppColors.white : AppColors.textPrimary,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

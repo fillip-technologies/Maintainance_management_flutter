@@ -7,6 +7,7 @@ import '../../../../core/widgets/empty_state_view.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../devices/models/technician_zone_node.dart';
 import '../../models/technician_zone_map_data.dart';
+import '../../viewmodels/technician_org_filter_provider.dart';
 import '../../viewmodels/technician_zone_tree_viewmodel.dart';
 import 'technician_breadcrumb_bar.dart';
 import 'technician_top_level_zone_card.dart';
@@ -93,6 +94,7 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
     final l10n = AppLocalizations.of(context)!;
     final treeAsync = ref.watch(technicianZoneTreeViewModelProvider);
     final viewModel = ref.read(technicianZoneTreeViewModelProvider.notifier);
+    final orgId = ref.watch(technicianActiveOrgProvider);
 
     return treeAsync.when(
       loading: () => const ZoneTreeSkeleton(),
@@ -131,8 +133,11 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
         // 1. ROOT VIEW: High-Fidelity Web-Parity Big Cards View
         // ════════════════════════════════════════════════════════════════════
         if (isAtRoot) {
+          final orgSections = state.zoneSections
+              .where((s) => orgId == null || s.zone.clientId == orgId)
+              .toList();
           final filteredSections = _getFilteredSections(
-            state.zoneSections,
+            orgSections,
             _searchQuery,
             _selectedFilter,
           );
@@ -140,14 +145,11 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
           var totalDevices = 0;
           var totalOnline = 0;
           var totalOffline = 0;
-          for (final sec in state.zoneSections) {
+          for (final sec in orgSections) {
             totalDevices += sec.totalDevices;
             totalOnline += sec.onlineDevices;
             totalOffline += sec.offlineDevices;
           }
-          final fleetHealthPct = totalDevices > 0
-              ? ((totalOnline / totalDevices) * 100).toStringAsFixed(0)
-              : '100';
 
           return RefreshIndicator(
             color: AppColors.primary,
@@ -230,7 +232,7 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                         ),
                         const SizedBox(height: 10),
 
-                        // Filter Chips & Fleet Health Indicator
+                        // Filter Chips
                         Row(
                           children: [
                             Expanded(
@@ -276,49 +278,6 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                                     ),
                                   ],
                                 ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: totalOffline > 0
-                                    ? AppColors.error.withValues(alpha: 0.1)
-                                    : AppColors.success.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: totalOffline > 0
-                                      ? AppColors.error.withValues(alpha: 0.3)
-                                      : AppColors.success.withValues(alpha: 0.3),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    width: 6,
-                                    height: 6,
-                                    decoration: BoxDecoration(
-                                      color: totalOffline > 0
-                                          ? AppColors.error
-                                          : AppColors.success,
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 5),
-                                  Text(
-                                    '$fleetHealthPct% Health',
-                                    style: TextStyle(
-                                      fontSize: 10.5,
-                                      fontWeight: FontWeight.bold,
-                                      fontFamily: 'monospace',
-                                      color: totalOffline > 0
-                                          ? AppColors.error
-                                          : AppColors.success,
-                                    ),
-                                  ),
-                                ],
                               ),
                             ),
                           ],
@@ -381,13 +340,13 @@ class _ZoneTreeExplorerViewState extends ConsumerState<ZoneTreeExplorerView> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 32, vertical: 40),
                       child: EmptyStateView(
-                        icon: state.zoneSections.isEmpty
+                        icon: orgSections.isEmpty
                             ? Icons.map_outlined
                             : Icons.search_off_rounded,
-                        title: state.zoneSections.isEmpty
+                        title: orgSections.isEmpty
                             ? l10n.techNoAssignedZones
                             : 'No Matching Equipment',
-                        subtitle: state.zoneSections.isEmpty
+                        subtitle: orgSections.isEmpty
                             ? l10n.techNoAssignedZonesSub
                             : 'No zones or equipment match your current search and filter criteria.',
                       ),

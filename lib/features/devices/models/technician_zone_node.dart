@@ -26,6 +26,7 @@ class TechnicianZoneNode {
   final String? parentZoneId;
   final int depth;
   final String status;
+  final String? clientId;
   final String? clientName;
   final String? imageUrl;
 
@@ -61,6 +62,7 @@ class TechnicianZoneNode {
     this.parentZoneId,
     this.depth = 0,
     this.status = 'active',
+    this.clientId,
     this.clientName,
     this.imageUrl,
     this.deviceCount = 0,
@@ -110,6 +112,7 @@ class TechnicianZoneNode {
     String? parentZoneId,
     int? depth,
     String? status,
+    String? clientId,
     String? clientName,
     String? imageUrl,
     int? deviceCount,
@@ -133,6 +136,7 @@ class TechnicianZoneNode {
       parentZoneId: parentZoneId ?? this.parentZoneId,
       depth: depth ?? this.depth,
       status: status ?? this.status,
+      clientId: clientId ?? this.clientId,
       clientName: clientName ?? this.clientName,
       imageUrl: imageUrl ?? this.imageUrl,
       deviceCount: deviceCount ?? this.deviceCount,
@@ -190,6 +194,7 @@ class TechnicianZoneNode {
       parentZoneId: (json['parentZoneId'] ?? json['parent_zone_id']) as String?,
       depth: (json['depth'] as num?)?.toInt() ?? 0,
       status: (json['status'] as String?) ?? 'active',
+      clientId: (json['clientId'] ?? json['client_id'] ?? clientObj?['id']) as String?,
       clientName: (json['clientName'] as String?) ?? (clientObj?['name'] as String?),
       imageUrl: (json['imageUrl'] ?? json['image_url'] ?? json['logoUrl'] ?? json['logo_url']) as String?,
       deviceCount: deviceCount,

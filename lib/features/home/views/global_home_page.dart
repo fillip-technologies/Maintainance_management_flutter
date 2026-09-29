@@ -108,8 +108,8 @@ class GlobalHomePage extends ConsumerWidget {
             child: Row(
               children: [
                 Container(
-                  width: 38,
-                  height: 38,
+                  width: 44,
+                  height: 44,
                   decoration: BoxDecoration(
                     color: AppColors.primaryBg,
                     borderRadius: BorderRadius.circular(12),
@@ -125,7 +125,7 @@ class GlobalHomePage extends ConsumerWidget {
                                   ? Icons.engineering_outlined
                                   : Icons.shield_outlined,
                               color: AppColors.primary,
-                              size: 20,
+                              size: 24,
                             ),
                           ),
                         )
@@ -135,7 +135,7 @@ class GlobalHomePage extends ConsumerWidget {
                                 ? Icons.engineering_outlined
                                 : Icons.shield_outlined,
                             color: AppColors.primary,
-                            size: 20,
+                            size: 24,
                           ),
                         ),
                 ),
@@ -151,10 +151,10 @@ class GlobalHomePage extends ConsumerWidget {
                             child: Text(
                               user?.name ??
                                    (isTechnician
-                                       ? 'Field Technician'
-                                       : 'Staff Member'),
+                                       ? (l10n?.roleHardwareTechnician ?? 'Field Technician')
+                                       : (l10n?.roleZoneStaff ?? 'Staff Member')),
                               style: TextStyle(
-                                fontSize: 16,
+                                fontSize: 17,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.textPrimary,
                               ),
@@ -176,18 +176,18 @@ class GlobalHomePage extends ConsumerWidget {
                             isTechnician
                                 ? Icons.build_circle_outlined
                                 : Icons.location_on,
-                            size: 12,
+                            size: 14,
                             color: AppColors.icon,
                           ),
                           const SizedBox(width: 3),
                           Expanded(
                             child: Text(
                               isTechnician
-                                  ? 'Hardware Technician • Assigned Queue'
+                                  ? (l10n?.roleHardwareTechnician ?? 'Hardware Technician')
                                   : effectiveZoneName,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: 13,
                                 color: AppColors.textSecondary,
                               ),
                             ),
