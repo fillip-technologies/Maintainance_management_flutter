@@ -32,7 +32,7 @@ class DecommissionShortcutBanner extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'Tap here to decommission & replace hardware',
+                    'Tap here to request an equipment replacement',
                     style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
                   ),
                 ],

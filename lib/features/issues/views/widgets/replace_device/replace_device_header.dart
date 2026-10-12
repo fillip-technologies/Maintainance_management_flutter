@@ -35,7 +35,7 @@ class ReplaceDeviceHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  l10n.decommissionHeading,
+                  l10n.replacementRequestHeading,
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                 ),
                 Text(

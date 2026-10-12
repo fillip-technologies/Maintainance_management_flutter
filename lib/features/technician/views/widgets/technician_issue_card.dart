@@ -260,7 +260,14 @@ class TechnicianIssueCard extends StatelessWidget {
 
               // In bulk-selection mode the whole card is a checkbox target, so
               // per-card action buttons would just get in the way.
-              if (!isSelectable) ...[
+              if (!isSelectable && issue.awaitingReplacementApproval) ...[
+                const SizedBox(height: 14),
+                AwaitingReplacementBanner(
+                  compact: true,
+                  message: l10n?.replacementPendingCannotClose ??
+                      'Replacement awaiting approval — cannot resolve or close yet',
+                ),
+              ] else if (!isSelectable) ...[
                 const SizedBox(height: 14),
                 _buildActionArea(
                   startWorkLabel: startWorkLabel,

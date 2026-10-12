@@ -2,7 +2,6 @@
   "@@locale": "hi",
   "appName": "Fixly",
   "appTagline": "उपकरण और रखरखाव प्रबंधन",
-
   "ok": "ठीक है",
   "cancel": "रद्द करें",
   "save": "सहेजें",
@@ -16,7 +15,6 @@
   "language": "भाषा",
   "switchToHindi": "हिन्दी",
   "switchToEnglish": "English",
-
   "signIn": "लॉग इन करें",
   "forgotPassword": "पासवर्ड भूल गए?",
   "secureConnectionNotice": "एंटरप्राइज़ रखरखाव नेटवर्क",
@@ -29,12 +27,10 @@
   "demoQuickLogin": "डेमो त्वरित लॉगिन",
   "demoLoginNotice": "त्वरित परीक्षण हेतु एक-क्लिक लॉगिन",
   "emailRequired": "कृपया ईमेल और पासवर्ड दोनों दर्ज करें",
-
   "roleHardwareTechnician": "हार्डवेयर तकनीशियन",
   "roleZoneStaff": "ज़ोन कर्मचारी",
   "unassignedQueue": "असाइन नहीं (संस्था कतार)",
   "assignedQueue": "असाइन की गई कतार",
-
   "kpiTotal": "कुल",
   "kpiOpen": "खुली समस्याएं",
   "kpiOnHold": "रोका गया",
@@ -51,7 +47,6 @@
   "btnResolve": "हल करें",
   "noActiveTickets": "सक्रिय सूची में कोई टिकट नहीं है",
   "allTicketsDone": "बहुत बढ़िया! सभी असाइन किए गए टिकट हल हो चुके हैं।",
-
   "kpiTotalDevices": "कुल उपकरण",
   "kpiActiveIssues": "सक्रिय समस्याएं",
   "kpiMissingLogs": "आज का लॉग बाकी",
@@ -66,7 +61,6 @@
   "logStatusNotWorking": "खराब (बंद)",
   "logNotesHint": "टिप्पणी, लेंस साफ किया, केबल की स्थिति...",
   "logSubmittedSuccess": "दैनिक लॉग सफलतापूर्वक दर्ज हुआ",
-
   "ticketDetails": "टिकट विवरण",
   "defectDescription": "दोष / समस्या का विवरण",
   "timelineHistory": "स्थिति इतिहास और टाइमलाइन",
@@ -77,7 +71,6 @@
   "btnUpdateStatus": "स्थिति बदलें / कार्य विवरण जोड़ें",
   "noHistory": "अभी कोई इतिहास उपलब्ध नहीं है। समस्या प्रारंभिक स्थिति में है।",
   "timeJustNow": "अभी-अभी",
-
   "updateWorkStatus": "कार्य स्थिति अपडेट करें",
   "selectNextStatus": "अगली स्थिति चुनें",
   "workLogLabel": "कार्य विवरण / टिप्पणी",
@@ -89,7 +82,6 @@
   "takePhotoCamera": "फोटो खींचें (कैमरा)",
   "chooseFromGallery": "गैलरी से चुनें",
   "confirmTransition": "पुष्टि करें और {status} में बदलें",
-
   "raiseEquipmentDefect": "उपकरण की समस्या रिपोर्ट करें",
   "selectDevice": "उपकरण इकाई चुनें",
   "defectCategory": "दोष की श्रेणी",
@@ -102,7 +94,6 @@
   "defectPhotoAdded": "दोष की फोटो जोड़ी गई",
   "evidencePhotos": "साक्ष्य एवं संलग्नक",
   "submitDefectTicket": "समस्या टिकट दर्ज करें",
-
   "statusOpen": "खुला",
   "statusAssigned": "असाइन किया गया",
   "statusInProgress": "प्रगति पर",
@@ -110,18 +101,15 @@
   "statusResolved": "हल किया गया",
   "statusClosed": "बंद",
   "statusReopened": "पुनः खोला गया",
-
   "priorityCritical": "गंभीर",
   "priorityHigh": "उच्च",
   "priorityMedium": "मध्यम",
   "priorityLow": "कम",
-
   "deviceStatusActive": "सक्रिय",
   "deviceStatusMaintenance": "रखरखाव",
   "deviceStatusFaulty": "खराब",
   "deviceStatusProvisioned": "स्टॉक में",
   "deviceStatusRetired": "हटाया गया / सेवामुक्त",
-
   "profile": "प्रोफ़ाइल",
   "workScope": "कार्य एवं असाइनमेंट विवरण",
   "preferencesSystem": "प्राथमिकताएं एवं सिस्टम",
@@ -136,7 +124,6 @@
   "role": "भूमिका (Role)",
   "orgWideQueue": "संस्था-स्तरीय कार्य सूची (Organization Wide)",
   "unassignedScope": "अनिर्दिष्ट क्षेत्र (Unassigned)",
-
   "btnDecommissionReplace": "उपकरण बदलें / हटाएं",
   "decommissionHeading": "उपकरण सेवामुक्त / निष्कासन",
   "decommissionReason": "हटाने का कारण",
@@ -161,7 +148,6 @@
   "issueResolvedAlert": "तकनीशियन द्वारा समस्या हल की गई",
   "deviceCheckedLive": "सहकर्मी द्वारा उपकरण जांचा गया",
   "viewTicket": "टिकट देखें",
-
   "stepWhatHappened": "1. उपकरण के साथ क्या हुआ?",
   "stepWhatDidYouDo": "2. आपने क्या कार्रवाई की?",
   "actionRemovedOnly": "सिर्फ निकाल दिया (स्थान खाली है)",
@@ -177,7 +163,6 @@
   "submittingDecommission": "दर्ज हो रहा है...",
   "selectedSpareBadge": "चयनित",
   "searchSparesHint": "नाम या कोड से स्पेयर खोजें...",
-
   "btnBulkDefect": "थोक समस्या",
   "raiseBulkDefectTitle": "थोक उपकरण समस्या रिपोर्ट करें",
   "raiseBulkDefectSubtitle": "एकाधिक उपकरणों पर समान समस्या दर्ज करें (1–50)",
@@ -240,7 +225,6 @@
   "presetBatchRepaired": "बैच मरम्मत पूरी हुई और जांच की गई",
   "presetFirmwareUpdated": "फ़र्मवेयर अपडेट और रीबूट किया गया",
   "presetCablesTested": "केबल दोबारा जोड़े गए और कनेक्टिविटी जांची गई",
-
   "techViewSpatial": "ज़ोन नक्शा",
   "techViewQueue": "मेरे टिकट",
   "techBadgeOk": "ठीक",
@@ -252,17 +236,29 @@
   "techZonesDevicesSummary": "{zones} सौंपे गए ज़ोन • {devices} कुल उपकरण",
   "@techZonesDevicesSummary": {
     "placeholders": {
-      "zones": { "type": "int" },
-      "devices": { "type": "int" }
+      "zones": {
+        "type": "int"
+      },
+      "devices": {
+        "type": "int"
+      }
     }
   },
   "techPercentOnline": "{percent}% सक्रिय",
   "@techPercentOnline": {
-    "placeholders": { "percent": { "type": "int" } }
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
   },
   "techPercentHealth": "{percent}% सक्रिय",
   "@techPercentHealth": {
-    "placeholders": { "percent": { "type": "int" } }
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
   },
   "techStatTotal": "कुल",
   "techStatOnline": "सक्रिय",
@@ -272,36 +268,64 @@
   "techZoneClientDepth": "{client} • स्तर {depth}",
   "@techZoneClientDepth": {
     "placeholders": {
-      "client": { "type": "String" },
-      "depth": { "type": "int" }
+      "client": {
+        "type": "String"
+      },
+      "depth": {
+        "type": "int"
+      }
     }
   },
   "techZoneDepthStatus": "स्तर {depth} • स्थिति: {status}",
   "@techZoneDepthStatus": {
     "placeholders": {
-      "depth": { "type": "int" },
-      "status": { "type": "String" }
+      "depth": {
+        "type": "int"
+      },
+      "status": {
+        "type": "String"
+      }
     }
   },
   "techFailedToLoadZones": "ज़ोन लोड नहीं हुए: {error}",
   "@techFailedToLoadZones": {
-    "placeholders": { "error": { "type": "String" } }
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
   },
   "techAssignedZonesCount": "सौंपे गए ज़ोन ({count})",
   "@techAssignedZonesCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "techSubZonesCount": "उप-ज़ोन ({count})",
   "@techSubZonesCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "techUnresolvedHardwareCount": "बिना ठीक हुए उपकरण ({count})",
   "@techUnresolvedHardwareCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "techFacilityIncidentsCount": "क्षेत्र की समस्याएँ ({count})",
   "@techFacilityIncidentsCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "techNoAssignedZones": "कोई ज़ोन नहीं सौंपा गया",
   "techNoAssignedZonesSub": "अभी आपको कोई ज़ोन नहीं सौंपा गया है",
@@ -309,13 +333,21 @@
   "techAllUnitsOperationalSub": "{zone} में सभी {count} उपकरण चालू हैं, कोई बाकी समस्या नहीं",
   "@techAllUnitsOperationalSub": {
     "placeholders": {
-      "count": { "type": "int" },
-      "zone": { "type": "String" }
+      "count": {
+        "type": "int"
+      },
+      "zone": {
+        "type": "String"
+      }
     }
   },
   "techNoUnresolvedInZone": "{zone} में कोई बाकी समस्या या खराबी नहीं",
   "@techNoUnresolvedInZone": {
-    "placeholders": { "zone": { "type": "String" } }
+    "placeholders": {
+      "zone": {
+        "type": "String"
+      }
+    }
   },
   "techAllZones": "सभी ज़ोन",
   "techFailedToLoadQueue": "आपकी काम सूची लोड नहीं हुई",
@@ -327,21 +359,32 @@
   "bulkAlreadyInStatus": "{count} पहले से {status}",
   "@bulkAlreadyInStatus": {
     "placeholders": {
-      "count": { "type": "int" },
-      "status": { "type": "String" }
+      "count": {
+        "type": "int"
+      },
+      "status": {
+        "type": "String"
+      }
     }
   },
   "bulkCouldNotUpdate": "{count} अपनी मौजूदा स्थिति से नहीं बदले जा सके",
   "@bulkCouldNotUpdate": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "bulkFailedToUpdate": "टिकट अपडेट नहीं हुए: {error}",
   "@bulkFailedToUpdate": {
-    "placeholders": { "error": { "type": "String" } }
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
   },
   "bulkNoPendingIssues": "हल करने के लिए कोई टिकट नहीं",
   "bulkNoMatchingTickets": "कोई मिलता-जुलता टिकट नहीं मिला",
-
   "staffKpiCheckedToday": "आज जांचे",
   "staffKpiWorking": "चालू",
   "staffKpiProblems": "समस्याएं",
@@ -349,23 +392,39 @@
   "staffMarkedDeviceAs": "{device} को {status} के रूप में दर्ज किया",
   "@staffMarkedDeviceAs": {
     "placeholders": {
-      "device": { "type": "String" },
-      "status": { "type": "String" }
+      "device": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
     }
   },
   "staffFailedToRecord": "सहेजा नहीं जा सका: {error}",
   "@staffFailedToRecord": {
-    "placeholders": { "error": { "type": "String" } }
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
   },
   "staffHardwareDownTitle": "उपकरण बंद है!",
   "staffHardwareDownBody": "आपने \"{device}\" को बंद बताया। क्या अभी मरम्मत टिकट बनाएं ताकि तकनीशियन भेजा जा सके?",
   "@staffHardwareDownBody": {
-    "placeholders": { "device": { "type": "String" } }
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
   },
   "staffNeedsAttentionTitle": "ध्यान देने की ज़रूरत",
   "staffNeedsAttentionBody": "आपने \"{device}\" को ध्यान देने योग्य बताया। क्या टिकट बनाएं ताकि तकनीशियन जांच कर सके?",
   "@staffNeedsAttentionBody": {
-    "placeholders": { "device": { "type": "String" } }
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
   },
   "staffLater": "बाद में",
   "staffRaiseTicketNow": "टिकट बनाएं",
@@ -375,36 +434,91 @@
   "staffCouldNotUpdateTicket": "टिकट अपडेट नहीं हो सका",
   "staffNSelected": "{count} चुने गए",
   "@staffNSelected": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
-
   "staffCheckedTodayProgress": "आज {total} में से {done} जांचे गए",
   "@staffCheckedTodayProgress": {
     "placeholders": {
-      "done": { "type": "int" },
-      "total": { "type": "int" }
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "staffFilterAll": "सभी ({count})",
-  "@staffFilterAll": { "placeholders": { "count": { "type": "int" } } },
+  "@staffFilterAll": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "staffFilterPending": "बाकी ({count})",
-  "@staffFilterPending": { "placeholders": { "count": { "type": "int" } } },
+  "@staffFilterPending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "staffFilterDone": "हो गए ({count})",
-  "@staffFilterDone": { "placeholders": { "count": { "type": "int" } } },
+  "@staffFilterDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "staffFilterOpen": "खुले ({count})",
-  "@staffFilterOpen": { "placeholders": { "count": { "type": "int" } } },
+  "@staffFilterOpen": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "staffFilterNeedsCheck": "खुले ({count})",
-  "@staffFilterNeedsCheck": { "placeholders": { "count": { "type": "int" } } },
+  "@staffFilterNeedsCheck": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "staffFilterInProgress": "चल रहा ({count})",
-  "@staffFilterInProgress": { "placeholders": { "count": { "type": "int" } } },
+  "@staffFilterInProgress": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "staffFilterDoneTickets": "हो गए ({count})",
-  "@staffFilterDoneTickets": { "placeholders": { "count": { "type": "int" } } },
+  "@staffFilterDoneTickets": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "staffPendingCheck": "बाकी",
   "staffChange": "बदलें",
   "staffCancel": "रद्द करें",
   "staffAddNote": "नोट जोड़ें (वैकल्पिक)",
   "staffRepeatedlyDown": "{count} बार बंद बताया गया — खराब चिह्नित हो सकता है",
-  "@staffRepeatedlyDown": { "placeholders": { "count": { "type": "int" } } },
+  "@staffRepeatedlyDown": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "staffChecklistLoadFailed": "चेकलिस्ट लोड नहीं हुई",
   "staffCheckConnectionRetry": "अपना कनेक्शन जांचें और दोबारा कोशिश करें",
   "staffAllChecksDone": "आज की सभी जांच पूरी। बहुत बढ़िया!",
@@ -421,7 +535,6 @@
   "staffTryAdjustingFilter": "दूसरी खोज या फ़िल्टर आज़माएं",
   "staffNoHardwareRegistered": "यहां अभी कोई उपकरण दर्ज नहीं है",
   "staffClearFilters": "फ़िल्टर हटाएं",
-
   "raiseIssueTitle": "समस्या दर्ज करें",
   "raiseSelectEquipment": "कौन सा उपकरण?",
   "raiseSelectUnitHint": "एक उपकरण चुनें",
@@ -438,10 +551,21 @@
   "raiseErrLoadCategories": "समस्या के प्रकार लोड नहीं हुए",
   "raiseErrGeneric": "टिकट दर्ज नहीं हो सका",
   "raiseSuccess": "{device} के लिए टिकट भेजा गया",
-  "@raiseSuccess": { "placeholders": { "device": { "type": "String" } } },
+  "@raiseSuccess": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
   "staffTicketResolvedToast": "{device} को तकनीशियन ने ठीक किया। विवरण के लिए टैप करें।",
-  "@staffTicketResolvedToast": { "placeholders": { "device": { "type": "String" } } },
-
+  "@staffTicketResolvedToast": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
   "techViewStatus": "ज़ोन स्थिति",
   "zoneStatusTitle": "ज़ोन स्थिति",
   "zoneStatusColZone": "ज़ोन / क्षेत्र",
@@ -465,5 +589,19 @@
   "statusDown": "डाउन",
   "categoryDevices": "श्रेणी के उपकरण",
   "noEquipmentInCategory": "इस श्रेणी में कोई उपकरण नहीं मिला",
-  "searchWithinCategory": "सीरियल नंबर या स्थान से खोजें..."
+  "searchWithinCategory": "सीरियल नंबर या स्थान से खोजें...",
+  "btnRequestReplacement": "बदलाव का अनुरोध करें",
+  "btnSubmitForApproval": "मंज़ूरी के लिए भेजें",
+  "submittingRequest": "अनुरोध भेजा जा रहा है...",
+  "replacementRequestHeading": "उपकरण बदलने का अनुरोध",
+  "replacementRequestSubmitted": "बदलाव का अनुरोध मंज़ूरी के लिए भेजा गया",
+  "replacementAwaitingApproval": "एडमिन की मंज़ूरी की प्रतीक्षा",
+  "replacementApprovedProceed": "मंज़ूर — उपकरण बदलें",
+  "replacementApprovedBanner": "आपका बदलाव अनुरोध मंज़ूर हो गया है। अब आप उपकरण बदल सकते हैं।",
+  "replacementRejectedBanner": "बदलाव का अनुरोध अस्वीकार किया गया",
+  "replacementCompleteTitle": "बदलाव पूरा करें?",
+  "replacementCompleteBody": "पुष्टि करें कि मंज़ूर बदलाव पूरा हो गया है। टिकट हल हुआ माना जाएगा।",
+  "btnConfirm": "पुष्टि करें",
+  "btnCancel": "रद्द करें",
+  "replacementPendingCannotClose": "बदलाव एडमिन की मंज़ूरी की प्रतीक्षा में है — यह टिकट अभी हल या बंद नहीं किया जा सकता"
 }

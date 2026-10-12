@@ -1168,4 +1168,50 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get searchWithinCategory => 'सीरियल नंबर या स्थान से खोजें...';
+
+  @override
+  String get btnRequestReplacement => 'बदलाव का अनुरोध करें';
+
+  @override
+  String get btnSubmitForApproval => 'मंज़ूरी के लिए भेजें';
+
+  @override
+  String get submittingRequest => 'अनुरोध भेजा जा रहा है...';
+
+  @override
+  String get replacementRequestHeading => 'उपकरण बदलने का अनुरोध';
+
+  @override
+  String get replacementRequestSubmitted =>
+      'बदलाव का अनुरोध मंज़ूरी के लिए भेजा गया';
+
+  @override
+  String get replacementAwaitingApproval => 'एडमिन की मंज़ूरी की प्रतीक्षा';
+
+  @override
+  String get replacementApprovedProceed => 'मंज़ूर — उपकरण बदलें';
+
+  @override
+  String get replacementApprovedBanner =>
+      'आपका बदलाव अनुरोध मंज़ूर हो गया है। अब आप उपकरण बदल सकते हैं।';
+
+  @override
+  String get replacementRejectedBanner => 'बदलाव का अनुरोध अस्वीकार किया गया';
+
+  @override
+  String get replacementCompleteTitle => 'बदलाव पूरा करें?';
+
+  @override
+  String get replacementCompleteBody =>
+      'पुष्टि करें कि मंज़ूर बदलाव पूरा हो गया है। टिकट हल हुआ माना जाएगा।';
+
+  @override
+  String get btnConfirm => 'पुष्टि करें';
+
+  @override
+  String get btnCancel => 'रद्द करें';
+
+  @override
+  String get replacementPendingCannotClose =>
+      'बदलाव एडमिन की मंज़ूरी की प्रतीक्षा में है — यह टिकट अभी हल या बंद नहीं किया जा सकता';
 }

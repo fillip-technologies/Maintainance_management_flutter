@@ -2209,6 +2209,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Search by serial number or location...'**
   String get searchWithinCategory;
+
+  /// No description provided for @btnRequestReplacement.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Replacement'**
+  String get btnRequestReplacement;
+
+  /// No description provided for @btnSubmitForApproval.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit for Approval'**
+  String get btnSubmitForApproval;
+
+  /// No description provided for @submittingRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending request...'**
+  String get submittingRequest;
+
+  /// No description provided for @replacementRequestHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Equipment Replacement'**
+  String get replacementRequestHeading;
+
+  /// No description provided for @replacementRequestSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Replacement request sent for approval'**
+  String get replacementRequestSubmitted;
+
+  /// No description provided for @replacementAwaitingApproval.
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting approval from admin'**
+  String get replacementAwaitingApproval;
+
+  /// No description provided for @replacementApprovedProceed.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved — Replace Equipment'**
+  String get replacementApprovedProceed;
+
+  /// No description provided for @replacementApprovedBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Your replacement request was approved. You can now replace the equipment.'**
+  String get replacementApprovedBanner;
+
+  /// No description provided for @replacementRejectedBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Replacement request was rejected'**
+  String get replacementRejectedBanner;
+
+  /// No description provided for @replacementCompleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete replacement?'**
+  String get replacementCompleteTitle;
+
+  /// No description provided for @replacementCompleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm the approved replacement has been carried out. The ticket will be marked as resolved.'**
+  String get replacementCompleteBody;
+
+  /// No description provided for @btnConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get btnConfirm;
+
+  /// No description provided for @btnCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get btnCancel;
+
+  /// No description provided for @replacementPendingCannotClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Replacement awaiting admin approval — this ticket cannot be resolved or closed yet'**
+  String get replacementPendingCannotClose;
 }
 
 class _AppLocalizationsDelegate

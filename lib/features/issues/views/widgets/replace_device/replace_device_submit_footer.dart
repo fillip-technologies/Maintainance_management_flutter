@@ -45,9 +45,9 @@ class ReplaceDeviceSubmitFooter extends StatelessWidget {
                   height: 20,
                   child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.white),
                 )
-              : const Icon(Icons.check_circle_rounded, size: 22),
+              : const Icon(Icons.send_rounded, size: 20),
           label: Text(
-            isSubmitting ? l10n.submittingDecommission : l10n.btnSubmitAndClose,
+            isSubmitting ? l10n.submittingRequest : l10n.btnSubmitForApproval,
             style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
           ),
           style: ElevatedButton.styleFrom(

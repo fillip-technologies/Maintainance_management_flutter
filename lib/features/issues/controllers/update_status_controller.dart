@@ -44,7 +44,7 @@ class UpdateStatusController {
   }
 
   IssueStatus _resolveInitialStatus() {
-    final allowed = getAllowedTransitions(issue.status);
+    final allowed = allowedTransitionsFor(issue);
     final requested = initialTargetStatus;
     if (requested != null && allowed.contains(requested)) {
       return requested;
@@ -61,6 +61,17 @@ class UpdateStatusController {
       IssueStatus.resolved => IssueStatus.closed,
       IssueStatus.closed || IssueStatus.reopened => IssueStatus.inProgress,
     };
+  }
+
+  /// Transitions for this specific issue: resolve/close are withheld while a
+  /// replacement request awaits admin approval (the backend enforces the same).
+  static List<IssueStatus> allowedTransitionsFor(IssueModel issue) {
+    final allowed = getAllowedTransitions(issue.status);
+    if (!issue.awaitingReplacementApproval) return allowed;
+    final filtered = allowed
+        .where((s) => s != IssueStatus.resolved && s != IssueStatus.closed)
+        .toList();
+    return filtered.isEmpty ? [IssueStatus.onHold] : filtered;
   }
 
   static List<IssueStatus> getAllowedTransitions(IssueStatus current) {

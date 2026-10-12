@@ -1173,4 +1173,50 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get searchWithinCategory => 'Search by serial number or location...';
+
+  @override
+  String get btnRequestReplacement => 'Request Replacement';
+
+  @override
+  String get btnSubmitForApproval => 'Submit for Approval';
+
+  @override
+  String get submittingRequest => 'Sending request...';
+
+  @override
+  String get replacementRequestHeading => 'Request Equipment Replacement';
+
+  @override
+  String get replacementRequestSubmitted =>
+      'Replacement request sent for approval';
+
+  @override
+  String get replacementAwaitingApproval => 'Awaiting approval from admin';
+
+  @override
+  String get replacementApprovedProceed => 'Approved — Replace Equipment';
+
+  @override
+  String get replacementApprovedBanner =>
+      'Your replacement request was approved. You can now replace the equipment.';
+
+  @override
+  String get replacementRejectedBanner => 'Replacement request was rejected';
+
+  @override
+  String get replacementCompleteTitle => 'Complete replacement?';
+
+  @override
+  String get replacementCompleteBody =>
+      'Confirm the approved replacement has been carried out. The ticket will be marked as resolved.';
+
+  @override
+  String get btnConfirm => 'Confirm';
+
+  @override
+  String get btnCancel => 'Cancel';
+
+  @override
+  String get replacementPendingCannotClose =>
+      'Replacement awaiting admin approval — this ticket cannot be resolved or closed yet';
 }

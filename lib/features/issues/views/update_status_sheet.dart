@@ -6,7 +6,8 @@ import '../../location/location_helper.dart';
 import '../controllers/update_status_controller.dart';
 import '../controllers/update_status_state.dart';
 import '../models/issue_model.dart';
-import 'replace_device_sheet.dart';
+import '../../../l10n/app_localizations.dart';
+import 'widgets/awaiting_replacement_banner.dart';
 import 'widgets/update_status/decommission_shortcut_banner.dart';
 import 'widgets/update_status/proof_photo_box.dart';
 import 'widgets/update_status/status_choice_chips.dart';
@@ -28,12 +29,18 @@ class UpdateStatusSheet extends StatefulWidget {
   final StatusUpdateCallback onStatusUpdated;
   final LocationHelper? locationHelper;
 
+  /// Invoked when the technician taps the "equipment destroyed" shortcut. The
+  /// caller starts the approval-gated replacement request flow; when null the
+  /// shortcut is hidden (a replacement can never bypass approval from here).
+  final VoidCallback? onRequestReplacement;
+
   const UpdateStatusSheet({
     super.key,
     required this.issue,
     this.initialTargetStatus,
     required this.onStatusUpdated,
     this.locationHelper,
+    this.onRequestReplacement,
   });
 
   static Future<void> show(
@@ -42,6 +49,7 @@ class UpdateStatusSheet extends StatefulWidget {
     IssueStatus? initialTargetStatus,
     required StatusUpdateCallback onStatusUpdated,
     LocationHelper? locationHelper,
+    VoidCallback? onRequestReplacement,
   }) {
     return showModalBottomSheet(
       context: context,
@@ -53,6 +61,7 @@ class UpdateStatusSheet extends StatefulWidget {
         initialTargetStatus: initialTargetStatus,
         onStatusUpdated: onStatusUpdated,
         locationHelper: locationHelper,
+        onRequestReplacement: onRequestReplacement,
       ),
     );
   }
@@ -147,7 +156,7 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> with WidgetsBindi
   @override
   Widget build(BuildContext context) {
     final state = _controller.state;
-    final allowedStatuses = UpdateStatusController.getAllowedTransitions(widget.issue.status);
+    final allowedStatuses = UpdateStatusController.allowedTransitionsFor(widget.issue);
     final maxHeight = MediaQuery.of(context).size.height * 0.90;
 
     return Container(
@@ -208,34 +217,17 @@ class _UpdateStatusSheetState extends State<UpdateStatusSheet> with WidgetsBindi
                     const SizedBox(height: 12),
                   ],
 
-                  DecommissionShortcutBanner(
-                    onTap: () {
-                      Navigator.pop(context);
-                      ReplaceDeviceSheet.show(
-                        context,
-                        issue: widget.issue,
-                        onConfirm: ({
-                          required reason,
-                          required notes,
-                          required replacementChoice,
-                          spareDeviceId,
-                          newDeviceName,
-                          newDeviceSerial,
-                          proofPhoto,
-                          latitude,
-                          longitude,
-                        }) async {
-                          widget.onStatusUpdated(
-                            IssueStatus.resolved,
-                            notes,
-                            null,
-                            latitude ?? state.locationResult?.latitude,
-                            longitude ?? state.locationResult?.longitude,
-                          );
-                        },
-                      );
-                    },
-                  ),
+                  if (widget.issue.awaitingReplacementApproval)
+                    AwaitingReplacementBanner(
+                      message: AppLocalizations.of(context)!.replacementPendingCannotClose,
+                    )
+                  else if (widget.onRequestReplacement != null)
+                    DecommissionShortcutBanner(
+                      onTap: () {
+                        Navigator.pop(context);
+                        widget.onRequestReplacement!();
+                      },
+                    ),
                   const SizedBox(height: 16),
 
                   StatusChoiceChips(

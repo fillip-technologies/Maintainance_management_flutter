@@ -125,6 +125,7 @@ class _TechnicianHomePageState extends ConsumerState<TechnicianHomePage> {
       context,
       issue: issue,
       initialTargetStatus: targetStatus,
+      onRequestReplacement: () => handleReplacementAction(context, ref, issue),
       onStatusUpdated: (newStatus, comment, resolutionPhoto, [latitude, longitude]) async {
         try {
           await actionNotifier.updateStatus(

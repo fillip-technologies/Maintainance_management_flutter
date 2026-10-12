@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/colors.dart';
 import '../../../core/utils/app_snackbar.dart';
 import '../../devices/devices.dart';
-import '../../location/location_helper.dart';
 import '../../../l10n/app_localizations.dart';
 import '../controllers/replace_device_controller.dart';
 import '../controllers/replace_device_state.dart';
@@ -110,53 +109,26 @@ class _ReplaceDeviceSheetState extends ConsumerState<ReplaceDeviceSheet> {
 
     _controller.setSubmitting(true);
 
-    double? lat;
-    double? lng;
-    final locRes = await LocationHelper().getLocation();
-    if (!locRes.isSuccess) {
-      if (mounted) {
-        _controller.setSubmitting(false);
-        AppSnackbar.error(
-          locRes.errorMessage ??
-              'GPS coordinates are required to decommission and resolve tickets. Please turn on GPS.',
-        );
-        if (locRes.error == LocationErrorType.serviceDisabled) {
-          await LocationHelper().openLocationSettings();
-        } else if (locRes.error == LocationErrorType.permissionDeniedForever) {
-          await LocationHelper().openAppSettings();
-        }
-      }
-      return;
-    }
-    lat = locRes.latitude;
-    lng = locRes.longitude;
-
-    final fullComment = ReplaceDeviceController.buildFullComment(
-      reason: state.selectedReason,
-      choice: state.replacementChoice,
-      userNotes: _optionalNotesController.text,
-      selectedSpare: state.selectedSpareDevice,
-      l10n: l10n,
-    );
-
     try {
       await widget.onConfirm(
         reason: state.selectedReason,
-        notes: fullComment,
+        // Only the technician's own note — the backend composes the
+        // decommission comment (reason + replacement) when it is carried out.
+        notes: _optionalNotesController.text.trim(),
         replacementChoice: state.replacementChoice,
         spareDeviceId: state.selectedSpareDevice?.id,
         newDeviceName: state.selectedSpareDevice?.name,
         newDeviceSerial: state.selectedSpareDevice?.code,
         proofPhoto: null, // Camera proof disabled for now
-        latitude: lat,
-        longitude: lng,
+        latitude: null,
+        longitude: null,
       );
 
       if (mounted) {
         Navigator.pop(context);
       }
     } catch (e) {
-      AppSnackbar.error('Failed to decommission: $e');
+      AppSnackbar.error('Failed to send replacement request: $e');
     } finally {
       if (mounted) {
         _controller.setSubmitting(false);

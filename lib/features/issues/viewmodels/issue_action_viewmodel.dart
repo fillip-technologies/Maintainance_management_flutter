@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../devices/devices.dart';
 import '../../../core/utils/app_logger.dart';
 import '../models/issue_model.dart';
+import '../models/replacement_request_model.dart';
 import 'issue_query_viewmodel.dart';
 
 /// State for issue mutation operations (e.g. creating, updating status).
@@ -181,6 +182,53 @@ class IssueActionController extends Notifier<IssueActionState> {
       );
       return null;
     }
+  }
+
+  /// Raises a replacement request for admin approval (does NOT resolve the issue).
+  /// Throws on failure so the calling sheet can keep itself open.
+  Future<ReplacementRequestModel> requestReplacement({
+    required String issueId,
+    required String reason,
+    required String replacementChoice,
+    String? spareDeviceId,
+    String? newDeviceName,
+    String? notes,
+  }) async {
+    final repo = ref.read(issueRepositoryProvider);
+    final request = await repo.createReplacementRequest(
+      issueId: issueId,
+      reason: reason,
+      replacementChoice: replacementChoice,
+      spareDeviceId: spareDeviceId,
+      newDeviceName: newDeviceName,
+      notes: notes,
+    );
+    ref.invalidate(replacementRequestForIssueProvider(issueId));
+    ref.invalidate(issueDetailProvider(issueId));
+    ref.invalidate(staffIssuesProvider);
+    ref.invalidate(technicianIssuesProvider);
+    return request;
+  }
+
+  /// Carries out an approved replacement; the backend resolves the issue.
+  Future<void> completeReplacement({
+    required String issueId,
+    required String requestId,
+    double? latitude,
+    double? longitude,
+  }) async {
+    final repo = ref.read(issueRepositoryProvider);
+    await repo.completeReplacement(
+      requestId: requestId,
+      latitude: latitude,
+      longitude: longitude,
+    );
+    ref.invalidate(replacementRequestForIssueProvider(issueId));
+    ref.invalidate(staffIssuesProvider);
+    ref.invalidate(technicianIssuesProvider);
+    ref.invalidate(issueDetailProvider(issueId));
+    ref.invalidate(issueHistoryProvider(issueId));
+    ref.invalidate(staffDevicesProvider);
   }
 
   void clearError() {

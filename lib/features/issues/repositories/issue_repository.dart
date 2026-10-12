@@ -4,6 +4,7 @@ import 'package:path/path.dart' as p;
 import '../../../core/network/api_client.dart';
 import '../../../core/utils/app_logger.dart';
 import '../models/issue_model.dart';
+import '../models/replacement_request_model.dart';
 
 class IssueRepository {
   final ApiClient apiClient;
@@ -447,6 +448,87 @@ class IssueRepository {
     } catch (e, st) {
       AppLogger.e('💥 [IssueRepository] Error updating issue status: $e', e, st);
       throw Exception('Failed to update status: $e');
+    }
+  }
+
+  // ── Replacement requests (technician → admin approval → technician) ──────
+
+  /// Latest replacement requests for an issue, newest first.
+  Future<List<ReplacementRequestModel>> getReplacementRequests({String? issueId, String? status}) async {
+    try {
+      final response = await apiClient.dio.get(
+        '/replacement-requests',
+        queryParameters: {
+          'limit': 20,
+          'issueId': ?issueId,
+          'status': ?status,
+        },
+      );
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        final data = response.data['data'] as Map<String, dynamic>;
+        final items = (data['items'] as List<dynamic>?) ?? [];
+        return items
+            .map((e) => ReplacementRequestModel.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }
+      throw Exception(response.data['message'] ?? 'Failed to load replacement requests');
+    } on DioException catch (e) {
+      throw Exception(e.extractErrorMessage('Network error loading replacement requests'));
+    }
+  }
+
+  /// Raises a replacement request; an admin must approve it before replacing.
+  Future<ReplacementRequestModel> createReplacementRequest({
+    required String issueId,
+    required String reason,
+    required String replacementChoice,
+    String? spareDeviceId,
+    String? newDeviceName,
+    String? notes,
+  }) async {
+    try {
+      final payload = <String, dynamic>{
+        'issueId': issueId,
+        'reason': reason,
+        'replacementChoice': replacementChoice,
+        if (spareDeviceId != null && spareDeviceId.isNotEmpty) 'spareDeviceId': spareDeviceId,
+        if (newDeviceName != null && newDeviceName.isNotEmpty) 'newDeviceName': newDeviceName,
+        if (notes != null && notes.trim().isNotEmpty) 'notes': notes.trim(),
+      };
+      AppLogger.d('📡 [IssueRepository] POST /replacement-requests $payload');
+      final response = await apiClient.dio.post('/replacement-requests', data: payload);
+      if ((response.statusCode == 201 || response.statusCode == 200) &&
+          response.data['success'] == true) {
+        return ReplacementRequestModel.fromJson(response.data['data'] as Map<String, dynamic>);
+      }
+      throw Exception(response.data['message'] ?? 'Failed to send replacement request');
+    } on DioException catch (e) {
+      throw Exception(e.extractErrorMessage('Network error sending replacement request'));
+    }
+  }
+
+  /// Carries out an APPROVED replacement; the backend resolves the issue.
+  Future<ReplacementRequestModel> completeReplacement({
+    required String requestId,
+    double? latitude,
+    double? longitude,
+    String? notes,
+  }) async {
+    try {
+      final response = await apiClient.dio.post(
+        '/replacement-requests/$requestId/complete',
+        data: {
+          'latitude': ?latitude,
+          'longitude': ?longitude,
+          if (notes != null && notes.trim().isNotEmpty) 'notes': notes.trim(),
+        },
+      );
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        return ReplacementRequestModel.fromJson(response.data['data'] as Map<String, dynamic>);
+      }
+      throw Exception(response.data['message'] ?? 'Failed to complete replacement');
+    } on DioException catch (e) {
+      throw Exception(e.extractErrorMessage('Network error completing replacement'));
     }
   }
 }

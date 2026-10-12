@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/auth.dart';
 import '../models/issue_model.dart';
+import '../models/replacement_request_model.dart';
 import '../repositories/issue_repository.dart';
 
 /// 1. Issue Repository Provider
@@ -61,4 +62,12 @@ final issueCategoriesProvider = FutureProvider.autoDispose.family<List<IssueCate
 final issueCategoriesForDeviceProvider = FutureProvider.autoDispose.family<List<IssueCategoryModel>, String?>((ref, deviceId) async {
   final issueRepo = ref.watch(issueRepositoryProvider);
   return issueRepo.getCategoriesForHardwareType(null, deviceId: deviceId);
+});
+
+/// 8. Most recent replacement request for an issue (null when none raised).
+final replacementRequestForIssueProvider =
+    FutureProvider.autoDispose.family<ReplacementRequestModel?, String>((ref, issueId) async {
+  final issueRepo = ref.watch(issueRepositoryProvider);
+  final requests = await issueRepo.getReplacementRequests(issueId: issueId);
+  return requests.isEmpty ? null : requests.first;
 });

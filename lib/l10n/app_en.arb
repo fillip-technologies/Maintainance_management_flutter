@@ -8,7 +8,6 @@
   "@appTagline": {
     "description": "The subtitle or tagline of the application"
   },
-
   "ok": "OK",
   "cancel": "Cancel",
   "save": "Save",
@@ -22,7 +21,6 @@
   "language": "Language",
   "switchToHindi": "हिन्दी",
   "switchToEnglish": "English",
-
   "signIn": "Sign In",
   "forgotPassword": "Forgot Password?",
   "secureConnectionNotice": "Enterprise Maintenance Network",
@@ -35,12 +33,10 @@
   "demoQuickLogin": "Demo Quick Login",
   "demoLoginNotice": "One-tap role switching for rapid testing",
   "emailRequired": "Please enter both email and password",
-
   "roleHardwareTechnician": "Hardware Technician",
   "roleZoneStaff": "Zone Staff",
   "unassignedQueue": "Unassigned (Organization Queue)",
   "assignedQueue": "Assigned Queue",
-
   "kpiTotal": "Total",
   "kpiOpen": "Open",
   "kpiOnHold": "On Hold",
@@ -57,7 +53,6 @@
   "btnResolve": "Resolve",
   "noActiveTickets": "No tickets in active queue",
   "allTicketsDone": "Great job! All assigned tickets are resolved.",
-
   "kpiTotalDevices": "Total Equipment",
   "kpiActiveIssues": "Active Issues",
   "kpiMissingLogs": "Missing Today's Log",
@@ -72,7 +67,6 @@
   "logStatusNotWorking": "Not Working",
   "logNotesHint": "Observations, lens cleaned, cable status...",
   "logSubmittedSuccess": "Daily log submitted successfully",
-
   "ticketDetails": "Ticket Details",
   "defectDescription": "Defect Description",
   "timelineHistory": "Status History & Timeline",
@@ -83,7 +77,6 @@
   "btnUpdateStatus": "Update Ticket Status / Add Work Log",
   "noHistory": "No transitions logged yet. Issue is in initial state.",
   "timeJustNow": "Just now",
-
   "updateWorkStatus": "Update Work Status",
   "selectNextStatus": "Select Next Status",
   "workLogLabel": "Work Log / Comments",
@@ -102,7 +95,6 @@
       }
     }
   },
-
   "raiseEquipmentDefect": "Raise Equipment Defect",
   "selectDevice": "Select Equipment Unit",
   "defectCategory": "Defect Category",
@@ -115,7 +107,6 @@
   "defectPhotoAdded": "Defect Photo Added",
   "evidencePhotos": "Evidence & Attachments",
   "submitDefectTicket": "Submit & Raise Maintenance Ticket",
-
   "statusOpen": "Open",
   "statusAssigned": "Assigned",
   "statusInProgress": "In Progress",
@@ -123,18 +114,15 @@
   "statusResolved": "Resolved",
   "statusClosed": "Closed",
   "statusReopened": "Reopened",
-
   "priorityCritical": "Critical",
   "priorityHigh": "High",
   "priorityMedium": "Medium",
   "priorityLow": "Low",
-
   "deviceStatusActive": "Active",
   "deviceStatusMaintenance": "Maintenance",
   "deviceStatusFaulty": "Faulty",
   "deviceStatusProvisioned": "In Stock",
   "deviceStatusRetired": "Removed / Retired",
-
   "profile": "Profile",
   "workScope": "Work & Assignment Scope",
   "preferencesSystem": "Preferences & System",
@@ -149,7 +137,6 @@
   "role": "Role",
   "orgWideQueue": "Organization Wide Queue",
   "unassignedScope": "Unassigned Scope",
-
   "btnDecommissionReplace": "Decommission & Replace",
   "decommissionHeading": "Decommission Equipment",
   "decommissionReason": "Reason for Removal",
@@ -174,7 +161,6 @@
   "issueResolvedAlert": "Issue marked resolved by technician",
   "deviceCheckedLive": "Unit verified by colleague",
   "viewTicket": "View Ticket",
-
   "stepWhatHappened": "1. What happened to the equipment?",
   "stepWhatDidYouDo": "2. What action did you take?",
   "actionRemovedOnly": "Removed Only (Slot Left Empty)",
@@ -190,7 +176,6 @@
   "submittingDecommission": "Submitting...",
   "selectedSpareBadge": "SELECTED",
   "searchSparesHint": "Search spare by name or code...",
-
   "btnBulkDefect": "Bulk Defect",
   "raiseBulkDefectTitle": "Raise Bulk Defect",
   "raiseBulkDefectSubtitle": "Report identical issue on multiple units (1–50)",
@@ -332,7 +317,6 @@
   "presetBatchRepaired": "Batch repair completed and verified",
   "presetFirmwareUpdated": "Firmware updated & rebooted",
   "presetCablesTested": "Cables re-seated & connectivity verified",
-
   "techViewSpatial": "Zone Map",
   "techViewQueue": "My Tickets",
   "techBadgeOk": "OK",
@@ -344,17 +328,29 @@
   "techZonesDevicesSummary": "{zones} Assigned Zones • {devices} Total Devices",
   "@techZonesDevicesSummary": {
     "placeholders": {
-      "zones": { "type": "int" },
-      "devices": { "type": "int" }
+      "zones": {
+        "type": "int"
+      },
+      "devices": {
+        "type": "int"
+      }
     }
   },
   "techPercentOnline": "{percent}% active",
   "@techPercentOnline": {
-    "placeholders": { "percent": { "type": "int" } }
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
   },
   "techPercentHealth": "{percent}% active",
   "@techPercentHealth": {
-    "placeholders": { "percent": { "type": "int" } }
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
   },
   "techStatTotal": "TOTAL",
   "techStatOnline": "ACTIVE",
@@ -364,36 +360,64 @@
   "techZoneClientDepth": "{client} • Depth Level {depth}",
   "@techZoneClientDepth": {
     "placeholders": {
-      "client": { "type": "String" },
-      "depth": { "type": "int" }
+      "client": {
+        "type": "String"
+      },
+      "depth": {
+        "type": "int"
+      }
     }
   },
   "techZoneDepthStatus": "Depth Level {depth} • Status: {status}",
   "@techZoneDepthStatus": {
     "placeholders": {
-      "depth": { "type": "int" },
-      "status": { "type": "String" }
+      "depth": {
+        "type": "int"
+      },
+      "status": {
+        "type": "String"
+      }
     }
   },
   "techFailedToLoadZones": "Failed to load zones: {error}",
   "@techFailedToLoadZones": {
-    "placeholders": { "error": { "type": "String" } }
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
   },
   "techAssignedZonesCount": "ASSIGNED ZONES ({count})",
   "@techAssignedZonesCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "techSubZonesCount": "SUB-ZONES ({count})",
   "@techSubZonesCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "techUnresolvedHardwareCount": "UNRESOLVED HARDWARE UNITS ({count})",
   "@techUnresolvedHardwareCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "techFacilityIncidentsCount": "FACILITY INCIDENTS ({count})",
   "@techFacilityIncidentsCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "techNoAssignedZones": "No Assigned Zones",
   "techNoAssignedZonesSub": "You are currently not assigned to any facility zones",
@@ -401,13 +425,21 @@
   "techAllUnitsOperationalSub": "All {count} units in {zone} are operational with no unresolved issues",
   "@techAllUnitsOperationalSub": {
     "placeholders": {
-      "count": { "type": "int" },
-      "zone": { "type": "String" }
+      "count": {
+        "type": "int"
+      },
+      "zone": {
+        "type": "String"
+      }
     }
   },
   "techNoUnresolvedInZone": "No unresolved issues or defects in {zone}",
   "@techNoUnresolvedInZone": {
-    "placeholders": { "zone": { "type": "String" } }
+    "placeholders": {
+      "zone": {
+        "type": "String"
+      }
+    }
   },
   "techAllZones": "All Zones",
   "techFailedToLoadQueue": "Failed to load your job list",
@@ -419,21 +451,32 @@
   "bulkAlreadyInStatus": "{count} already {status}",
   "@bulkAlreadyInStatus": {
     "placeholders": {
-      "count": { "type": "int" },
-      "status": { "type": "String" }
+      "count": {
+        "type": "int"
+      },
+      "status": {
+        "type": "String"
+      }
     }
   },
   "bulkCouldNotUpdate": "{count} couldn't change from their current state",
   "@bulkCouldNotUpdate": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "bulkFailedToUpdate": "Couldn't update tickets: {error}",
   "@bulkFailedToUpdate": {
-    "placeholders": { "error": { "type": "String" } }
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
   },
   "bulkNoPendingIssues": "No pending issues to resolve",
   "bulkNoMatchingTickets": "No matching tickets found",
-
   "staffKpiCheckedToday": "Checked Today",
   "staffKpiWorking": "Working",
   "staffKpiProblems": "Problems",
@@ -441,23 +484,39 @@
   "staffMarkedDeviceAs": "Marked {device} as {status}",
   "@staffMarkedDeviceAs": {
     "placeholders": {
-      "device": { "type": "String" },
-      "status": { "type": "String" }
+      "device": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
     }
   },
   "staffFailedToRecord": "Couldn't save: {error}",
   "@staffFailedToRecord": {
-    "placeholders": { "error": { "type": "String" } }
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
   },
   "staffHardwareDownTitle": "Hardware Down!",
   "staffHardwareDownBody": "You marked \"{device}\" as Not Working. Raise a repair ticket now so a technician can be sent?",
   "@staffHardwareDownBody": {
-    "placeholders": { "device": { "type": "String" } }
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
   },
   "staffNeedsAttentionTitle": "Needs a Look",
   "staffNeedsAttentionBody": "You marked \"{device}\" as Needs Attention. Want to raise a ticket so a technician can check it?",
   "@staffNeedsAttentionBody": {
-    "placeholders": { "device": { "type": "String" } }
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
   },
   "staffLater": "Later",
   "staffRaiseTicketNow": "Raise Ticket",
@@ -467,36 +526,91 @@
   "staffCouldNotUpdateTicket": "Couldn't update ticket",
   "staffNSelected": "{count} Selected",
   "@staffNSelected": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
-
   "staffCheckedTodayProgress": "{done} / {total} checked today",
   "@staffCheckedTodayProgress": {
     "placeholders": {
-      "done": { "type": "int" },
-      "total": { "type": "int" }
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "staffFilterAll": "All ({count})",
-  "@staffFilterAll": { "placeholders": { "count": { "type": "int" } } },
+  "@staffFilterAll": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "staffFilterPending": "Pending ({count})",
-  "@staffFilterPending": { "placeholders": { "count": { "type": "int" } } },
+  "@staffFilterPending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "staffFilterDone": "Done ({count})",
-  "@staffFilterDone": { "placeholders": { "count": { "type": "int" } } },
+  "@staffFilterDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "staffFilterOpen": "Open ({count})",
-  "@staffFilterOpen": { "placeholders": { "count": { "type": "int" } } },
+  "@staffFilterOpen": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "staffFilterNeedsCheck": "Open ({count})",
-  "@staffFilterNeedsCheck": { "placeholders": { "count": { "type": "int" } } },
+  "@staffFilterNeedsCheck": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "staffFilterInProgress": "In Progress ({count})",
-  "@staffFilterInProgress": { "placeholders": { "count": { "type": "int" } } },
+  "@staffFilterInProgress": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "staffFilterDoneTickets": "Done ({count})",
-  "@staffFilterDoneTickets": { "placeholders": { "count": { "type": "int" } } },
+  "@staffFilterDoneTickets": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "staffPendingCheck": "Pending",
   "staffChange": "Change",
   "staffCancel": "Cancel",
   "staffAddNote": "Add a note (optional)",
   "staffRepeatedlyDown": "Reported down {count} times — may be marked faulty",
-  "@staffRepeatedlyDown": { "placeholders": { "count": { "type": "int" } } },
+  "@staffRepeatedlyDown": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "staffChecklistLoadFailed": "Couldn't load the checklist",
   "staffCheckConnectionRetry": "Check your connection and tap to retry",
   "staffAllChecksDone": "All checks done for today. Great work!",
@@ -513,7 +627,6 @@
   "staffTryAdjustingFilter": "Try a different search or filter",
   "staffNoHardwareRegistered": "No equipment registered here yet",
   "staffClearFilters": "Clear Filters",
-
   "raiseIssueTitle": "Report a Problem",
   "raiseSelectEquipment": "Which equipment?",
   "raiseSelectUnitHint": "Choose a unit",
@@ -530,10 +643,21 @@
   "raiseErrLoadCategories": "Couldn't load problem types",
   "raiseErrGeneric": "Couldn't raise the ticket",
   "raiseSuccess": "Ticket sent for {device}",
-  "@raiseSuccess": { "placeholders": { "device": { "type": "String" } } },
+  "@raiseSuccess": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
   "staffTicketResolvedToast": "{device} was fixed by a technician. Tap for details.",
-  "@staffTicketResolvedToast": { "placeholders": { "device": { "type": "String" } } },
-
+  "@staffTicketResolvedToast": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
   "techViewStatus": "Zone Status",
   "zoneStatusTitle": "Zone Status",
   "zoneStatusColZone": "Zone / Area",
@@ -557,5 +681,19 @@
   "statusDown": "Down",
   "categoryDevices": "Equipment in Category",
   "noEquipmentInCategory": "No equipment found in this category",
-  "searchWithinCategory": "Search by serial number or location..."
+  "searchWithinCategory": "Search by serial number or location...",
+  "btnRequestReplacement": "Request Replacement",
+  "btnSubmitForApproval": "Submit for Approval",
+  "submittingRequest": "Sending request...",
+  "replacementRequestHeading": "Request Equipment Replacement",
+  "replacementRequestSubmitted": "Replacement request sent for approval",
+  "replacementAwaitingApproval": "Awaiting approval from admin",
+  "replacementApprovedProceed": "Approved — Replace Equipment",
+  "replacementApprovedBanner": "Your replacement request was approved. You can now replace the equipment.",
+  "replacementRejectedBanner": "Replacement request was rejected",
+  "replacementCompleteTitle": "Complete replacement?",
+  "replacementCompleteBody": "Confirm the approved replacement has been carried out. The ticket will be marked as resolved.",
+  "btnConfirm": "Confirm",
+  "btnCancel": "Cancel",
+  "replacementPendingCannotClose": "Replacement awaiting admin approval — this ticket cannot be resolved or closed yet"
 }

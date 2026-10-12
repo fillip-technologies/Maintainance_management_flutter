@@ -9,7 +9,8 @@ import '../../../l10n/app_localizations.dart';
 import '../viewmodels/issue_action_viewmodel.dart';
 import '../viewmodels/issue_query_viewmodel.dart';
 import 'widgets/issue_timeline_view.dart';
-import 'replace_device_sheet.dart';
+import 'replacement_flow.dart';
+import 'widgets/awaiting_replacement_banner.dart';
 import 'update_status_sheet.dart';
 
 class IssueDetailSheet extends ConsumerWidget {
@@ -34,6 +35,8 @@ class IssueDetailSheet extends ConsumerWidget {
     final isTechnician = user?.role == UserRole.technician;
     final liveIssueAsync = ref.watch(issueDetailProvider(issue.id));
     final currentIssue = liveIssueAsync.value ?? issue;
+    final replacementRequest =
+        isTechnician ? ref.watch(replacementRequestForIssueProvider(issue.id)).value : null;
     final maxHeight = MediaQuery.of(context).size.height * 0.92;
 
     return Container(
@@ -279,6 +282,10 @@ class IssueDetailSheet extends ConsumerWidget {
 
                   // Quick Status Transition Button for Technicians
                   if (isTechnician) ...[
+                    if (currentIssue.awaitingReplacementApproval) ...[
+                      AwaitingReplacementBanner(message: l10n.replacementPendingCannotClose),
+                      const SizedBox(height: 10),
+                    ],
                     ElevatedButton.icon(
                       onPressed: () {
                         final actionController = ref.read(issueActionControllerProvider.notifier);
@@ -288,6 +295,8 @@ class IssueDetailSheet extends ConsumerWidget {
                         UpdateStatusSheet.show(
                           sheetContext,
                           issue: currentIssue,
+                          onRequestReplacement: () =>
+                              handleReplacementAction(sheetContext, ref, currentIssue),
                           onStatusUpdated: (newStatus, comment, resolutionPhoto, [latitude, longitude]) async {
                             try {
                               await actionController.updateStatus(
@@ -324,58 +333,71 @@ class IssueDetailSheet extends ConsumerWidget {
                     ),
                     if (currentIssue.status != IssueStatus.closed && currentIssue.status != IssueStatus.resolved) ...[
                       const SizedBox(height: 10),
+                      if (replacementRequest != null && replacementRequest.isRejected) ...[
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: AppColors.errorLight,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            (replacementRequest.reviewNote ?? '').trim().isEmpty
+                                ? l10n.replacementRejectedBanner
+                                : '${l10n.replacementRejectedBanner}: ${replacementRequest.reviewNote}',
+                            style: TextStyle(fontSize: 12, color: AppColors.errorText),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                      if (replacementRequest != null && replacementRequest.isApproved) ...[
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: AppColors.successLight,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            l10n.replacementApprovedBanner,
+                            style: TextStyle(fontSize: 12, color: AppColors.successText),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
                       OutlinedButton.icon(
-                        onPressed: () {
-                          final actionController = ref.read(issueActionControllerProvider.notifier);
-                          final sheetContext = context;
-                          final issueId = currentIssue.id;
-
-                          ReplaceDeviceSheet.show(
-                            sheetContext,
-                            issue: currentIssue,
-                            onConfirm: ({
-                              required reason,
-                              required notes,
-                              required replacementChoice,
-                              spareDeviceId,
-                              newDeviceName,
-                              newDeviceSerial,
-                              proofPhoto,
-                              latitude,
-                              longitude,
-                            }) async {
-                              final replacementText = switch (replacementChoice) {
-                                ReplacementChoice.inStock => 'Installed in-stock spare unit ($spareDeviceId).',
-                                ReplacementChoice.newDevice => 'Installed new hardware unit: $newDeviceName ($newDeviceSerial).',
-                                ReplacementChoice.none => 'No replacement installed; slot left vacant.',
-                              };
-                              final fullComment = '[HARDWARE DECOMMISSIONED - ${reason.name.toUpperCase()}] $notes. $replacementText';
-                              try {
-                                await actionController.updateStatus(
-                                  issueId: issueId,
-                                  toStatus: IssueStatus.resolved,
-                                  notes: fullComment,
-                                  attachments: proofPhoto != null ? [proofPhoto] : null,
-                                  latitude: latitude,
-                                  longitude: longitude,
-                                );
-                                AppSnackbar.success(
-                                  l10n.replacementSuccess,
-                                );
-                                if (sheetContext.mounted) {
-                                  Navigator.of(sheetContext).pop();
-                                }
-                              } catch (e) {
-                                AppSnackbar.error('Failed to update status: $e');
-                                rethrow;
-                              }
-                            },
-                          );
-                        },
-                        icon: Icon(Icons.broken_image_outlined, size: 18, color: AppColors.error),
-                        label: Text(l10n.btnDecommissionReplace, style: TextStyle(color: AppColors.errorText)),
+                        // Pending requests are inert; everything else is routed
+                        // through the approval flow (request → approve → replace).
+                        onPressed: (replacementRequest != null && replacementRequest.isPending)
+                            ? null
+                            : () => handleReplacementAction(context, ref, currentIssue),
+                        icon: Icon(
+                          (replacementRequest != null && replacementRequest.isApproved)
+                              ? Icons.build_circle_outlined
+                              : (replacementRequest != null && replacementRequest.isPending)
+                                  ? Icons.hourglass_top_rounded
+                                  : Icons.broken_image_outlined,
+                          size: 18,
+                          color: (replacementRequest != null && replacementRequest.isApproved)
+                              ? AppColors.success
+                              : AppColors.error,
+                        ),
+                        label: Text(
+                          (replacementRequest != null && replacementRequest.isApproved)
+                              ? l10n.replacementApprovedProceed
+                              : (replacementRequest != null && replacementRequest.isPending)
+                                  ? l10n.replacementAwaitingApproval
+                                  : l10n.btnRequestReplacement,
+                          style: TextStyle(
+                            color: (replacementRequest != null && replacementRequest.isApproved)
+                                ? AppColors.successText
+                                : AppColors.errorText,
+                          ),
+                        ),
                         style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: AppColors.error),
+                          side: BorderSide(
+                            color: (replacementRequest != null && replacementRequest.isApproved)
+                                ? AppColors.success
+                                : AppColors.error,
+                          ),
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),

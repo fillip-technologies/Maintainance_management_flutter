@@ -228,6 +228,10 @@ class IssueModel {
   final DateTime? closedAt;
   final List<IssueStatusHistoryModel> history;
 
+  /// True while a technician's replacement request awaits admin approval.
+  /// Such an issue cannot be resolved or closed until it is reviewed.
+  final bool awaitingReplacementApproval;
+
   const IssueModel({
     required this.id,
     required this.title,
@@ -257,6 +261,7 @@ class IssueModel {
     this.resolvedAt,
     this.closedAt,
     this.history = const [],
+    this.awaitingReplacementApproval = false,
   });
 
   factory IssueModel.fromJson(Map<String, dynamic> json) {
@@ -274,6 +279,11 @@ class IssueModel {
     final closedDateStr = (json['closedAt'] ?? json['closed_at']) as String?;
 
     final historyList = (json['statusHistory'] ?? json['history']) as List<dynamic>?;
+    final replacementList = json['replacementRequests'] as List<dynamic>?;
+    final awaitingReplacement = replacementList?.any(
+          (r) => r is Map && r['status'] == 'pending',
+        ) ??
+        (json['awaiting_replacement_approval'] as bool? ?? false);
 
     final catName = (json['categoryName'] ?? json['category_name'] ?? categoryObj?['name']) as String? ?? 'General Fault';
     final devName = (json['deviceName'] ?? json['device_name'] ?? deviceObj?['name']) as String? ?? 'Unknown Device';
@@ -330,6 +340,7 @@ class IssueModel {
               ?.map((e) => IssueStatusHistoryModel.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
+      awaitingReplacementApproval: awaitingReplacement,
     );
   }
 
@@ -361,6 +372,7 @@ class IssueModel {
       'resolved_at': resolvedAt?.toIso8601String(),
       'closed_at': closedAt?.toIso8601String(),
       'history': history.map((e) => e.toJson()).toList(),
+      'awaiting_replacement_approval': awaitingReplacementApproval,
     };
   }
 
@@ -393,6 +405,7 @@ class IssueModel {
     DateTime? resolvedAt,
     DateTime? closedAt,
     List<IssueStatusHistoryModel>? history,
+    bool? awaitingReplacementApproval,
   }) {
     return IssueModel(
       id: id ?? this.id,
@@ -424,6 +437,8 @@ class IssueModel {
       resolvedAt: resolvedAt ?? this.resolvedAt,
       closedAt: closedAt ?? this.closedAt,
       history: history ?? this.history,
+      awaitingReplacementApproval:
+          awaitingReplacementApproval ?? this.awaitingReplacementApproval,
     );
   }
 
