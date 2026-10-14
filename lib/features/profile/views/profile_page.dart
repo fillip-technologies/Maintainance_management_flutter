@@ -100,7 +100,7 @@ class ProfilePage extends ConsumerWidget {
         if (devs != null && (user.zoneLogoUrl == null || user.zoneLogoUrl!.isEmpty)) {
           final foundLogo = devs
                   .where((d) =>
-                      (user.assignedZoneId == null || d.zoneId == user.assignedZoneId) &&
+                      user.isInAssignedZones(d.zoneId) &&
                       d.zoneLogoUrl != null &&
                       d.zoneLogoUrl!.isNotEmpty)
                   .firstOrNull
@@ -166,9 +166,9 @@ class ProfilePage extends ConsumerWidget {
                 label: l10n.assignedLocation,
                 value: isTech
                     ? l10n.orgWideQueue
-                    : (user.assignedZoneName != null &&
-                              user.assignedZoneName!.isNotEmpty
-                          ? user.assignedZoneName!
+                    : (user.assignedZonesLabel != null &&
+                              user.assignedZonesLabel!.isNotEmpty
+                          ? user.assignedZonesLabel!
                           : l10n.unassignedScope),
                 imageUrl: !isTech ? effectiveZoneLogoUrl : null,
               ),

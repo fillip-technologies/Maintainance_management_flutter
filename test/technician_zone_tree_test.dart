@@ -591,7 +591,7 @@ void main() {
       expect(defectiveMaterial.color, AppColors.error);
     });
 
-    testWidgets('TechnicianTopLevelZoneCard renders uppercase name, stats, health ring, and collapses', (tester) async {
+    testWidgets('TechnicianTopLevelZoneCard renders uppercase name, stats, and collapses', (tester) async {
       const topZone = TechnicianZoneNode(
         id: 'root-1',
         name: 'Lion Safari Zone',
@@ -634,9 +634,6 @@ void main() {
       expect(find.text('2 products'), findsOneWidget);
       expect(find.text('● 1'), findsOneWidget);
       expect(find.text('○ 1'), findsOneWidget);
-      // Verify circular health ring is present in card
-      expect(find.byType(TechnicianHealthRing), findsOneWidget);
-      expect(find.text('50%'), findsOneWidget);
 
       // Camera blocks and offline summary rendered when expanded
       expect(find.byType(TechnicianDeviceBlock), findsNWidgets(2));

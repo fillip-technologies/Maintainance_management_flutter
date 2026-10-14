@@ -36,6 +36,23 @@ enum UserRole {
       this == UserRole.clientAdmin || this == UserRole.superAdmin;
 }
 
+/// A zone a user is assigned to (an officer may hold several).
+class AssignedZone {
+  final String id;
+  final String name;
+  final String? logoUrl;
+
+  const AssignedZone({required this.id, required this.name, this.logoUrl});
+
+  factory AssignedZone.fromJson(Map<String, dynamic> json) => AssignedZone(
+        id: (json['id'] as String?) ?? '',
+        name: (json['name'] as String?) ?? '',
+        logoUrl: (json['logoUrl'] ?? json['logo_url']) as String?,
+      );
+
+  Map<String, dynamic> toJson() => {'id': id, 'name': name, 'logo_url': logoUrl};
+}
+
 class UserModel {
   final String id;
   final String email;
@@ -45,6 +62,7 @@ class UserModel {
   final String? clientId;
   final String? assignedZoneId;
   final String? assignedZoneName;
+  final List<AssignedZone> assignedZones;
   final String? zoneLogoUrl;
   final String? technicianId;
   final String accountStatus;
@@ -57,10 +75,30 @@ class UserModel {
     this.clientId,
     this.assignedZoneId,
     this.assignedZoneName,
+    this.assignedZones = const [],
     this.zoneLogoUrl,
     this.technicianId,
     this.accountStatus = 'active',
   });
+
+  /// Ids of every zone the user is assigned to (falls back to the primary zone).
+  List<String> get assignedZoneIds => assignedZones.isNotEmpty
+      ? assignedZones.map((z) => z.id).toList()
+      : [?assignedZoneId];
+
+  /// True when [zoneId] is one of the user's zones. A user with no zone
+  /// assignment is unrestricted (matches the previous single-zone behaviour).
+  bool isInAssignedZones(String? zoneId) {
+    final ids = assignedZoneIds;
+    return ids.isEmpty || (zoneId != null && ids.contains(zoneId));
+  }
+
+  /// Display label: all assigned zone names, comma-separated.
+  String? get assignedZonesLabel {
+    final names = assignedZones.map((z) => z.name).where((n) => n.isNotEmpty);
+    if (names.isNotEmpty) return names.join(', ');
+    return assignedZoneName;
+  }
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     final email = (json['email'] as String?) ?? '';
@@ -79,7 +117,14 @@ class UserModel {
           (json['zoneId'] ?? json['assigned_zone_id'] ?? json['zone_id'])
               as String?,
       assignedZoneName:
-          (json['assigned_zone_name'] ?? json['zone_name']) as String?,
+          (json['assigned_zone_name'] ?? json['zone_name'] ?? json['zoneName'])
+              as String?,
+      assignedZones: ((json['zones'] ?? json['assigned_zones']) as List<dynamic>?)
+              ?.whereType<Map<String, dynamic>>()
+              .map(AssignedZone.fromJson)
+              .where((z) => z.id.isNotEmpty)
+              .toList() ??
+          const [],
       zoneLogoUrl:
           (json['zoneLogoUrl'] ?? json['zone_logo_url']) as String?,
       technicianId: (json['technicianId'] ?? json['technician_id']) as String?,
@@ -98,6 +143,7 @@ class UserModel {
       'client_id': clientId,
       'assigned_zone_id': assignedZoneId,
       'assigned_zone_name': assignedZoneName,
+      'zones': assignedZones.map((z) => z.toJson()).toList(),
       'zone_logo_url': zoneLogoUrl,
       'technician_id': technicianId,
       'account_status': accountStatus,
@@ -112,6 +158,7 @@ class UserModel {
     String? clientId,
     String? assignedZoneId,
     String? assignedZoneName,
+    List<AssignedZone>? assignedZones,
     String? zoneLogoUrl,
     String? technicianId,
     String? accountStatus,
@@ -124,6 +171,7 @@ class UserModel {
       clientId: clientId ?? this.clientId,
       assignedZoneId: assignedZoneId ?? this.assignedZoneId,
       assignedZoneName: assignedZoneName ?? this.assignedZoneName,
+      assignedZones: assignedZones ?? this.assignedZones,
       zoneLogoUrl: zoneLogoUrl ?? this.zoneLogoUrl,
       technicianId: technicianId ?? this.technicianId,
       accountStatus: accountStatus ?? this.accountStatus,

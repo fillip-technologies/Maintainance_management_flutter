@@ -29,7 +29,7 @@ class GlobalHomePage extends ConsumerWidget {
     final staffDevices = !isTechnician ? ref.watch(staffDevicesProvider).value : null;
     final fallbackZoneLogo = staffDevices
             ?.where((d) =>
-                (user?.assignedZoneId == null || d.zoneId == user?.assignedZoneId) &&
+                (user?.isInAssignedZones(d.zoneId) ?? true) &&
                 d.zoneLogoUrl != null &&
                 d.zoneLogoUrl!.isNotEmpty)
             .firstOrNull
@@ -45,8 +45,8 @@ class GlobalHomePage extends ConsumerWidget {
             : fallbackZoneLogo;
 
     final effectiveZoneName =
-        (user?.assignedZoneName != null && user!.assignedZoneName!.isNotEmpty)
-            ? user.assignedZoneName!
+        (user?.assignedZonesLabel != null && user!.assignedZonesLabel!.isNotEmpty)
+            ? user.assignedZonesLabel!
             : (staffDevices?.firstOrNull?.zoneName ?? 'Assigned Zone Scope');
 
     // Auto-heal local user session if zoneLogoUrl was missing at login time
@@ -56,7 +56,7 @@ class GlobalHomePage extends ConsumerWidget {
         if (devs != null && user != null && (user.zoneLogoUrl == null || user.zoneLogoUrl!.isEmpty)) {
           final foundLogo = devs
                   .where((d) =>
-                      (user.assignedZoneId == null || d.zoneId == user.assignedZoneId) &&
+                      user.isInAssignedZones(d.zoneId) &&
                       d.zoneLogoUrl != null &&
                       d.zoneLogoUrl!.isNotEmpty)
                   .firstOrNull
