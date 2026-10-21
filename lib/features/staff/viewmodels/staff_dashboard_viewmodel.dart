@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../daily_logs/daily_logs.dart';
 import '../../devices/devices.dart';
 import '../../issues/issues.dart';
+import 'staff_top_zones_provider.dart';
 
 class StaffDashboardViewModel {
   final Ref _ref;
@@ -10,6 +11,7 @@ class StaffDashboardViewModel {
 
   void refreshAll() {
     _ref.invalidate(staffDevicesProvider);
+    _ref.invalidate(staffTopZonesProvider);
     _ref.invalidate(todayLogsProvider);
     _ref.invalidate(staffIssuesProvider);
   }

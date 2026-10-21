@@ -7,6 +7,7 @@ import '../../../../core/widgets/app_shimmer.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../devices/devices.dart';
 import '../../../issues/issues.dart';
+import '../../viewmodels/staff_top_zones_provider.dart';
 import 'staff_device_grid_card.dart';
 
 /// Visual icon grid directory for staff equipment catalogue.
@@ -14,7 +15,8 @@ import 'staff_device_grid_card.dart';
 /// Key UX:
 /// - Pure visual grid: no camera names on card face, zero text clutter.
 /// - Status color-coding: Green for active, Red for issue raised / not solved.
-/// - Top zone tabs when devices span multiple zones for 1-tap filtering.
+/// - Top zone tabs (the user's assigned top-level zones) for 1-tap filtering;
+///   each tab covers every device in that zone's sub-zones.
 /// - File-manager style multi-select with sticky bottom bulk action bar.
 class StaffDevicesDirectoryTab extends StatefulWidget {
   final List<DeviceModel> devices;
@@ -25,6 +27,10 @@ class StaffDevicesDirectoryTab extends StatefulWidget {
   final void Function(DeviceModel device) onOpenRaiseIssue;
   final void Function(List<DeviceModel> devices)? onOpenRaiseBulkIssue;
 
+  /// Assigned top-level zones used for the zone tabs. When null (e.g. in
+  /// isolated widget tests) tabs fall back to the devices' own zones.
+  final StaffTopZones? topZones;
+
   const StaffDevicesDirectoryTab({
     super.key,
     required this.devices,
@@ -34,6 +40,7 @@ class StaffDevicesDirectoryTab extends StatefulWidget {
     required this.onRefresh,
     required this.onOpenRaiseIssue,
     this.onOpenRaiseBulkIssue,
+    this.topZones,
   });
 
   @override
@@ -101,18 +108,30 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
         .where((id) => id.isNotEmpty)
         .toSet();
 
-    // Extract unique zones present across hardware
+    // Zone tabs: the user's assigned top-level zones; a device belongs to the
+    // top-level zone that contains its (sub-)zone.
+    final topZones = widget.topZones;
+    String tabZoneOf(DeviceModel d) =>
+        topZones == null ? d.zoneId : (topZones.topZoneOf[d.zoneId] ?? '');
     final Map<String, String> zonesMap = {};
-    for (final d in widget.devices) {
-      if (d.zoneId.isNotEmpty) {
-        zonesMap[d.zoneId] = d.zoneName.isNotEmpty ? d.zoneName : 'Zone ${d.zoneId}';
+    if (topZones != null) {
+      for (final z in topZones.zones) {
+        zonesMap[z.id] = z.name;
+      }
+    } else {
+      for (final d in widget.devices) {
+        if (d.zoneId.isNotEmpty) {
+          zonesMap[d.zoneId] = d.zoneName.isNotEmpty ? d.zoneName : 'Zone ${d.zoneId}';
+        }
       }
     }
+    // Drop a stale selection (e.g. after zones reload or reassignment).
+    final selectedZoneId = zonesMap.containsKey(_selectedZoneId) ? _selectedZoneId : null;
 
     // Apply zone filter
     var filteredList = widget.devices;
-    if (_selectedZoneId != null) {
-      filteredList = filteredList.where((d) => d.zoneId == _selectedZoneId).toList();
+    if (selectedZoneId != null) {
+      filteredList = filteredList.where((d) => tabZoneOf(d) == selectedZoneId).toList();
     }
 
     // Calculate status counts for current zone scope
@@ -139,7 +158,7 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
       }).toList();
     }
 
-    final hasActiveFilter = _searchQuery.isNotEmpty || _selectedZoneId != null || _filterProblemsOnly != null;
+    final hasActiveFilter = _searchQuery.isNotEmpty || selectedZoneId != null || _filterProblemsOnly != null;
     final isSelectionMode = _selectedDeviceIds.isNotEmpty;
 
     return Stack(
@@ -190,18 +209,18 @@ class _StaffDevicesDirectoryTabState extends State<StaffDevicesDirectoryTab> {
                           _buildZoneTab(
                             label: 'All Zones',
                             count: widget.devices.length,
-                            isSelected: _selectedZoneId == null,
+                            isSelected: selectedZoneId == null,
                             onTap: () => setState(() => _selectedZoneId = null),
                           ),
                           const SizedBox(width: 8),
                           ...zonesMap.entries.map((entry) {
-                            final zoneCount = widget.devices.where((d) => d.zoneId == entry.key).length;
+                            final zoneCount = widget.devices.where((d) => tabZoneOf(d) == entry.key).length;
                             return Padding(
                               padding: const EdgeInsets.only(right: 8),
                               child: _buildZoneTab(
                                 label: entry.value,
                                 count: zoneCount,
-                                isSelected: _selectedZoneId == entry.key,
+                                isSelected: selectedZoneId == entry.key,
                                 onTap: () => setState(() => _selectedZoneId = entry.key),
                               ),
                             );

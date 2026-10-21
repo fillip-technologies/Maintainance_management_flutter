@@ -158,7 +158,9 @@ class ProfilePage extends ConsumerWidget {
                 label: l10n.role,
                 value: isTech
                     ? l10n.roleHardwareTechnician
-                    : l10n.roleZoneStaff,
+                    : (user.role == UserRole.zoneStaff
+                        ? l10n.roleRzsForestGuard
+                        : l10n.roleZoneStaff),
               ),
               Divider(color: AppColors.divider, height: 1),
               ProfileInfoTile(

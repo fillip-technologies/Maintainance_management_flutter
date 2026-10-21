@@ -35,6 +35,7 @@
   "emailRequired": "Please enter both email and password",
   "roleHardwareTechnician": "Hardware Technician",
   "roleZoneStaff": "Zone Staff",
+  "roleRzsForestGuard": "RZS Forest Guard",
   "unassignedQueue": "Unassigned (Organization Queue)",
   "assignedQueue": "Assigned Queue",
   "kpiTotal": "Total",

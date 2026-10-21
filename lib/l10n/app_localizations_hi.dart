@@ -96,6 +96,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get roleZoneStaff => 'ज़ोन कर्मचारी';
 
   @override
+  String get roleRzsForestGuard => 'आरजेडएस फ़ॉरेस्ट गार्ड';
+
+  @override
   String get unassignedQueue => 'असाइन नहीं (संस्था कतार)';
 
   @override

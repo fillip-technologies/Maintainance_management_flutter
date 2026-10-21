@@ -272,6 +272,12 @@ abstract class AppLocalizations {
   /// **'Zone Staff'**
   String get roleZoneStaff;
 
+  /// No description provided for @roleRzsForestGuard.
+  ///
+  /// In en, this message translates to:
+  /// **'RZS Forest Guard'**
+  String get roleRzsForestGuard;
+
   /// No description provided for @unassignedQueue.
   ///
   /// In en, this message translates to:

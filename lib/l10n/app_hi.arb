@@ -29,6 +29,7 @@
   "emailRequired": "कृपया ईमेल और पासवर्ड दोनों दर्ज करें",
   "roleHardwareTechnician": "हार्डवेयर तकनीशियन",
   "roleZoneStaff": "ज़ोन कर्मचारी",
+  "roleRzsForestGuard": "आरजेडएस फ़ॉरेस्ट गार्ड",
   "unassignedQueue": "असाइन नहीं (संस्था कतार)",
   "assignedQueue": "असाइन की गई कतार",
   "kpiTotal": "कुल",

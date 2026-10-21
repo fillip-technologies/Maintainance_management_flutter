@@ -9,6 +9,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../daily_logs/daily_logs.dart';
 import '../../devices/devices.dart';
 import '../../issues/issues.dart';
+import '../viewmodels/staff_top_zones_provider.dart';
 import '../../realtime/realtime.dart';
 import '../viewmodels/staff_checklist_viewmodel.dart';
 import '../viewmodels/staff_dashboard_viewmodel.dart';
@@ -298,9 +299,14 @@ class _StaffHomePageState extends ConsumerState<StaffHomePage>
                 issues: staffIssuesAsync.value ?? const [],
                 isLoading: staffDevicesAsync.isLoading,
                 hasError: staffDevicesAsync.hasError,
-                onRefresh: () async => dashboardVm.refreshDevices(),
+                onRefresh: () async {
+                  dashboardVm.refreshDevices();
+                  ref.invalidate(staffTopZonesProvider);
+                },
                 onOpenRaiseIssue: _openRaiseIssueSheet,
                 onOpenRaiseBulkIssue: _openRaiseBulkIssueSheet,
+                // No tabs while loading/failed rather than falling back to sub-zones.
+                topZones: ref.watch(staffTopZonesProvider).value ?? const StaffTopZones.empty(),
               ),
             1 => StaffDailyChecklistTab(
                 allDevices: devices,

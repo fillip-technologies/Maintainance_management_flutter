@@ -990,6 +990,20 @@ void main() {
       );
 
       expect(find.byIcon(Icons.shield_outlined), findsOneWidget);
+      expect(find.text('RZS Forest Guard'), findsOneWidget);
+
+      // 3. In Hindi locale: should render 'आरजेडएस फ़ॉरेस्ट गार्ड'
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('hi'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: ProfileHeaderCard(user: userWithoutLogo),
+          ),
+        ),
+      );
+      expect(find.text('आरजेडएस फ़ॉरेस्ट गार्ड'), findsOneWidget);
     });
 
     testWidgets('30. ProfileInfoTile renders thumbnail image when imageUrl is provided', (tester) async {

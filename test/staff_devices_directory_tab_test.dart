@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../lib/core/theme/colors.dart';
 import '../lib/features/devices/devices.dart';
 import '../lib/features/issues/models/issue_model.dart';
+import '../lib/features/staff/viewmodels/staff_top_zones_provider.dart';
 import '../lib/features/staff/views/widgets/staff_devices_directory_tab.dart';
 import '../lib/features/staff/views/widgets/staff_device_grid_card.dart';
 import '../lib/l10n/app_localizations.dart';
@@ -206,6 +207,82 @@ void main() {
       await tester.tap(find.text('All Zones'));
       await tester.pumpAndSettle();
       expect(find.byType(StaffDeviceGridCard), findsNWidgets(4));
+    });
+
+    testWidgets('with assigned top-level zones, tabs show only top zones and filter by subtree', (tester) async {
+      tester.view.physicalSize = const Size(400, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      // z1 + z2 are sub-zones of top zone T1; z3 is a sub-zone of T2.
+      const topZones = StaffTopZones(
+        zones: [(id: 'T1', name: 'Lion Retiring room'), (id: 'T2', name: 'Tiger Retiring room')],
+        topZoneOf: {'T1': 'T1', 'T2': 'T2', 'z1': 'T1', 'z2': 'T1', 'z3': 'T2'},
+      );
+
+      await tester.pumpWidget(
+        buildTestWidget(
+          StaffDevicesDirectoryTab(
+            devices: sampleDevices,
+            issues: sampleIssues,
+            isLoading: false,
+            hasError: false,
+            onRefresh: () async {},
+            onOpenRaiseIssue: (_) {},
+            topZones: topZones,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('All Zones'), findsOneWidget);
+      expect(find.text('Lion Retiring room'), findsOneWidget);
+      expect(find.text('Tiger Retiring room'), findsOneWidget);
+      // Sub-zone names are no longer tabs.
+      expect(find.text('Main Entrance'), findsNothing);
+      expect(find.text('Perimeter'), findsNothing);
+      expect(find.text('Server Room'), findsNothing);
+
+      final perZone = {
+        for (final z in ['z1', 'z2', 'z3']) z: sampleDevices.where((d) => d.zoneId == z).length,
+      };
+
+      await tester.tap(find.text('Lion Retiring room'));
+      await tester.pumpAndSettle();
+      expect(find.byType(StaffDeviceGridCard), findsNWidgets(perZone['z1']! + perZone['z2']!));
+
+      await tester.ensureVisible(find.text('Tiger Retiring room'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Tiger Retiring room'));
+      await tester.pumpAndSettle();
+      expect(find.byType(StaffDeviceGridCard), findsNWidgets(perZone['z3']!));
+    });
+
+    test('StaffTopZones.fromScopedZones finds assigned top zones and maps sub-zones', () {
+      final tz = StaffTopZones.fromScopedZones([
+        (id: 'A', name: 'Lion Retiring room', parentZoneId: 'CLIENT_ROOT_NOT_VISIBLE'),
+        (id: 'a1', name: 'Cell No.-01', parentZoneId: 'A'),
+        (id: 'a1x', name: 'Nested', parentZoneId: 'a1'),
+        (id: 'B', name: 'Bear Retiring room', parentZoneId: null),
+        (id: 'b1', name: 'Main Gate', parentZoneId: 'B'),
+      ]);
+      expect(tz.zones.map((z) => z.name), ['Bear Retiring room', 'Lion Retiring room']);
+      expect(tz.topZoneOf['a1x'], 'A');
+      expect(tz.topZoneOf['a1'], 'A');
+      expect(tz.topZoneOf['b1'], 'B');
+      expect(tz.topZoneOf['B'], 'B');
+    });
+
+    test('StaffTopZones.fromScopedZones with a single assigned zone yields one tab', () {
+      final tz = StaffTopZones.fromScopedZones([
+        (id: 'E', name: 'Entrance Plaza', parentZoneId: null),
+        (id: 'e1', name: 'Ticket counter', parentZoneId: 'E'),
+      ]);
+      expect(tz.zones.length, 1);
+      expect(tz.topZoneOf['e1'], 'E');
     });
 
     testWidgets('multi-select allows selecting units, shows bottom bar, and selects all', (tester) async {

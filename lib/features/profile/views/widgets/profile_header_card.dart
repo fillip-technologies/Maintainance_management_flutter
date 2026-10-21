@@ -132,7 +132,9 @@ class ProfileHeaderCard extends StatelessWidget {
                 Text(
                   isTech
                       ? l10n.roleHardwareTechnician
-                      : l10n.roleZoneStaff,
+                      : (user.role == UserRole.zoneStaff
+                          ? l10n.roleRzsForestGuard
+                          : l10n.roleZoneStaff),
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,

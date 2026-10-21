@@ -96,6 +96,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get roleZoneStaff => 'Zone Staff';
 
   @override
+  String get roleRzsForestGuard => 'RZS Forest Guard';
+
+  @override
   String get unassignedQueue => 'Unassigned (Organization Queue)';
 
   @override
